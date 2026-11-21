@@ -37,11 +37,11 @@ ROLE_ICONS = {
 }
 
 ROLE_CATALOG_ITEMS = [
-    {"id": str(STAFF_ROLE_IDS[0]), "label": "Staff Role 1 (Founder Icon)", "icon_url": ROLE_ICONS["founder"]},
-    {"id": str(STAFF_ROLE_IDS[1]), "label": "Staff Role 2 (Server Manager Icon)", "icon_url": ROLE_ICONS["server_manager"]},
-    {"id": str(STAFF_ROLE_IDS[2]), "label": "Staff Role 3 (Senior Moderator Icon)", "icon_url": ROLE_ICONS["senior_moderator"]},
-    {"id": str(STAFF_ROLE_IDS[3]), "label": "Staff Role 4 (Head Moderator Icon)", "icon_url": ROLE_ICONS["head_moderator"]},
-    {"id": "support_server", "label": "Support Server Badge", "icon_url": ROLE_ICONS["support_server"]},
+    {"id": str(STAFF_ROLE_IDS[0]), "label": "Founder Role", "short_label": "Founder", "icon_url": ROLE_ICONS["founder"]},
+    {"id": str(STAFF_ROLE_IDS[1]), "label": "Server Manager Role", "short_label": "Manager", "icon_url": ROLE_ICONS["server_manager"]},
+    {"id": str(STAFF_ROLE_IDS[2]), "label": "Senior Moderator Role", "short_label": "Senior Mod", "icon_url": ROLE_ICONS["senior_moderator"]},
+    {"id": str(STAFF_ROLE_IDS[3]), "label": "Head Moderator Role", "short_label": "Head Mod", "icon_url": ROLE_ICONS["head_moderator"]},
+    {"id": "support_server", "label": "Support Server Role", "short_label": "Support", "icon_url": ROLE_ICONS["support_server"]},
 ]
 
 DEFAULT_AVATAR_DECORATION = (
@@ -192,7 +192,7 @@ LATEST_DATA: dict = {
         "banner_position": PROFILE_CONFIG["banner_position"],
         "avatar_decoration_url": DEFAULT_AVATAR_DECORATION,
         "profile_effect": {
-            "name": "Shimmer Effect",
+            "name": None,
             "asset_url": None,
             "source": "elwey.fr/effects",
         },
@@ -223,6 +223,7 @@ LATEST_DATA: dict = {
 }
 
 _ELWEY_CACHE: dict = {"fetched_at": 0.0, "entries": []}
+_USER_DETAIL_CACHE: dict[int, dict] = {}
 
 
 def _fetch_elwey_effects_sync() -> list[dict]:
@@ -263,34 +264,46 @@ def _fetch_elwey_effects_sync() -> list[dict]:
         return _ELWEY_CACHE["entries"]
 
 
-async def resolve_profile_effect(user: discord.User | None) -> dict:
-    effect_obj = getattr(user, "profile_effect", None) if user else None
+def build_effect_payload(user_obj, elwey_entries: list[dict]) -> dict:
+    effect_obj = getattr(user_obj, "profile_effect", None) if user_obj else None
     effect_id = getattr(effect_obj, "id", None) if effect_obj else None
     effect_name = getattr(effect_obj, "name", None) if effect_obj else None
 
-    entries = await asyncio.to_thread(_fetch_elwey_effects_sync)
     matched_asset = None
-
-    if entries:
+    if elwey_entries:
         if effect_name:
             target_key = effect_name.lower().strip()
-            for item in entries:
+            for item in elwey_entries:
                 if target_key in item["name"].lower() or item["name"].lower() in target_key:
                     matched_asset = item["asset_url"]
                     break
         if not matched_asset and effect_id:
             id_str = str(effect_id)
-            for item in entries:
+            for item in elwey_entries:
                 if id_str in item["asset_url"]:
                     matched_asset = item["asset_url"]
                     break
 
     return {
         "id": str(effect_id) if effect_id else None,
-        "name": effect_name or ("Profile Effect" if matched_asset else "Shimmer Effect"),
+        "name": effect_name,
         "asset_url": matched_asset,
         "source": "elwey.fr/effects",
     }
+
+
+async def get_enriched_user(user_id: int, fallback_member: discord.Member | None = None):
+    now = datetime.now(timezone.utc).timestamp()
+    cached = _USER_DETAIL_CACHE.get(user_id)
+    if cached and (now - cached["ts"]) < 300:
+        return cached["user"]
+
+    try:
+        fetched = await bot.fetch_user(user_id)
+        _USER_DETAIL_CACHE[user_id] = {"ts": now, "user": fetched}
+        return fetched
+    except Exception:
+        return fallback_member
 
 
 def load_index_html() -> bytes:
@@ -316,49 +329,72 @@ def find_member(user_id: int) -> discord.Member | None:
     return None
 
 
-def resolve_role_icon(role: discord.Role) -> str | None:
+def resolve_role_icon(role: discord.Role) -> tuple[str | None, str]:
     lower = role.name.lower()
     if "founder" in lower or "owner" in lower:
-        return ROLE_ICONS["founder"]
+        return ROLE_ICONS["founder"], "founder"
     if "server manager" in lower or "community manager" in lower or "manager" in lower:
-        return ROLE_ICONS["server_manager"]
+        return ROLE_ICONS["server_manager"], "server_manager"
     if "head moderator" in lower or "head mod" in lower:
-        return ROLE_ICONS["head_moderator"]
+        return ROLE_ICONS["head_moderator"], "head_moderator"
     if "senior moderator" in lower or "senior mod" in lower or "mod" in lower:
-        return ROLE_ICONS["senior_moderator"]
+        return ROLE_ICONS["senior_moderator"], "senior_moderator"
     if "support" in lower:
-        return ROLE_ICONS["support_server"]
+        return ROLE_ICONS["support_server"], "support_server"
     if role.icon:
-        return role.icon.url
-    return None
+        return role.icon.url, str(role.id)
+    return None, str(role.id)
 
 
-def collect_staff_members(guild: discord.Guild | None) -> list[dict]:
+async def collect_staff_members(guild: discord.Guild | None, elwey_entries: list[dict]) -> list[dict]:
     if not guild:
         return []
 
     tracked_set = set(STAFF_ROLE_IDS)
-    results = []
+    matched_pairs: list[tuple[discord.Member, list[discord.Role]]] = []
 
     for member in guild.members:
         matched_roles = [r for r in member.roles if r.id in tracked_set]
-        if not matched_roles:
-            continue
+        if matched_roles:
+            matched_roles.sort(key=lambda r: r.position, reverse=True)
+            matched_pairs.append((member, matched_roles))
 
-        matched_roles.sort(key=lambda r: r.position, reverse=True)
+    results = []
+    for member, matched_roles in matched_pairs[:30]:
+        detailed_user = await get_enriched_user(member.id, fallback_member=member)
+        source_obj = detailed_user or member
+
+        banner_url = None
+        if getattr(source_obj, "banner", None):
+            banner_url = source_obj.banner.url
+        elif getattr(member, "banner", None):
+            banner_url = member.banner.url
+
+        deco_obj = getattr(source_obj, "avatar_decoration", None) or getattr(member, "avatar_decoration", None)
+        deco_url = deco_obj.url if deco_obj else None
+
+        effect_payload = build_effect_payload(source_obj, elwey_entries)
+
+        role_items = []
+        for r in matched_roles:
+            icon_url, role_key = resolve_role_icon(r)
+            role_items.append({
+                "id": str(r.id),
+                "role_key": role_key,
+                "name": r.name,
+                "icon_url": icon_url,
+            })
+
         results.append({
             "id": str(member.id),
             "username": member.name,
             "display_name": member.display_name,
+            "status": str(member.status) if member.status else "offline",
             "avatar_url": member.display_avatar.url,
-            "roles": [
-                {
-                    "id": str(r.id),
-                    "name": r.name,
-                    "icon_url": resolve_role_icon(r),
-                }
-                for r in matched_roles
-            ],
+            "banner_url": banner_url,
+            "avatar_decoration_url": deco_url,
+            "profile_effect": effect_payload,
+            "roles": role_items,
         })
 
     return results
@@ -379,6 +415,8 @@ async def resolve_guild_invite(guild: discord.Guild) -> str:
 
 async def refresh_showcase_data(bot_status: str = "online"):
     global LATEST_DATA
+
+    elwey_entries = await asyncio.to_thread(_fetch_elwey_effects_sync)
 
     try:
         user = await bot.fetch_user(TARGET_USER_ID)
@@ -402,7 +440,7 @@ async def refresh_showcase_data(bot_status: str = "online"):
     live_deco = getattr(user, "avatar_decoration", None) if user else None
     deco_url = live_deco.url if live_deco else DEFAULT_AVATAR_DECORATION
 
-    profile_effect_payload = await resolve_profile_effect(user)
+    profile_effect_payload = build_effect_payload(user, elwey_entries)
 
     primary_guild = getattr(user, "primary_guild", None) if user else None
     clan_tag = getattr(primary_guild, "tag", None) if primary_guild else PROFILE_CONFIG["clan_tag"]
@@ -475,7 +513,7 @@ async def refresh_showcase_data(bot_status: str = "online"):
             "boost_count": guild.premium_subscription_count or 0,
             "invite_url": invite_url,
         }
-        staff_list = collect_staff_members(guild)
+        staff_list = await collect_staff_members(guild, elwey_entries)
     else:
         server_payload = dict(SERVER_DEFAULTS)
         staff_list = []
@@ -520,7 +558,7 @@ def start_http_server():
     server.serve_forever()
 
 
-@tasks.loop(seconds=20)
+@tasks.loop(seconds=25)
 async def sync_loop():
     await refresh_showcase_data(bot_status="online")
 
@@ -542,6 +580,7 @@ async def on_presence_update(before: discord.Member, after: discord.Member):
 @bot.event
 async def on_member_update(before: discord.Member, after: discord.Member):
     if after.guild and after.guild.id == TARGET_GUILD_ID:
+        _USER_DETAIL_CACHE.pop(after.id, None)
         await refresh_showcase_data(bot_status="online")
 
 
@@ -549,8 +588,9 @@ async def on_member_update(before: discord.Member, after: discord.Member):
 async def sync_command(ctx: commands.Context):
     if ctx.author.id != TARGET_USER_ID:
         return
+    _USER_DETAIL_CACHE.clear()
     await refresh_showcase_data(bot_status="online")
-    await ctx.send("Synced showcase, staff roles, profile media, and server stats.")
+    await ctx.send("Synced showcase, role members, profile media, banners, decorations, and effects.")
 
 
 async def idle_forever():
