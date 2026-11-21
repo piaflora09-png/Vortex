@@ -26,6 +26,12 @@
       --server-border: rgba(251, 113, 133, 0.65);
     }
 
+    @property --rim-angle {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: false;
+    }
+
     * { box-sizing: border-box; }
 
     ::selection {
@@ -58,6 +64,16 @@
       transition: background 0.3s ease;
     }
 
+    #sparkle-canvas {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.72;
+    }
+
     .ambient-orb {
       position: fixed;
       border-radius: 50%;
@@ -88,8 +104,8 @@
     }
 
     @keyframes settleIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
+      from { opacity: 0; transform: translateY(12px) scale(0.99); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
     @keyframes effectShimmer {
@@ -99,20 +115,67 @@
       100% { transform: translateX(240%) rotate(14deg); opacity: 0; }
     }
 
+    @keyframes spinRim {
+      to { --rim-angle: 360deg; }
+    }
+
+    @keyframes copyBounce {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.07); }
+      100% { transform: scale(1); }
+    }
+
+    .copied-pulse {
+      animation: copyBounce 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      background: rgba(34, 197, 94, 0.24) !important;
+      border-color: rgba(74, 222, 128, 0.75) !important;
+      color: #bbf7d0 !important;
+    }
+
     .tilt-3d {
+      position: relative;
       transform-style: preserve-3d;
       will-change: transform;
+      --spot-x: 50%;
+      --spot-y: 35%;
+      --spot-opacity: 0;
+      --par-bg-x: 0px;
+      --par-bg-y: 0px;
+      --par-fg-x: 0px;
+      --par-fg-y: 0px;
       transition: transform 0.14s ease-out, box-shadow 0.22s ease, border-color 0.2s ease;
     }
     .tilt-3d.resetting {
       transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.2s ease;
     }
-    .depth-lift {
-      transform: translateZ(18px);
+    .tilt-3d::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      pointer-events: none;
+      z-index: 8;
+      opacity: var(--spot-opacity);
+      transition: opacity 0.22s ease;
+      background: radial-gradient(
+        340px circle at var(--spot-x) var(--spot-y),
+        rgba(232, 121, 249, 0.22),
+        rgba(245, 158, 11, 0.13) 42%,
+        transparent 72%
+      );
     }
-    .depth-peak {
-      transform: translateZ(28px);
+
+    .parallax-bg {
+      transform: translate3d(var(--par-bg-x), var(--par-bg-y), 0) scale(1.04);
+      transition: transform 0.16s ease-out;
     }
+
+    .parallax-fg {
+      transform: translate3d(var(--par-fg-x), var(--par-fg-y), 18px);
+      transition: transform 0.16s ease-out;
+    }
+
+    .depth-lift { transform: translateZ(18px); }
 
     .top-nav {
       position: relative;
@@ -125,13 +188,30 @@
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 20px;
-      padding: 11px 16px;
+      padding: 11px 16px 15px;
       border-radius: 18px;
-      background: rgba(20, 12, 34, 0.88);
+      background: rgba(20, 12, 34, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.11);
       box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(14px);
+      overflow: hidden;
       animation: settleIn 0.35s ease;
+    }
+
+    .sync-countdown-strip {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .sync-countdown-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-pink), var(--accent-gold));
+      transition: width 0.25s linear;
     }
 
     .nav-tabs {
@@ -153,10 +233,13 @@
     }
     .nav-tab:hover { background: rgba(168, 85, 247, 0.2); color: #ffffff; transform: translateY(-1px); }
     .nav-tab.active {
-      background: linear-gradient(135deg, var(--accent-primary), #d97706);
+      background:
+        linear-gradient(135deg, var(--accent-primary), #d97706) padding-box,
+        conic-gradient(from var(--rim-angle), #f59e0b, #e879f9, #8b5cf6, #f59e0b) border-box;
+      border: 1.5px solid transparent;
       color: #ffffff;
-      border-color: transparent;
-      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.42);
+      animation: spinRim 6s linear infinite;
     }
 
     .sync-status-group {
@@ -264,15 +347,19 @@
       position: relative;
       border-radius: 26px;
       padding: 8px;
-      background: linear-gradient(180deg, #b057f5 0%, var(--accent-primary) 52%, #4c1d95 100%);
+      background:
+        linear-gradient(180deg, #b057f5 0%, var(--accent-primary) 52%, #4c1d95 100%) padding-box,
+        conic-gradient(from var(--rim-angle), rgba(245, 158, 11, 0.75), rgba(232, 121, 249, 0.8), rgba(139, 92, 246, 0.75), rgba(245, 158, 11, 0.75)) border-box;
+      border: 2px solid transparent;
       box-shadow:
-        0 0 0 2px rgba(216, 180, 254, 0.28),
+        0 0 0 1px rgba(216, 180, 254, 0.22),
         0 26px 70px rgba(0, 0, 0, 0.88);
+      animation: spinRim 9s linear infinite;
     }
 
     .frame-shell:hover {
       box-shadow:
-        0 0 30px rgba(168, 85, 247, 0.42),
+        0 0 32px rgba(168, 85, 247, 0.45),
         0 32px 76px rgba(0, 0, 0, 0.92);
     }
 
@@ -335,6 +422,7 @@
       background-size: cover;
       background-position: center;
       z-index: 1;
+      overflow: hidden;
     }
 
     .banner::after {
@@ -395,7 +483,7 @@
       width: 92px;
       height: 92px;
       flex-shrink: 0;
-      transform: translateZ(24px);
+      transform: translateZ(26px);
     }
 
     .avatar-img {
@@ -403,9 +491,13 @@
       height: 92px;
       border-radius: 50%;
       object-fit: cover;
-      border: 5px solid #220b40;
+      border: 4px solid rgba(245, 158, 11, 0.45);
+      outline: 3px solid #220b40;
       background: #140726;
-      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.65), 0 0 18px rgba(168, 85, 247, 0.28);
+      box-shadow:
+        0 12px 24px rgba(0, 0, 0, 0.75),
+        0 0 22px rgba(168, 85, 247, 0.35),
+        inset 0 1px 2px rgba(255, 255, 255, 0.35);
     }
 
     .avatar-deco {
@@ -532,6 +624,7 @@
       gap: 8px;
       flex-wrap: wrap;
       margin-bottom: 12px;
+      transform-style: preserve-3d;
     }
 
     .clan-chip {
@@ -546,6 +639,12 @@
       font-weight: 700;
       color: #f5f3ff;
       min-height: 28px;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+    }
+    .clan-chip:hover {
+      transform: translateZ(16px) translateY(-2px);
+      border-color: rgba(245, 158, 11, 0.55);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.25);
     }
 
     .clan-chip img {
@@ -564,6 +663,7 @@
       border-radius: 8px;
       padding: 4px 9px;
       min-height: 28px;
+      transform-style: preserve-3d;
     }
 
     .badge-icon-item {
@@ -575,9 +675,12 @@
       height: 20px;
       font-size: 0.92rem;
       cursor: pointer;
-      transition: transform 0.14s ease;
+      transition: transform 0.16s ease, filter 0.16s ease;
     }
-    .badge-icon-item:hover { transform: translateY(-2px) scale(1.1); }
+    .badge-icon-item:hover {
+      transform: translateZ(20px) translateY(-3px) scale(1.16);
+      filter: drop-shadow(0 6px 12px rgba(232, 121, 249, 0.55));
+    }
 
     .badge-icon-item img {
       width: 18px;
@@ -645,6 +748,12 @@
       padding: 4px 10px;
       border-radius: 8px;
       margin-bottom: 10px;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+    .role-pill:hover {
+      transform: translateZ(16px) translateY(-2px);
+      border-color: rgba(245, 158, 11, 0.65);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5), 0 0 14px rgba(96, 165, 250, 0.35);
     }
 
     .owner-text {
@@ -756,15 +865,18 @@
 
     .server-card {
       position: relative;
-      background: linear-gradient(165deg, rgba(36, 16, 62, 0.97), rgba(16, 10, 27, 0.99));
+      background:
+        linear-gradient(165deg, rgba(36, 16, 62, 0.97), rgba(16, 10, 27, 0.99)) padding-box,
+        conic-gradient(from var(--rim-angle), rgba(245, 158, 11, 0.72), rgba(232, 121, 249, 0.65), rgba(139, 92, 246, 0.65), rgba(245, 158, 11, 0.72)) border-box;
       border-radius: 22px;
       padding: 0 26px 22px;
-      border: 1.5px solid var(--server-border);
+      border: 1.5px solid transparent;
       box-shadow:
         0 0 34px rgba(245, 158, 11, 0.16),
         0 26px 70px rgba(0, 0, 0, 0.88);
       overflow: hidden;
       transform-style: preserve-3d;
+      animation: spinRim 11s linear infinite;
     }
 
     .server-card:hover {
@@ -786,6 +898,7 @@
       border-bottom: 1px solid rgba(245, 158, 11, 0.24);
       padding: 12px 18px;
       overflow: hidden;
+      transform-style: preserve-3d;
     }
 
     .server-banner-strip.custom-guild-banner .banner-3d-items {
@@ -801,6 +914,7 @@
       gap: 10px;
       height: 100%;
       transition: opacity 0.2s ease;
+      transform-style: preserve-3d;
     }
 
     .banner-3d-slot {
@@ -815,6 +929,13 @@
       padding: 6px;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
       transform: translateZ(14px);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .server-banner-strip:hover .banner-3d-slot {
+      transform: translateZ(26px) translateY(-2px);
+      border-color: rgba(245, 158, 11, 0.45);
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.65), 0 0 14px rgba(168, 85, 247, 0.25);
     }
 
     .banner-3d-tag {
@@ -823,7 +944,7 @@
       letter-spacing: 0.05em;
       padding: 1px 6px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.8);
+      background: rgba(15, 23, 42, 0.82);
       color: #fde68a;
       border: 1px solid rgba(245, 158, 11, 0.35);
     }
@@ -847,12 +968,16 @@
       height: 74px;
       border-radius: 18px;
       background: linear-gradient(135deg, #3b0764, #1e1b4b);
-      border: 1.5px solid rgba(245, 158, 11, 0.55);
+      border: 1.5px solid rgba(245, 158, 11, 0.65);
+      outline: 3px solid rgba(139, 92, 246, 0.28);
       display: grid;
       place-items: center;
       overflow: hidden;
       flex-shrink: 0;
-      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.65), 0 0 18px rgba(168, 85, 247, 0.25);
+      box-shadow:
+        0 14px 28px rgba(0, 0, 0, 0.72),
+        0 0 22px rgba(245, 158, 11, 0.25),
+        inset 0 1px 2px rgba(255, 255, 255, 0.35);
     }
 
     .server-icon-box img {
@@ -1059,7 +1184,7 @@
       padding: 20px;
       box-shadow: 0 20px 46px rgba(0, 0, 0, 0.72);
     }
-    .sub-panel.active { display: block; animation: settleIn 0.25s ease; }
+    .sub-panel.active { display: block; animation: settleIn 0.26s ease; }
 
     .sub-panel h3 {
       margin: 0 0 10px;
@@ -1134,9 +1259,12 @@
       color: #ffffff;
     }
     .filter-chip.active {
-      background: linear-gradient(135deg, var(--accent-primary), #d97706);
-      border-color: transparent;
+      background:
+        linear-gradient(135deg, var(--accent-primary), #d97706) padding-box,
+        conic-gradient(from var(--rim-angle), #f59e0b, #e879f9, #8b5cf6, #f59e0b) border-box;
+      border: 1.5px solid transparent;
       color: #ffffff;
+      animation: spinRim 6s linear infinite;
     }
     .filter-chip img {
       width: 14px;
@@ -1161,6 +1289,7 @@
       box-shadow: 0 16px 34px rgba(0, 0, 0, 0.7);
       cursor: pointer;
       transform-style: preserve-3d;
+      animation: settleIn 0.24s ease;
     }
 
     .member-showcase-card:hover {
@@ -1209,6 +1338,7 @@
       background-size: cover;
       background-position: center;
       z-index: 1;
+      overflow: hidden;
     }
 
     .member-banner-box::after {
@@ -1255,9 +1385,10 @@
       height: 64px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3.5px solid #210c3e;
+      border: 3px solid rgba(245, 158, 11, 0.42);
+      outline: 2.5px solid #210c3e;
       background: #120624;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.72), 0 0 14px rgba(168, 85, 247, 0.25);
     }
 
     .m-avatar-deco {
@@ -1310,6 +1441,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      flex-wrap: wrap;
       transform: translateZ(16px);
     }
 
@@ -1322,10 +1454,12 @@
       font-size: 0.72rem;
       font-weight: 700;
       cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
     }
     .m-copy-btn:hover {
       background: rgba(245, 158, 11, 0.22);
       border-color: rgba(245, 158, 11, 0.5);
+      transform: translateY(-1px);
     }
 
     .m-roles-row {
@@ -1346,6 +1480,12 @@
       font-size: 0.74rem;
       font-weight: 700;
       color: #fef3c7;
+      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+    .staff-role-pill:hover {
+      transform: translateZ(18px) translateY(-2px);
+      border-color: rgba(232, 121, 249, 0.65);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.55), 0 0 12px rgba(245, 158, 11, 0.3);
     }
 
     .staff-role-pill img {
@@ -1362,8 +1502,19 @@
       border: 1px solid rgba(255, 255, 255, 0.09);
       margin-bottom: 10px;
     }
+    .game-card-item:hover {
+      border-color: rgba(245, 158, 11, 0.42);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55), 0 0 16px rgba(168, 85, 247, 0.18);
+    }
     .game-card-item strong { color: #fbbf24; display: block; margin-bottom: 4px; font-size: 0.95rem; }
     .game-card-item span { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
+
+    .vouch-filter-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
 
     .vouch-card {
       padding: 11px 13px;
@@ -1371,6 +1522,11 @@
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.09);
       margin-bottom: 10px;
+      animation: settleIn 0.22s ease;
+    }
+    .vouch-card:hover {
+      border-color: rgba(245, 158, 11, 0.42);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55), 0 0 16px rgba(245, 158, 11, 0.16);
     }
 
     .vouch-top {
@@ -1439,6 +1595,33 @@
       margin-bottom: 12px;
     }
 
+    .checklist-box {
+      padding: 11px 13px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(168, 85, 247, 0.28);
+      margin-top: 12px;
+    }
+
+    .checklist-title {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #fbbf24;
+      margin-bottom: 8px;
+    }
+
+    .checklist-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.83rem;
+      color: #e2e8f0;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .checklist-item:last-child { margin-bottom: 0; }
+    .checklist-item input { accent-color: #f59e0b; cursor: pointer; }
+
     .rules-list {
       margin: 0 0 12px;
       padding-left: 18px;
@@ -1471,6 +1654,7 @@
       padding: 16px;
     }
     .modal-backdrop.open { display: grid; }
+    #lightbox-modal { z-index: 65; }
 
     .modal-box {
       width: 100%;
@@ -1480,6 +1664,7 @@
       border-radius: 18px;
       padding: 20px 22px;
       box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+      animation: settleIn 0.2s ease;
     }
     .modal-header {
       display: flex;
@@ -1499,13 +1684,30 @@
     }
 
     .inspector-banner {
-      height: 84px;
+      height: 92px;
       border-radius: 12px;
       background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.25)), #120822;
       background-size: cover;
       background-position: center;
       margin-bottom: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      cursor: zoom-in;
+    }
+
+    .inspector-avatar-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .inspector-avatar-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(245, 158, 11, 0.55);
+      cursor: zoom-in;
     }
 
     .inspector-meta {
@@ -1515,14 +1717,37 @@
       margin-bottom: 12px;
     }
 
+    .lightbox-box {
+      max-width: 680px;
+      text-align: center;
+    }
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 70vh;
+      border-radius: 14px;
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+    }
+
     @media (max-width: 520px) {
       .server-actions { grid-template-columns: 1fr; }
       .banner-3d-items { grid-template-columns: repeat(2, 1fr); }
       .server-banner-strip { height: auto; min-height: 112px; }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ambient-orb, .profile-effect-sweep, #sparkle-canvas, .frame-shell, .server-card, .nav-tab.active, .filter-chip.active {
+        animation: none !important;
+      }
+      .tilt-3d, .parallax-bg, .parallax-fg {
+        transform: none !important;
+        transition: none !important;
+      }
+    }
   </style>
 </head>
 <body>
+  <canvas id="sparkle-canvas" aria-hidden="true"></canvas>
   <div class="ambient-orb orb-left"></div>
   <div class="ambient-orb orb-right"></div>
 
@@ -1537,9 +1762,14 @@
     <div class="sync-status-group">
       <span class="live-pill"><span class="live-pulse"></span> Live Sync</span>
       <span id="last-synced-text">Synced just now</span>
+      <span id="sync-countdown-label">Next sync in 12s</span>
       <button type="button" class="mini-action-btn" id="btn-refresh-now" onclick="refreshShowcase(true)">Refresh Now</button>
       <button type="button" class="mini-action-btn" id="btn-theme-toggle" onclick="toggleTheme()">Theme: Violet</button>
       <button type="button" class="mini-action-btn" id="btn-share-page" onclick="sharePageLink()">Share Page</button>
+    </div>
+
+    <div class="sync-countdown-strip" aria-hidden="true">
+      <div class="sync-countdown-fill" id="sync-countdown-fill"></div>
     </div>
   </header>
 
@@ -1576,16 +1806,16 @@
             <div class="profile-effect-sweep"></div>
           </div>
 
-          <div id="banner" class="banner">
+          <div id="banner" class="banner parallax-bg">
             <div class="banner-top-actions">
-              <button type="button" class="circle-btn" title="Copy User ID" aria-label="Copy User ID" onclick="copyUserId()">ID</button>
+              <button type="button" class="circle-btn" title="Copy User ID" aria-label="Copy User ID" onclick="copyUserId(this)">ID</button>
               <button type="button" class="circle-btn" title="MM Safety Guide" aria-label="MM Safety Guide" onclick="openModal()">!</button>
             </div>
           </div>
 
           <div class="card-body">
             <div class="avatar-thought-row">
-              <div class="avatar-box">
+              <div class="avatar-box parallax-fg">
                 <img id="avatar" class="avatar-img" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" />
                 <img id="avatar-deco" class="avatar-deco" src="" alt="" style="display:none;" />
                 <span id="status-dot" class="status-dot"></span>
@@ -1604,7 +1834,7 @@
 
             <div class="username-sub">
               <span id="username">mvn412. •</span>
-              <button type="button" class="copy-handle-inline" id="btn-copy-handle" onclick="copyHandle()">Copy</button>
+              <button type="button" class="copy-handle-inline" id="btn-copy-handle" onclick="copyHandle(this)">Copy</button>
             </div>
 
             <div class="bio-link">
@@ -1668,7 +1898,7 @@
 
     <section class="server-column" aria-label="Target Discord Server">
       <div class="server-card tilt-3d" id="server-card" data-tilt-max="6">
-        <div class="server-banner-strip" id="server-banner-strip">
+        <div class="server-banner-strip parallax-bg" id="server-banner-strip">
           <div class="banner-3d-items" aria-hidden="true">
             <div class="banner-3d-slot">
               <span class="banner-3d-tag">EXCLUSIVE</span>
@@ -1689,7 +1919,7 @@
           </div>
         </div>
 
-        <div class="server-header">
+        <div class="server-header parallax-fg">
           <div class="server-icon-box" id="server-icon-box">
             <span class="server-icon-fallback" id="server-icon-initials">VX</span>
           </div>
@@ -1732,12 +1962,12 @@
           </div>
         </div>
 
-        <div class="server-actions">
-          <button type="button" class="btn-copy-invite" id="btn-copy-invite" onclick="copyInviteLink()">
+        <div class="server-actions parallax-fg">
+          <button type="button" class="btn-copy-invite" id="btn-copy-invite" onclick="copyInviteLink(this)">
             <span>🔗</span>
             <span id="btn-copy-invite-text">Copy Invite</span>
           </button>
-          <button type="button" class="btn-copy-id" id="btn-copy-id" onclick="copyServerId()">
+          <button type="button" class="btn-copy-id" id="btn-copy-id" onclick="copyServerId(this)">
             <span>#</span>
             <span id="btn-copy-id-text">Copy ID</span>
           </button>
@@ -1749,7 +1979,7 @@
       <div id="panel-staff" class="sub-panel">
         <h3>Members with Tracked Roles (<span id="staff-count-label">0</span>)</h3>
         <div class="custom-note-box">
-          Showing members holding role IDs <code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, or <code>1568387457752371270</code> with profile image, banner image, avatar decoration, and effect overlay. Hover cards for 3D depth or click to inspect.
+          Showing members holding role IDs <code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, or <code>1568387457752371270</code> with profile image, banner image, avatar decoration, and effect overlay. Hover cards for 3D spotlight, parallax &amp; tilt or click to inspect.
         </div>
 
         <div class="controls-toolbar">
@@ -1780,7 +2010,12 @@
         <div class="custom-note-box" id="custom-trade-note-box"></div>
         <div id="games-list-container"></div>
 
-        <h4>Member Vouches (5★ &amp; 4★ Combined)</h4>
+        <h4>Member Vouches</h4>
+        <div class="vouch-filter-row" id="vouch-filter-row">
+          <button type="button" class="filter-chip active" data-stars="ALL" onclick="setVouchFilter('ALL')">All Vouches</button>
+          <button type="button" class="filter-chip" data-stars="5" onclick="setVouchFilter('5')">5★ Only</button>
+          <button type="button" class="filter-chip" data-stars="4" onclick="setVouchFilter('4')">4★ Only</button>
+        </div>
         <div id="vouches-list-container"></div>
 
         <a id="store-cta-link" class="store-cta-btn" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
@@ -1794,6 +2029,22 @@
           Anti-Scam Reminder: Always open an official server ticket and verify the Middleman's Discord ID before trading. Avoid unverified direct in-game trade windows or off-server impersonators.
         </div>
         <ol class="rules-list" id="rules-list-container"></ol>
+
+        <div class="checklist-box">
+          <div class="checklist-title">✓ Verify Ticket Checklist</div>
+          <label class="checklist-item">
+            <input type="checkbox" />
+            <span>Opened an official ticket inside Vortex Exchange &amp; MM</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" />
+            <span>Confirmed the Middleman's Discord ID &amp; role in the ticket</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" />
+            <span>Double-checked both sides' items and trade terms</span>
+          </label>
+        </div>
       </div>
     </section>
   </main>
@@ -1817,49 +2068,191 @@
         <h3 id="inspector-title">Member Profile Details</h3>
         <button type="button" class="modal-close" onclick="closeInspectorModal()">✕</button>
       </div>
-      <div id="inspector-banner" class="inspector-banner"></div>
+      <div id="inspector-banner" class="inspector-banner" title="Click to enlarge banner"></div>
+      <div class="inspector-avatar-row">
+        <img id="inspector-avatar" class="inspector-avatar-thumb" src="" alt="" title="Click to enlarge avatar" />
+        <div>
+          <div id="inspector-sub" style="font-size:0.86rem;font-weight:700;color:#fff;"></div>
+          <div style="font-size:0.74rem;color:#cbd5e1;">Click banner or avatar to view full size</div>
+        </div>
+      </div>
       <div id="inspector-meta" class="inspector-meta"></div>
+      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
+        <button type="button" class="mini-action-btn" id="inspector-copy-id">Copy ID</button>
+        <button type="button" class="mini-action-btn" id="inspector-copy-mention">Copy Mention (&lt;@id&gt;)</button>
+      </div>
       <div id="inspector-roles" class="m-roles-row"></div>
     </div>
   </div>
 
+  <div id="lightbox-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
+    <div class="modal-box lightbox-box">
+      <div class="modal-header">
+        <h3 id="lightbox-title">Full-Size Preview</h3>
+        <button type="button" class="modal-close" onclick="closeLightbox()">✕</button>
+      </div>
+      <img id="lightbox-img" class="lightbox-img" src="" alt="Full size preview" />
+    </div>
+  </div>
+
   <script>
+    const SYNC_INTERVAL_MS = 12000;
+    let nextSyncAt = Date.now() + SYNC_INTERVAL_MS;
+
     let currentServerInvite = "https://discord.gg/3JPatMmyF";
     let currentServerId = "1542941315933667348";
     let currentUserId = "1540575139538796634";
     let currentHandle = "mvn412.";
     let allGames = [];
     let allVouches = [];
+    let selectedVouchStars = "ALL";
     let roleCatalog = [];
     let staffMembers = [];
     let selectedRoleFilter = "ALL";
     let onlineOnlyFilter = false;
 
+    const displayedCounts = {
+      members: 0,
+      online: 0,
+      offline: 0,
+      boosts: 0,
+    };
+
+    const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function animateCounter(elId, key, targetVal) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      const target = Math.max(0, Number(targetVal || 0));
+      const start = displayedCounts[key] ?? 0;
+      if (start === target || prefersReducedMotion) {
+        displayedCounts[key] = target;
+        el.textContent = target.toLocaleString();
+        return;
+      }
+      const duration = 550;
+      const startTime = performance.now();
+
+      function tick(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        const current = Math.round(start + (target - start) * eased);
+        el.textContent = current.toLocaleString();
+        if (progress < 1) {
+          requestAnimationFrame(tick);
+        } else {
+          displayedCounts[key] = target;
+          el.textContent = target.toLocaleString();
+        }
+      }
+      requestAnimationFrame(tick);
+    }
+
     function attach3DTilt(el) {
       if (!el || el.dataset.tiltBound === "1") return;
       el.dataset.tiltBound = "1";
+      if (prefersReducedMotion) return;
+
       const maxDeg = Number(el.dataset.tiltMax || "6");
 
       el.addEventListener("pointermove", (e) => {
         if (e.pointerType === "touch") return;
         const rect = el.getBoundingClientRect();
         if (!rect.width || !rect.height) return;
-        const px = (e.clientX - rect.left) / rect.width - 0.5;
-        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        const px = x / rect.width - 0.5;
+        const py = y / rect.height - 0.5;
         const rotY = (px * maxDeg * 2).toFixed(2);
         const rotX = (-py * maxDeg * 2).toFixed(2);
+        const bgX = (-px * 12).toFixed(1);
+        const bgY = (-py * 10).toFixed(1);
+        const fgX = (px * 8).toFixed(1);
+        const fgY = (py * 6).toFixed(1);
+
         el.classList.remove("resetting");
+        el.style.setProperty("--spot-x", `${x.toFixed(1)}px`);
+        el.style.setProperty("--spot-y", `${y.toFixed(1)}px`);
+        el.style.setProperty("--spot-opacity", "1");
+        el.style.setProperty("--par-bg-x", `${bgX}px`);
+        el.style.setProperty("--par-bg-y", `${bgY}px`);
+        el.style.setProperty("--par-fg-x", `${fgX}px`);
+        el.style.setProperty("--par-fg-y", `${fgY}px`);
         el.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.012, 1.012, 1.012)`;
       });
 
       el.addEventListener("pointerleave", () => {
         el.classList.add("resetting");
+        el.style.setProperty("--spot-opacity", "0");
+        el.style.setProperty("--par-bg-x", "0px");
+        el.style.setProperty("--par-bg-y", "0px");
+        el.style.setProperty("--par-fg-x", "0px");
+        el.style.setProperty("--par-fg-y", "0px");
         el.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
       });
     }
 
     function initAll3DTilts() {
       document.querySelectorAll(".tilt-3d").forEach(attach3DTilt);
+    }
+
+    (function initSparkleField() {
+      const canvas = document.getElementById("sparkle-canvas");
+      if (!canvas || prefersReducedMotion) return;
+      const ctx = canvas.getContext("2d");
+      let width = (canvas.width = window.innerWidth);
+      let height = (canvas.height = window.innerHeight);
+      let pointerOffsetX = 0;
+      let pointerOffsetY = 0;
+
+      const stars = Array.from({ length: 42 }, (_, idx) => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        r: 0.9 + (idx % 3) * 0.65,
+        vy: 0.14 + (idx % 4) * 0.06,
+        alpha: 0.25 + (idx % 5) * 0.12,
+      }));
+
+      window.addEventListener("resize", () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+      });
+
+      window.addEventListener("pointermove", (e) => {
+        pointerOffsetX = (e.clientX / Math.max(1, width) - 0.5) * 18;
+        pointerOffsetY = (e.clientY / Math.max(1, height) - 0.5) * 14;
+      }, { passive: true });
+
+      function draw() {
+        ctx.clearRect(0, 0, width, height);
+        const isCrimson = document.body.classList.contains("theme-crimson");
+        for (const s of stars) {
+          s.y -= s.vy;
+          if (s.y < -10) {
+            s.y = height + 10;
+            s.x = Math.random() * width;
+          }
+          const drawX = (s.x + pointerOffsetX * (s.r * 0.6) + width) % width;
+          const drawY = (s.y + pointerOffsetY * (s.r * 0.6) + height) % height;
+          ctx.beginPath();
+          ctx.arc(drawX, drawY, s.r, 0, Math.PI * 2);
+          ctx.fillStyle = isCrimson
+            ? `rgba(253, 164, 175, ${s.alpha})`
+            : `rgba(216, 180, 254, ${s.alpha})`;
+          ctx.fill();
+        }
+        requestAnimationFrame(draw);
+      }
+      requestAnimationFrame(draw);
+    })();
+
+    function pulseCopied(btnEl) {
+      if (!btnEl) return;
+      btnEl.classList.remove("copied-pulse");
+      void btnEl.offsetWidth;
+      btnEl.classList.add("copied-pulse");
+      clearTimeout(btnEl._pulseTimer);
+      btnEl._pulseTimer = setTimeout(() => btnEl.classList.remove("copied-pulse"), 450);
     }
 
     function escapeHtml(str) {
@@ -1886,7 +2279,7 @@
       el._flashTimer = setTimeout(() => { el.textContent = originalText; }, 1600);
     }
 
-    async function copyText(text, successMsg, flashFn) {
+    async function copyText(text, successMsg, flashFn, triggerBtn) {
       try {
         await navigator.clipboard.writeText(text);
       } catch {
@@ -1897,36 +2290,38 @@
         document.execCommand("copy");
         inp.remove();
       }
+      pulseCopied(triggerBtn);
       showToast(successMsg);
       if (flashFn) flashFn();
     }
 
-    function copyInviteLink() {
+    function copyInviteLink(btnEl) {
       copyText(currentServerInvite, "Server invite copied.", () => {
         flashLabel("btn-copy-invite-text", "Copied!", "Copy Invite");
-      });
+      }, btnEl);
     }
 
-    function copyServerId() {
+    function copyServerId(btnEl) {
       copyText(currentServerId, "Server ID copied.", () => {
         flashLabel("btn-copy-id-text", "Copied!", "Copy ID");
-      });
+      }, btnEl);
     }
 
-    function copyUserId() {
-      copyText(currentUserId, "Owner User ID copied.");
+    function copyUserId(btnEl) {
+      copyText(currentUserId, "Owner User ID copied.", null, btnEl);
     }
 
-    function copyHandle() {
+    function copyHandle(btnEl) {
       copyText(currentHandle, `Copied handle: ${currentHandle}`, () => {
         flashLabel("btn-copy-handle", "Copied", "Copy");
-      });
+      }, btnEl);
     }
 
     function sharePageLink() {
+      const btnEl = document.getElementById("btn-share-page");
       copyText(window.location.href, "Page URL copied to clipboard.", () => {
         flashLabel("btn-share-page", "Copied!", "Share Page");
-      });
+      }, btnEl);
     }
 
     function toggleTheme() {
@@ -1955,18 +2350,54 @@
       document.getElementById("mm-modal").classList.remove("open");
     }
 
+    function openLightbox(title, url) {
+      if (!url) return;
+      document.getElementById("lightbox-title").textContent = title || "Full-Size Preview";
+      document.getElementById("lightbox-img").src = url;
+      document.getElementById("lightbox-modal").classList.add("open");
+    }
+
+    function closeLightbox() {
+      document.getElementById("lightbox-modal").classList.remove("open");
+    }
+
     function openInspectorModal(member) {
-      document.getElementById("inspector-title").textContent = `${member.display_name || member.username} (@${member.username})`;
+      document.getElementById("inspector-title").textContent = `${member.display_name || member.username}`;
+      document.getElementById("inspector-sub").textContent = `@${member.username} • ID ${member.id}`;
+
       const bannerEl = document.getElementById("inspector-banner");
       bannerEl.style.backgroundImage = member.banner_url ? `url("${member.banner_url}")` : "";
+      bannerEl.onclick = () => {
+        if (member.banner_url) {
+          openLightbox(`${member.display_name || member.username} — Banner`, member.banner_url);
+        } else {
+          showToast("No custom banner image on this member.");
+        }
+      };
+
+      const avEl = document.getElementById("inspector-avatar");
+      const avSrc = member.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
+      avEl.src = avSrc;
+      avEl.onclick = () => openLightbox(`${member.display_name || member.username} — Avatar`, avSrc);
 
       const eff = member.profile_effect || {};
       document.getElementById("inspector-meta").innerHTML = `
         <strong>User ID:</strong> <code>${escapeHtml(member.id)}</code><br />
+        <strong>Mention:</strong> <code>&lt;@${escapeHtml(member.id)}&gt;</code><br />
         <strong>Status:</strong> ${escapeHtml(member.status || "online")}<br />
         <strong>Effect Source:</strong> ${escapeHtml(eff.source || "elwey.fr/effects")}${eff.name ? ` (${escapeHtml(eff.name)})` : ""}<br />
         <strong>Decoration:</strong> ${member.avatar_decoration_url ? "Active" : "None"}
       `;
+
+      const copyIdBtn = document.getElementById("inspector-copy-id");
+      copyIdBtn.onclick = () => {
+        copyText(member.id, `Copied ID for ${member.display_name || member.username}.`, null, copyIdBtn);
+      };
+
+      const copyMentionBtn = document.getElementById("inspector-copy-mention");
+      copyMentionBtn.onclick = () => {
+        copyText(`<@${member.id}>`, `Copied mention <@${member.id}>.`, null, copyMentionBtn);
+      };
 
       const rolesBox = document.getElementById("inspector-roles");
       rolesBox.innerHTML = "";
@@ -1995,8 +2426,9 @@
 
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
-        closeModal();
+        closeLightbox();
         closeInspectorModal();
+        closeModal();
       }
     });
 
@@ -2018,6 +2450,12 @@
         .join("") || "VX";
     }
 
+    function countMembersForRole(roleId) {
+      return staffMembers.filter((m) =>
+        (m.roles || []).some((r) => r.id === roleId || r.role_key === roleId)
+      ).length;
+    }
+
     function renderFilterChips() {
       const container = document.getElementById("role-filter-chips");
       container.innerHTML = "";
@@ -2034,6 +2472,7 @@
       container.appendChild(allChip);
 
       roleCatalog.forEach((r) => {
+        const count = countMembersForRole(r.id);
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = `filter-chip ${selectedRoleFilter === r.id ? "active" : ""}`;
@@ -2045,7 +2484,7 @@
           chip.appendChild(img);
         }
         const txt = document.createElement("span");
-        txt.textContent = r.short_label || r.label;
+        txt.textContent = `${r.short_label || r.label} (${count})`;
         chip.appendChild(txt);
         chip.onclick = () => {
           selectedRoleFilter = r.id;
@@ -2106,7 +2545,7 @@
         card.appendChild(effectLayer);
 
         const banner = document.createElement("div");
-        banner.className = "member-banner-box";
+        banner.className = "member-banner-box parallax-bg";
         if (m.banner_url) {
           banner.style.backgroundImage = `url("${m.banner_url}")`;
         }
@@ -2119,7 +2558,7 @@
         idRow.className = "member-identity-row";
 
         const avWrap = document.createElement("div");
-        avWrap.className = "member-avatar-wrap";
+        avWrap.className = "member-avatar-wrap parallax-fg";
 
         const ring = document.createElement("div");
         ring.className = "m-avatar-ring";
@@ -2152,15 +2591,27 @@
 
         const actionsWrap = document.createElement("div");
         actionsWrap.className = "m-card-actions";
+
         const copyIdBtn = document.createElement("button");
         copyIdBtn.type = "button";
         copyIdBtn.className = "m-copy-btn";
         copyIdBtn.textContent = "Copy ID";
         copyIdBtn.onclick = (ev) => {
           ev.stopPropagation();
-          copyText(m.id, `Copied ID for ${m.display_name || m.username}.`);
+          copyText(m.id, `Copied ID for ${m.display_name || m.username}.`, null, copyIdBtn);
         };
+
+        const copyMentionBtn = document.createElement("button");
+        copyMentionBtn.type = "button";
+        copyMentionBtn.className = "m-copy-btn";
+        copyMentionBtn.textContent = "@Mention";
+        copyMentionBtn.onclick = (ev) => {
+          ev.stopPropagation();
+          copyText(`<@${m.id}>`, `Copied mention <@${m.id}>.`, null, copyMentionBtn);
+        };
+
         actionsWrap.appendChild(copyIdBtn);
+        actionsWrap.appendChild(copyMentionBtn);
 
         idRow.appendChild(avWrap);
         idRow.appendChild(actionsWrap);
@@ -2197,26 +2648,41 @@
       container.innerHTML = "";
       allGames.forEach((g) => {
         const box = document.createElement("div");
-        box.className = "game-card-item";
+        box.className = "game-card-item tilt-3d";
+        box.dataset.tiltMax = "4";
         box.innerHTML = `<strong>${escapeHtml(g.tag || "•")} ${escapeHtml(g.title)}</strong><span>${escapeHtml(g.note)}</span>`;
+        attach3DTilt(box);
         container.appendChild(box);
       });
+    }
+
+    function setVouchFilter(starVal) {
+      selectedVouchStars = starVal;
+      document.querySelectorAll("#vouch-filter-row .filter-chip").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-stars") === starVal);
+      });
+      renderVouches();
     }
 
     function renderVouches() {
       const container = document.getElementById("vouches-list-container");
       container.innerHTML = "";
 
-      if (!allVouches.length) {
-        container.innerHTML = `<div class="vouch-card"><p class="vouch-note">No member vouches listed yet.</p></div>`;
+      const list = selectedVouchStars === "ALL"
+        ? allVouches
+        : allVouches.filter((v) => String(Number(v.stars || 5)) === selectedVouchStars);
+
+      if (!list.length) {
+        container.innerHTML = `<div class="vouch-card"><p class="vouch-note">No member vouches match this star filter.</p></div>`;
         return;
       }
 
-      allVouches.forEach((v) => {
+      list.forEach((v) => {
         const starsNum = Math.max(1, Math.min(5, Number(v.stars || 5)));
         const starsDisplay = "★".repeat(starsNum) + "☆".repeat(5 - starsNum);
         const card = document.createElement("div");
-        card.className = "vouch-card";
+        card.className = "vouch-card tilt-3d";
+        card.dataset.tiltMax = "4";
 
         const top = document.createElement("div");
         top.className = "vouch-top";
@@ -2260,6 +2726,7 @@
 
         card.appendChild(top);
         card.appendChild(noteEl);
+        attach3DTilt(card);
         container.appendChild(card);
       });
     }
@@ -2289,7 +2756,20 @@
       document.getElementById("boost-meter-fill").style.width = `${pct}%`;
     }
 
+    function tickSyncCountdown() {
+      const remainingMs = Math.max(0, nextSyncAt - Date.now());
+      const secLeft = Math.ceil(remainingMs / 1000);
+      const pct = Math.max(0, Math.min(100, (remainingMs / SYNC_INTERVAL_MS) * 100));
+      const labelEl = document.getElementById("sync-countdown-label");
+      const fillEl = document.getElementById("sync-countdown-fill");
+      if (labelEl) labelEl.textContent = `Next sync in ${secLeft}s`;
+      if (fillEl) fillEl.style.width = `${pct}%`;
+    }
+
     async function refreshShowcase(manual = false) {
+      nextSyncAt = Date.now() + SYNC_INTERVAL_MS;
+      tickSyncCountdown();
+
       const grid = document.getElementById("showcase-grid");
       grid.classList.add("refreshing");
       try {
@@ -2451,10 +2931,11 @@
 
         document.getElementById("server-name").textContent = sName;
         document.getElementById("server-id-text").textContent = `ID: ${currentServerId}`;
-        document.getElementById("server-members").textContent = totalMembers.toLocaleString();
-        document.getElementById("server-online").textContent = onlineMembers.toLocaleString();
-        document.getElementById("server-offline").textContent = offlineMembers.toLocaleString();
-        document.getElementById("server-boosts").textContent = boostCount.toLocaleString();
+
+        animateCounter("server-members", "members", totalMembers);
+        animateCounter("server-online", "online", onlineMembers);
+        animateCounter("server-offline", "offline", offlineMembers);
+        animateCounter("server-boosts", "boosts", boostCount);
 
         const ratio = totalMembers > 0 ? Math.round((onlineMembers / totalMembers) * 100) : 0;
         document.getElementById("online-ratio-pill").textContent = `${ratio}% online`;
@@ -2487,7 +2968,8 @@
 
     initAll3DTilts();
     refreshShowcase(false);
-    setInterval(() => refreshShowcase(false), 12000);
+    setInterval(() => refreshShowcase(false), SYNC_INTERVAL_MS);
+    setInterval(tickSyncCountdown, 250);
   </script>
 </body>
 </html>
