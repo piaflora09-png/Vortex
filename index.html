@@ -2299,6 +2299,125 @@
         transition: none !important;
       }
     }
+  
+    /* Shop & Admin Item Features */
+    .shop-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .shop-items-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .shop-item-card {
+      background: rgba(15, 7, 28, 0.88);
+      border: 1px solid rgba(232, 121, 249, 0.28);
+      border-radius: 14px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: var(--glass-edge), 0 10px 24px rgba(0, 0, 0, 0.52);
+    }
+    .shop-item-img-box {
+      position: relative;
+      height: 128px;
+      background: #0d051a;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+    .shop-item-img-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .shop-stock-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(17, 12, 29, 0.9);
+      border: 1px solid rgba(74, 222, 128, 0.5);
+      color: #86efac;
+    }
+    .shop-stock-badge.sold-out {
+      border-color: rgba(248, 113, 113, 0.55);
+      color: #fca5a5;
+    }
+    .shop-item-body {
+      padding: 11px 12px 12px;
+    }
+    .shop-item-cat {
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #c084fc;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .shop-item-name {
+      margin: 2px 0 4px;
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .shop-item-price {
+      font-size: 0.96rem;
+      font-weight: 900;
+      color: #fbbf24;
+      margin-bottom: 5px;
+    }
+    .shop-item-desc {
+      margin: 0 0 6px;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      line-height: 1.38;
+    }
+    .shop-item-poster {
+      font-size: 0.72rem;
+      color: #e9d5ff;
+      margin-bottom: 8px;
+    }
+    .shop-upload-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 14px 12px;
+      border-radius: 12px;
+      border: 1.5px dashed rgba(245, 158, 11, 0.45);
+      background: rgba(11, 7, 20, 0.78);
+      cursor: pointer;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    .shop-upload-box:hover {
+      border-color: #fbbf24;
+      background: rgba(36, 13, 68, 0.65);
+    }
+    .shop-upload-preview {
+      max-height: 92px;
+      border-radius: 8px;
+      display: none;
+      margin-top: 6px;
+      object-fit: cover;
+    }
+    .admin-divider-box {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
   </style>
 </head>
 <body>
@@ -2354,6 +2473,7 @@
       <button type="button" class="nav-tab" data-tab="games" onclick="switchTab('games')">Roblox Crosstrading</button>
       <button type="button" class="nav-tab" data-tab="rules" onclick="switchTab('rules')">MM &amp; Rules</button>
       <button type="button" class="nav-tab" data-tab="tickets" onclick="switchTab('tickets')">Ticket System</button>
+      <button type="button" class="nav-tab" data-tab="shop" onclick="switchTab('shop')">Shop</button>
     </div>
 
     <div class="sync-status-group">
@@ -2478,6 +2598,7 @@
             <div class="bio-actions-row">
               <button type="button" class="link-btn" onclick="toggleFullBio()">View Full Bio</button>
               <button type="button" class="link-btn" onclick="openModal()">How MM Works</button>
+              <button type="button" class="link-btn" onclick="switchTab('shop')">Browse Shop</button>
               <button type="button" class="link-btn" onclick="switchTab('tickets')">Open Ticket</button>
             </div>
             <div id="full-bio-panel" class="full-bio-panel"></div>
@@ -2807,6 +2928,119 @@
 
         <h4>Active &amp; Closed Tickets (<span id="closed-tickets-count">0</span>)</h4>
         <div id="tickets-feed-container"></div>
+      </div>
+      <!-- Panel 6: VortexShop Storefront & Admin Item Manager -->
+      <div id="panel-shop" class="sub-panel">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+          <h3 style="margin:0;">VortexShop Listings</h3>
+          <button type="button" class="mini-action-btn" onclick="document.getElementById('shop-admin-section').scrollIntoView({behavior:'smooth'})">+ Admin Add Item</button>
+        </div>
+        <div class="safety-callout">
+          <strong>No Pre-Payment on Website:</strong> Items listed in the Shop do not charge upfront on the site. Click <strong>Make Ticket to Buy</strong> to auto-fill a ticket with the item details and pay the seller who posted it directly inside your ticket.
+        </div>
+
+        <div class="shop-toolbar">
+          <input
+            type="search"
+            id="shop-search-input"
+            class="search-input"
+            placeholder="Search shop items, category, or @poster..."
+            oninput="renderShopItemsList()"
+          />
+          <select id="shop-filter-select" class="select-input" onchange="renderShopItemsList()" aria-label="Filter shop items">
+            <option value="ALL">All Items</option>
+            <option value="AVAILABLE">Available Only</option>
+            <option value="SOLD">Sold Out</option>
+          </select>
+        </div>
+
+        <div class="shop-items-grid" id="shop-items-grid"></div>
+
+        <div class="admin-divider-box" id="shop-admin-section">
+          <h4>Add a new item (Admin Password Protected)</h4>
+          <form id="shop-admin-item-form" onsubmit="handleShopAddItem(event)">
+            <div class="ticket-grid-2">
+              <div class="ticket-field">
+                <label for="shop-admin-password">Admin Password *</label>
+                <input
+                  type="password"
+                  id="shop-admin-password"
+                  class="ticket-input"
+                  placeholder="Enter admin password (default: vortexadmin2026)"
+                  required
+                />
+              </div>
+              <div class="ticket-field">
+                <label for="shop-item-poster">Posted By (@user / Seller) *</label>
+                <input
+                  type="text"
+                  id="shop-item-poster"
+                  class="ticket-input"
+                  value="@mvn412."
+                  placeholder="@seller"
+                  required
+                />
+              </div>
+            </div>
+
+            <label class="shop-upload-box" for="shop-image-file">
+              <div style="font-size:1rem;font-weight:800;color:#fbbf24;">&#8593; Upload product image</div>
+              <div style="font-size:0.72rem;color:#cbd5e1;">PNG, JPG, or WebP &middot; up to 3 MB</div>
+              <img id="shop-image-preview" class="shop-upload-preview" alt="Item preview" />
+            </label>
+            <input
+              type="file"
+              id="shop-image-file"
+              accept="image/png,image/jpeg,image/webp"
+              style="display:none;"
+              onchange="handleShopImageFile(event)"
+            />
+
+            <div class="ticket-field">
+              <label for="shop-image-url">Or Image URL (optional)</label>
+              <input type="url" id="shop-image-url" class="ticket-input" placeholder="https://..." />
+            </div>
+
+            <div class="ticket-grid-2">
+              <div class="ticket-field">
+                <label for="shop-item-name">Item Name *</label>
+                <input type="text" id="shop-item-name" class="ticket-input" placeholder="e.g. Harvester + Icepiercer / Gift Card" required />
+              </div>
+              <div class="ticket-field">
+                <label for="shop-item-category">Category *</label>
+                <input type="text" id="shop-item-category" class="ticket-input" placeholder="e.g. MM2 / Grow a Garden 2" required />
+              </div>
+            </div>
+
+            <div class="ticket-grid-2">
+              <div class="ticket-field">
+                <label for="shop-item-stock">Available Stock *</label>
+                <input type="number" id="shop-item-stock" class="ticket-input" min="1" value="1" required />
+              </div>
+              <div class="ticket-field">
+                <label for="shop-item-price">Price &amp; Currency *</label>
+                <div style="display:flex;gap:6px;">
+                  <input type="number" id="shop-item-price" class="ticket-input" step="0.01" min="0" placeholder="0.00" required />
+                  <select id="shop-item-currency" class="ticket-select" style="max-width:110px;">
+                    <option value="USD">USD</option>
+                    <option value="PHP">PHP</option>
+                    <option value="EUR">EUR</option>
+                    <option value="ROB">ROB</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="ticket-field">
+              <label for="shop-item-desc">Description (optional)</label>
+              <textarea id="shop-item-desc" class="ticket-textarea" placeholder="Edition, region, trade notes, or delivery instructions..."></textarea>
+            </div>
+
+            <div class="ticket-actions-bar">
+              <button type="submit" class="btn-ticket-close">Add product &#8599;</button>
+            </div>
+          </form>
+        </div>
       </div>
     </section>
   </main>
@@ -3369,6 +3603,7 @@
       else if (e.key === "3") switchTab("games");
       else if (e.key === "4") switchTab("rules");
       else if (e.key === "5") switchTab("tickets");
+      else if (e.key === "6") switchTab("shop");
       else if (e.key === "?") {
         e.preventDefault();
         openShortcutsModal();
@@ -3380,7 +3615,7 @@
       }
     });
 
-    const VALID_TABS = ["overview", "staff", "games", "rules", "tickets"];
+    const VALID_TABS = ["overview", "staff", "games", "rules", "tickets", "shop"];
 
     function switchTab(tabName, updateHash = true) {
       const targetTab = VALID_TABS.includes(tabName) ? tabName : "overview";
@@ -3391,6 +3626,7 @@
       document.getElementById("panel-games").classList.toggle("active", targetTab === "games");
       document.getElementById("panel-rules").classList.toggle("active", targetTab === "rules");
       document.getElementById("panel-tickets").classList.toggle("active", targetTab === "tickets");
+      document.getElementById("panel-shop").classList.toggle("active", targetTab === "shop");
 
       if (updateHash && window.location.hash !== `#${targetTab}`) {
         try {
@@ -4264,6 +4500,250 @@
       if (!autoSyncPaused) refreshShowcase(false);
     }, SYNC_INTERVAL_MS);
     setInterval(tickSyncCountdown, 250);
+  
+    // Shop & Admin Item State + Sync
+    let shopCatalogItems = [
+      {
+        id: "vx-item-1",
+        name: "Harvester + Icepiercer Bundle",
+        category: "MM2",
+        stock: 2,
+        price: "18.00",
+        currency: "USD",
+        posted_by: "@mvn412.",
+        description: "Verified MM2 Godly duo. Pay seller directly inside your official Vortex ticket.",
+        image_url: "https://cdn.discordapp.com/embed/avatars/1.png",
+        status: "AVAILABLE"
+      },
+      {
+        id: "vx-item-2",
+        name: "Dragonfly + Raccoon Pet Pack",
+        category: "Grow a Garden 2",
+        stock: 3,
+        price: "450.00",
+        currency: "PHP",
+        posted_by: "@mvn412.",
+        description: "Fast escrow trade via official ticket. No website pre-payment.",
+        image_url: "https://cdn.discordapp.com/embed/avatars/2.png",
+        status: "AVAILABLE"
+      },
+      {
+        id: "vx-item-3",
+        name: "Sakura Set + Dark Set",
+        category: "MM2",
+        stock: 1,
+        price: "24.00",
+        currency: "USD",
+        posted_by: "@mvn412.",
+        description: "Full matching MM2 sets. Open ticket to confirm availability and pay seller.",
+        image_url: "https://cdn.discordapp.com/embed/avatars/4.png",
+        status: "AVAILABLE"
+      }
+    ];
+    let shopUploadedDataUrl = "";
+
+    function handleShopImageFile(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (file.size > 3 * 1024 * 1024) {
+        showToast("Product image must be 3 MB or smaller.");
+        e.target.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        shopUploadedDataUrl = String(reader.result || "");
+        const prev = document.getElementById("shop-image-preview");
+        if (prev) {
+          prev.src = shopUploadedDataUrl;
+          prev.style.display = "block";
+        }
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function handleShopAddItem(e) {
+      e.preventDefault();
+      const adminPassword = document.getElementById("shop-admin-password").value;
+      const imageUrl = document.getElementById("shop-image-url").value.trim() || shopUploadedDataUrl;
+      const payload = {
+        admin_password: adminPassword,
+        name: document.getElementById("shop-item-name").value.trim(),
+        category: document.getElementById("shop-item-category").value.trim(),
+        stock: Math.max(1, Number(document.getElementById("shop-item-stock").value || 1)),
+        price: Number(document.getElementById("shop-item-price").value || 0).toFixed(2),
+        currency: document.getElementById("shop-item-currency").value,
+        posted_by: normalizeMention(document.getElementById("shop-item-poster").value),
+        description: document.getElementById("shop-item-desc").value.trim(),
+        image_url: imageUrl,
+      };
+
+      try {
+        const res = await fetch("/api/shop/items", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          showToast(data.error || "Failed to add item (check admin password).");
+          return;
+        }
+        shopCatalogItems.unshift(data.item);
+        renderShopItemsList();
+        document.getElementById("shop-admin-item-form").reset();
+        document.getElementById("shop-item-stock").value = "1";
+        document.getElementById("shop-item-poster").value = "@mvn412.";
+        shopUploadedDataUrl = "";
+        const prev = document.getElementById("shop-image-preview");
+        if (prev) {
+          prev.src = "";
+          prev.style.display = "none";
+        }
+        showToast(`Added "${data.item.name}" & sent item-added webhook.`);
+      } catch {
+        // Local preview fallback if backend isn't running locally
+        if (adminPassword !== "vortexadmin2026") {
+          showToast("Invalid admin password.");
+          return;
+        }
+        const localItem = {
+          id: "item-" + Date.now(),
+          ...payload,
+          status: "AVAILABLE",
+        };
+        shopCatalogItems.unshift(localItem);
+        renderShopItemsList();
+        document.getElementById("shop-admin-item-form").reset();
+        document.getElementById("shop-item-stock").value = "1";
+        document.getElementById("shop-item-poster").value = "@mvn412.";
+        shopUploadedDataUrl = "";
+        const prev = document.getElementById("shop-image-preview");
+        if (prev) {
+          prev.src = "";
+          prev.style.display = "none";
+        }
+        showToast(`Added "${localItem.name}" locally.`);
+      }
+    }
+
+    function makeTicketToBuy(itemId) {
+      const item = shopCatalogItems.find((i) => i.id === itemId);
+      if (!item) return;
+      switchTab("tickets");
+      document.getElementById("trader1-name").value = item.posted_by.replace(/^@/, "");
+      document.getElementById("trader1-items").value = `${item.name} (${item.price} ${item.currency})`;
+      document.getElementById("trader2-items").value = `Pay ${item.posted_by} directly in ticket (no site pre-payment)`;
+      document.getElementById("ticket-value").value = `${item.price} ${item.currency}`;
+      const existingNotes = document.getElementById("ticket-notes").value.trim();
+      const buyNote = `Buy request for ${item.name} [${item.category}] posted by ${item.posted_by}.`;
+      document.getElementById("ticket-notes").value = existingNotes ? `${existingNotes} | ${buyNote}` : buyNote;
+      showToast(`Ticket ready for "${item.name}". Pay ${item.posted_by} inside your ticket.`);
+    }
+
+    async function markShopItemSold(itemId) {
+      const buyerTag = prompt("Enter buyer @username or ticket note for Sold Webhook:", "@buyer") || "@buyer";
+      try {
+        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}/sold`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ buyer: buyerTag }),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok) {
+          shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? data.item : it));
+          renderShopItemsList();
+          showToast(`Marked "${data.item.name}" as SOLD & sent sold webhook.`);
+          return;
+        }
+      } catch {}
+
+      shopCatalogItems = shopCatalogItems.map((it) => {
+        if (it.id !== itemId) return it;
+        const nextStock = Math.max(0, Number(it.stock || 1) - 1);
+        return { ...it, stock: nextStock, status: nextStock <= 0 ? "SOLD" : "AVAILABLE" };
+      });
+      renderShopItemsList();
+      showToast("Marked item as SOLD.");
+    }
+
+    function renderShopItemsList() {
+      const grid = document.getElementById("shop-items-grid");
+      if (!grid) return;
+      const q = (document.getElementById("shop-search-input")?.value || "").trim().toLowerCase();
+      const filterVal = document.getElementById("shop-filter-select")?.value || "ALL";
+
+      const items = shopCatalogItems.filter((it) => {
+        const soldOut = Number(it.stock || 0) <= 0 || it.status === "SOLD";
+        if (filterVal === "AVAILABLE" && soldOut) return false;
+        if (filterVal === "SOLD" && !soldOut) return false;
+        if (!q) return true;
+        const hay = `${it.name || ""} ${it.category || ""} ${it.posted_by || ""} ${it.description || ""}`.toLowerCase();
+        return hay.includes(q);
+      });
+
+      if (!items.length) {
+        grid.innerHTML = `<div class="vouch-card"><p class="vouch-note">No shop items yet. Add one below using your Admin Password.</p></div>`;
+        return;
+      }
+
+      grid.innerHTML = items.map((it) => {
+        const soldOut = Number(it.stock || 0) <= 0 || it.status === "SOLD";
+        const imgSrc = it.image_url || "https://cdn.discordapp.com/embed/avatars/0.png";
+        return `
+          <div class="shop-item-card">
+            <div>
+              <div class="shop-item-img-box">
+                <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(it.name)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" />
+                <span class="shop-stock-badge ${soldOut ? "sold-out" : ""}">${soldOut ? "SOLD OUT" : `Stock: ${it.stock}`}</span>
+              </div>
+              <div class="shop-item-body">
+                <div class="shop-item-cat">${escapeHtml(it.category || "Item")}</div>
+                <div class="shop-item-name">${escapeHtml(it.name)}</div>
+                <div class="shop-item-price">${escapeHtml(it.price)} ${escapeHtml(it.currency || "USD")}</div>
+                ${it.description ? `<p class="shop-item-desc">${escapeHtml(it.description)}</p>` : ""}
+                <div class="shop-item-poster">Posted by <strong>${escapeHtml(it.posted_by || "@mvn412.")}</strong></div>
+              </div>
+            </div>
+            <div class="shop-item-body" style="padding-top:0;">
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button type="button" class="btn-ticket-primary" style="padding:7px 10px;font-size:0.74rem;" ${soldOut ? "disabled" : ""} onclick="makeTicketToBuy('${escapeHtml(it.id)}')">
+                  Make Ticket to Buy
+                </button>
+                <button type="button" class="m-copy-btn" ${soldOut ? "disabled" : ""} onclick="markShopItemSold('${escapeHtml(it.id)}')">
+                  Mark Sold
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function syncShopStateFromBackend() {
+      try {
+        const res = await fetch("/api/state", { cache: "no-store" });
+        if (res.ok) {
+          const data = await res.json();
+          if (Array.isArray(data.items)) {
+            shopCatalogItems = data.items;
+            renderShopItemsList();
+          }
+          if (Array.isArray(data.closed_tickets) && data.closed_tickets.length) {
+            const existingIds = new Set(ticketRecords.map((t) => t.ticket_id));
+            data.closed_tickets.forEach((t) => {
+              if (!existingIds.has(t.ticket_id)) {
+                ticketRecords.push({ ...t, synced_to_website: true });
+              }
+            });
+            renderTicketsFeed();
+          }
+        }
+      } catch {}
+    }
+
+    renderShopItemsList();
+    syncShopStateFromBackend();
   </script>
 </body>
 </html>
