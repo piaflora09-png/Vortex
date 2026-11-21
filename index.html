@@ -4,6 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>VortexShop — 3D Roblox Crosstrading, Role Members &amp; Server Showcase</title>
+  <link
+    id="dynamic-favicon"
+    rel="icon"
+    type="image/svg+xml"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23a855f7'/%3E%3Cstop offset='55%25' stop-color='%23ec4899'/%3E%3Cstop offset='100%25' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%23120824'/%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Cpath d='M16 18L32 48L48 18' fill='none' stroke='url(%23g)' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='22' r='4' fill='%23fde68a'/%3E%3C/svg%3E"
+  />
   <style>
     :root {
       --bg-dark: #07050c;
@@ -15,6 +21,8 @@
       --accent-pink: #e879f9;
       --status-ring: #23a55a;
       --server-border: rgba(245, 158, 11, 0.62);
+      --bg-grid-stroke: rgba(192, 132, 252, 0.06);
+      --bg-ring-stroke: rgba(245, 158, 11, 0.11);
     }
 
     body.theme-crimson {
@@ -24,6 +32,8 @@
       --accent-primary: #e11d48;
       --accent-pink: #fb7185;
       --server-border: rgba(251, 113, 133, 0.65);
+      --bg-grid-stroke: rgba(251, 113, 133, 0.065);
+      --bg-ring-stroke: rgba(245, 158, 11, 0.12);
     }
 
     @property --rim-angle {
@@ -62,6 +72,16 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       overflow-x: hidden;
       transition: background 0.3s ease;
+    }
+
+    .site-bg-art {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.9;
     }
 
     #sparkle-canvas {
@@ -198,6 +218,25 @@
       animation: settleIn 0.35s ease;
     }
 
+    .brand-mark {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding-right: 6px;
+      font-weight: 900;
+      font-size: 0.92rem;
+      letter-spacing: 0.02em;
+      color: #ffffff;
+    }
+
+    .brand-icon-svg {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      flex-shrink: 0;
+      box-shadow: 0 0 14px rgba(168, 85, 247, 0.42);
+    }
+
     .sync-countdown-strip {
       position: absolute;
       left: 0;
@@ -217,6 +256,7 @@
     .nav-tabs {
       display: flex;
       flex-wrap: wrap;
+      align-items: center;
       gap: 8px;
     }
 
@@ -1747,12 +1787,47 @@
   </style>
 </head>
 <body>
+  <svg class="site-bg-art" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <pattern id="vortex-grid" width="72" height="72" patternUnits="userSpaceOnUse">
+        <path d="M 72 0 L 0 0 0 72" fill="none" stroke="var(--bg-grid-stroke)" stroke-width="1" />
+      </pattern>
+      <radialGradient id="vortex-core" cx="50%" cy="45%" r="55%">
+        <stop offset="0%" stop-color="#a855f7" stop-opacity="0.16" />
+        <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.06" />
+        <stop offset="100%" stop-color="#07050c" stop-opacity="0" />
+      </radialGradient>
+    </defs>
+    <rect width="1440" height="900" fill="url(#vortex-grid)" />
+    <rect width="1440" height="900" fill="url(#vortex-core)" />
+    <circle cx="720" cy="450" r="210" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" stroke-dasharray="6 8" />
+    <circle cx="720" cy="450" r="340" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1" />
+    <path d="M 0 740 Q 360 660 720 740 T 1440 720" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.5" />
+    <path d="M 0 170 Q 420 250 860 150 T 1440 190" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" />
+  </svg>
+
   <canvas id="sparkle-canvas" aria-hidden="true"></canvas>
   <div class="ambient-orb orb-left"></div>
   <div class="ambient-orb orb-right"></div>
 
   <header class="top-nav" aria-label="Navigation and Sync Controls">
     <div class="nav-tabs" role="tablist">
+      <span class="brand-mark">
+        <svg id="site-brand-icon" class="brand-icon-svg" viewBox="0 0 64 64" aria-hidden="true">
+          <defs>
+            <linearGradient id="vxBrandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#a855f7" />
+              <stop offset="55%" stop-color="#ec4899" />
+              <stop offset="100%" stop-color="#f59e0b" />
+            </linearGradient>
+          </defs>
+          <rect width="64" height="64" rx="16" fill="#120824" />
+          <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="url(#vxBrandGrad)" stroke-width="3" />
+          <path d="M16 18L32 48L48 18" fill="none" stroke="url(#vxBrandGrad)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
+          <circle cx="32" cy="22" r="4" fill="#fde68a" />
+        </svg>
+        <span>VortexShop</span>
+      </span>
       <button type="button" class="nav-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
       <button type="button" class="nav-tab" data-tab="staff" onclick="switchTab('staff')">Role Members</button>
       <button type="button" class="nav-tab" data-tab="games" onclick="switchTab('games')">Roblox Crosstrading</button>
