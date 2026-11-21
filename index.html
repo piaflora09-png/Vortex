@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VortexShop — Roblox Crosstrading & Server Showcase</title>
+  <title>VortexShop — Roblox Crosstrading, Role Members &amp; Server Showcase</title>
   <style>
     :root {
       --bg-dark: #07050c;
-      --purple-glow: rgba(168, 85, 247, 0.25);
-      --gold-glow: rgba(245, 158, 11, 0.17);
+      --purple-glow: rgba(168, 85, 247, 0.26);
+      --gold-glow: rgba(245, 158, 11, 0.18);
+      --rose-glow: rgba(236, 72, 153, 0.14);
       --accent-primary: #8b5cf6;
       --accent-gold: #f59e0b;
       --accent-pink: #e879f9;
@@ -17,11 +18,12 @@
     }
 
     body.theme-crimson {
-      --purple-glow: rgba(225, 29, 72, 0.25);
+      --purple-glow: rgba(225, 29, 72, 0.26);
       --gold-glow: rgba(245, 158, 11, 0.18);
+      --rose-glow: rgba(251, 113, 133, 0.18);
       --accent-primary: #e11d48;
       --accent-pink: #fb7185;
-      --server-border: rgba(251, 113, 133, 0.58);
+      --server-border: rgba(251, 113, 133, 0.62);
     }
 
     * { box-sizing: border-box; }
@@ -44,10 +46,11 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 18px 48px;
+      padding: 24px 18px 56px;
       background:
-        radial-gradient(circle at 16% 18%, var(--purple-glow), transparent 46%),
-        radial-gradient(circle at 84% 78%, var(--gold-glow), transparent 48%),
+        radial-gradient(circle at 14% 16%, var(--purple-glow), transparent 46%),
+        radial-gradient(circle at 86% 78%, var(--gold-glow), transparent 48%),
+        radial-gradient(circle at 55% 8%, var(--rose-glow), transparent 42%),
         var(--bg-dark);
       color: #f5f3ff;
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
@@ -58,30 +61,30 @@
     .ambient-orb {
       position: fixed;
       border-radius: 50%;
-      filter: blur(88px);
+      filter: blur(92px);
       pointer-events: none;
       z-index: 0;
-      animation: floatOrb 11s ease-in-out infinite alternate;
+      animation: floatOrb 12s ease-in-out infinite alternate;
     }
     .orb-left {
-      width: 340px;
-      height: 340px;
+      width: 360px;
+      height: 360px;
       top: 4%;
-      left: 6%;
+      left: 5%;
       background: var(--purple-glow);
     }
     .orb-right {
-      width: 320px;
-      height: 320px;
+      width: 340px;
+      height: 340px;
       bottom: 6%;
-      right: 8%;
+      right: 6%;
       background: var(--gold-glow);
       animation-delay: -5s;
     }
 
     @keyframes floatOrb {
       0% { transform: translate(0px, 0px) scale(1); }
-      100% { transform: translate(18px, -16px) scale(1.06); }
+      100% { transform: translate(20px, -18px) scale(1.07); }
     }
 
     @keyframes settleIn {
@@ -90,28 +93,29 @@
     }
 
     @keyframes effectShimmer {
-      0% { transform: translateX(-100%) rotate(12deg); opacity: 0; }
-      35% { opacity: 0.75; }
+      0% { transform: translateX(-115%) rotate(14deg); opacity: 0; }
+      35% { opacity: 0.8; }
       70% { opacity: 0.45; }
-      100% { transform: translateX(220%) rotate(12deg); opacity: 0; }
+      100% { transform: translateX(240%) rotate(14deg); opacity: 0; }
     }
 
     .top-nav {
       position: relative;
       z-index: 5;
       width: 100%;
-      max-width: 1020px;
+      max-width: 1080px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
       justify-content: space-between;
       gap: 12px;
-      margin-bottom: 18px;
-      padding: 10px 14px;
-      border-radius: 16px;
-      background: rgba(20, 12, 34, 0.86);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(12px);
+      margin-bottom: 20px;
+      padding: 11px 16px;
+      border-radius: 18px;
+      background: rgba(20, 12, 34, 0.88);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+      backdrop-filter: blur(14px);
       animation: settleIn 0.35s ease;
     }
 
@@ -125,19 +129,19 @@
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #e9d5ff;
-      padding: 7px 13px;
-      border-radius: 10px;
+      padding: 8px 14px;
+      border-radius: 11px;
       font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.15s ease;
+      transition: all 0.16s ease;
     }
-    .nav-tab:hover { background: rgba(168, 85, 247, 0.18); color: #ffffff; }
+    .nav-tab:hover { background: rgba(168, 85, 247, 0.2); color: #ffffff; transform: translateY(-1px); }
     .nav-tab.active {
       background: linear-gradient(135deg, var(--accent-primary), #d97706);
       color: #ffffff;
       border-color: transparent;
-      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.34);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
     }
 
     .sync-status-group {
@@ -174,14 +178,19 @@
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.14);
       color: #f5f3ff;
-      padding: 5px 10px;
-      border-radius: 8px;
+      padding: 5px 11px;
+      border-radius: 9px;
       font-size: 0.77rem;
       font-weight: 700;
       cursor: pointer;
-      transition: background 0.15s ease;
+      transition: background 0.15s ease, transform 0.12s ease;
     }
-    .mini-action-btn:hover { background: rgba(255, 255, 255, 0.14); }
+    .mini-action-btn:hover { background: rgba(255, 255, 255, 0.15); transform: translateY(-1px); }
+    .mini-action-btn.toggled {
+      background: rgba(34, 197, 94, 0.18);
+      border-color: rgba(34, 197, 94, 0.45);
+      color: #86efac;
+    }
 
     .showcase-grid {
       position: relative;
@@ -191,7 +200,7 @@
       align-items: flex-start;
       justify-content: center;
       gap: 34px;
-      max-width: 1020px;
+      max-width: 1080px;
       width: 100%;
       animation: settleIn 0.45s ease;
     }
@@ -205,7 +214,7 @@
 
     .outer-stage {
       position: relative;
-      width: 396px;
+      width: 398px;
       max-width: 100%;
       padding-top: 26px;
       flex-shrink: 0;
@@ -249,7 +258,7 @@
     .frame-shell:hover {
       transform: translateY(-3px);
       box-shadow:
-        0 0 26px rgba(168, 85, 247, 0.36),
+        0 0 28px rgba(168, 85, 247, 0.38),
         0 28px 70px rgba(0, 0, 0, 0.9);
     }
 
@@ -288,7 +297,7 @@
       background: linear-gradient(
         90deg,
         transparent,
-        rgba(232, 121, 249, 0.22),
+        rgba(232, 121, 249, 0.24),
         rgba(245, 158, 11, 0.18),
         transparent
       );
@@ -300,7 +309,7 @@
       height: 152px;
       background-color: #1c0b36;
       background-image:
-        linear-gradient(135deg, rgba(168, 85, 247, 0.42), rgba(236, 72, 153, 0.32)),
+        linear-gradient(135deg, rgba(168, 85, 247, 0.45), rgba(236, 72, 153, 0.34)),
         repeating-linear-gradient(
           90deg,
           rgba(255, 255, 255, 0.04) 0px,
@@ -469,7 +478,7 @@
     .note-icon-btn:hover { background: rgba(168, 85, 247, 0.3); }
 
     .username-sub {
-      margin: 2px 0 6px;
+      margin: 2px 0 10px;
       font-size: 0.92rem;
       color: #e2e8f0;
       font-weight: 500;
@@ -489,20 +498,6 @@
       cursor: pointer;
     }
     .copy-handle-inline:hover { color: #fff; background: rgba(168, 85, 247, 0.25); }
-
-    .effect-tag-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
-      border-radius: 8px;
-      background: rgba(168, 85, 247, 0.16);
-      border: 1px solid rgba(232, 121, 249, 0.35);
-      color: #f5d0fe;
-      font-size: 0.76rem;
-      font-weight: 700;
-      margin-bottom: 10px;
-    }
 
     .bio-link {
       font-size: 0.92rem;
@@ -731,7 +726,7 @@
     }
 
     .server-column {
-      width: 510px;
+      width: 560px;
       max-width: 100%;
       padding-top: 26px;
       flex-shrink: 0;
@@ -993,22 +988,22 @@
 
     .sub-panel {
       display: none;
-      background: rgba(20, 12, 34, 0.94);
-      border: 1px solid rgba(168, 85, 247, 0.3);
-      border-radius: 18px;
-      padding: 18px 20px;
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+      background: rgba(20, 12, 34, 0.95);
+      border: 1px solid rgba(168, 85, 247, 0.34);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 20px 46px rgba(0, 0, 0, 0.72);
     }
-    .sub-panel.active { display: block; }
+    .sub-panel.active { display: block; animation: settleIn 0.25s ease; }
 
     .sub-panel h3 {
       margin: 0 0 10px;
-      font-size: 1.05rem;
+      font-size: 1.08rem;
       color: #f5d0fe;
     }
 
     .sub-panel h4 {
-      margin: 14px 0 8px;
+      margin: 14px 0 9px;
       font-size: 0.95rem;
       color: #fbbf24;
     }
@@ -1024,6 +1019,273 @@
       margin-bottom: 12px;
     }
 
+    .controls-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 190px;
+      background: rgba(11, 7, 20, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: #ffffff;
+      font-size: 0.84rem;
+      outline: none;
+    }
+    .search-input:focus {
+      border-color: var(--accent-gold);
+    }
+
+    .filter-chips-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #e2e8f0;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+    .filter-chip:hover {
+      border-color: rgba(245, 158, 11, 0.45);
+      color: #ffffff;
+    }
+    .filter-chip.active {
+      background: linear-gradient(135deg, var(--accent-primary), #d97706);
+      border-color: transparent;
+      color: #ffffff;
+    }
+    .filter-chip img {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      border-radius: 3px;
+    }
+
+    .member-showcase-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 14px;
+    }
+
+    .member-showcase-card {
+      position: relative;
+      border-radius: 18px;
+      overflow: hidden;
+      background: linear-gradient(180deg, rgba(35, 14, 62, 0.96), rgba(16, 8, 29, 0.98));
+      border: 1px solid rgba(232, 121, 249, 0.28);
+      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .member-showcase-card:hover {
+      transform: translateY(-2px);
+      border-color: rgba(245, 158, 11, 0.58);
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.78), 0 0 22px rgba(168, 85, 247, 0.22);
+    }
+
+    .member-card-effect {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 4;
+      overflow: hidden;
+    }
+
+    .member-card-effect img.m-effect-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0.52;
+      mix-blend-mode: screen;
+    }
+
+    .member-card-effect .m-effect-sweep {
+      position: absolute;
+      top: -35%;
+      left: -45%;
+      width: 50%;
+      height: 170%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(232, 121, 249, 0.2),
+        rgba(245, 158, 11, 0.16),
+        transparent
+      );
+      animation: effectShimmer 5s ease-in-out infinite;
+    }
+
+    .member-banner-box {
+      position: relative;
+      height: 88px;
+      background:
+        linear-gradient(125deg, rgba(139, 92, 246, 0.45), rgba(236, 72, 153, 0.28), rgba(245, 158, 11, 0.2)),
+        #180a2e;
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+    }
+
+    .member-banner-box::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(7, 5, 12, 0.18), rgba(19, 9, 34, 0.86));
+    }
+
+    .member-card-body {
+      position: relative;
+      padding: 0 16px 15px;
+      z-index: 3;
+    }
+
+    .member-identity-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 12px;
+      margin-top: -28px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .member-avatar-wrap {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .m-avatar-ring {
+      position: relative;
+      width: 64px;
+      height: 64px;
+      flex-shrink: 0;
+    }
+
+    .m-avatar-photo {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3.5px solid #210c3e;
+      background: #120624;
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.65);
+    }
+
+    .m-avatar-deco {
+      position: absolute;
+      top: -9px;
+      left: -9px;
+      width: 82px;
+      height: 82px;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .m-status-badge {
+      position: absolute;
+      right: 1px;
+      bottom: 1px;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      border: 2.5px solid #210c3e;
+      background: #23a55a;
+      z-index: 4;
+    }
+    .m-status-badge.idle { background: #f0b232; }
+    .m-status-badge.dnd { background: #f23f43; }
+    .m-status-badge.offline { background: #747f8d; }
+
+    .m-name-block {
+      padding-top: 28px;
+      min-width: 0;
+    }
+
+    .m-display-name {
+      font-size: 1.05rem;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .m-username-line {
+      font-size: 0.77rem;
+      color: #cbd5e1;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .m-card-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .m-copy-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #f5f3ff;
+      border-radius: 8px;
+      padding: 4px 9px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .m-copy-btn:hover {
+      background: rgba(245, 158, 11, 0.22);
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+
+    .m-roles-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .staff-role-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(245, 158, 11, 0.34);
+      font-size: 0.74rem;
+      font-weight: 700;
+      color: #fef3c7;
+    }
+
+    .staff-role-pill img {
+      width: 15px;
+      height: 15px;
+      object-fit: contain;
+      border-radius: 3px;
+    }
+
     .game-card-item {
       padding: 12px 14px;
       border-radius: 12px;
@@ -1033,112 +1295,6 @@
     }
     .game-card-item strong { color: #fbbf24; display: block; margin-bottom: 4px; font-size: 0.95rem; }
     .game-card-item span { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
-
-    .role-legend-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 8px;
-      margin-bottom: 14px;
-    }
-
-    .role-legend-card {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-    }
-
-    .role-icon-badge {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      object-fit: cover;
-      background: rgba(15, 8, 28, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      flex-shrink: 0;
-    }
-
-    .role-legend-title {
-      font-size: 0.83rem;
-      font-weight: 700;
-      color: #ffffff;
-    }
-
-    .role-legend-id {
-      font-size: 0.7rem;
-      color: #94a3b8;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-
-    .staff-member-card {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      padding: 10px 12px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.035);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      margin-bottom: 8px;
-    }
-
-    .staff-member-left {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .staff-member-avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid rgba(245, 158, 11, 0.45);
-      background: #240d44;
-      flex-shrink: 0;
-    }
-
-    .staff-member-name {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #ffffff;
-    }
-
-    .staff-member-handle {
-      font-size: 0.75rem;
-      color: #cbd5e1;
-    }
-
-    .staff-roles-badges {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-      gap: 6px;
-    }
-
-    .staff-role-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      padding: 3px 8px;
-      border-radius: 999px;
-      background: rgba(139, 92, 246, 0.16);
-      border: 1px solid rgba(192, 132, 252, 0.35);
-      font-size: 0.73rem;
-      font-weight: 700;
-      color: #f3e8ff;
-    }
-
-    .staff-role-pill img {
-      width: 14px;
-      height: 14px;
-      object-fit: contain;
-      border-radius: 3px;
-    }
 
     .vouch-card {
       padding: 11px 13px;
@@ -1249,7 +1405,7 @@
 
     .modal-box {
       width: 100%;
-      max-width: 430px;
+      max-width: 440px;
       background: #170c2b;
       border: 1px solid rgba(245, 158, 11, 0.45);
       border-radius: 18px;
@@ -1273,6 +1429,23 @@
       font-weight: 700;
     }
 
+    .inspector-banner {
+      height: 84px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.25)), #120822;
+      background-size: cover;
+      background-position: center;
+      margin-bottom: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .inspector-meta {
+      font-size: 0.82rem;
+      color: #cbd5e1;
+      line-height: 1.5;
+      margin-bottom: 12px;
+    }
+
     @media (max-width: 520px) {
       .server-actions { grid-template-columns: 1fr; }
     }
@@ -1285,7 +1458,7 @@
   <header class="top-nav" aria-label="Navigation and Sync Controls">
     <div class="nav-tabs" role="tablist">
       <button type="button" class="nav-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
-      <button type="button" class="nav-tab" data-tab="staff" onclick="switchTab('staff')">Staff &amp; Roles</button>
+      <button type="button" class="nav-tab" data-tab="staff" onclick="switchTab('staff')">Role Members</button>
       <button type="button" class="nav-tab" data-tab="games" onclick="switchTab('games')">Roblox Crosstrading</button>
       <button type="button" class="nav-tab" data-tab="rules" onclick="switchTab('rules')">MM &amp; Rules</button>
     </div>
@@ -1327,7 +1500,7 @@
 
       <div class="frame-shell">
         <div class="card">
-          <div id="profile-effect-layer" class="profile-effect-layer">
+          <div id="profile-effect-layer" class="profile-effect-layer active">
             <img id="profile-effect-img" class="effect-asset" src="" alt="" style="display:none;" />
             <div class="profile-effect-sweep"></div>
           </div>
@@ -1363,11 +1536,6 @@
               <button type="button" class="copy-handle-inline" id="btn-copy-handle" onclick="copyHandle()">Copy</button>
             </div>
 
-            <div class="effect-tag-pill" id="profile-effect-pill">
-              <span>✨</span>
-              <span id="profile-effect-label">Effect: Default Shimmer (elwey.fr/effects)</span>
-            </div>
-
             <div class="bio-link">
               <a id="bio-link" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
                 Check out vortexshop.onrender.com
@@ -1396,7 +1564,7 @@
             <div id="role-pill" class="role-pill">
               <img id="role-pill-icon" src="" alt="" style="width:16px;height:16px;object-fit:contain;border-radius:3px;display:none;" />
               <span id="role-pill-emoji">👑</span>
-              <span id="role-pill-text">VortexShop</span>
+              <span id="role-pill-text">Founder • VortexShop</span>
             </div>
 
             <div class="owner-text">
@@ -1415,11 +1583,11 @@
             <div class="member-label">Member Since</div>
             <div id="member-since" class="member-date">Aug 22, 2026</div>
 
-            <div class="game-collection-bar" onclick="switchTab('staff')" title="View Staff & Role Members">
-              <span class="gc-title">Staff &amp; Role Directory</span>
+            <div class="game-collection-bar" onclick="switchTab('staff')" title="Browse Members with Tracked Roles">
+              <span class="gc-title">Role Members Showcase</span>
               <div class="gc-icons">
-                <div class="gc-tile gc-roblox" title="Staff Roles">❖</div>
-                <div class="gc-tile gc-mm" title="Verified Escrow & Vouches">✦</div>
+                <div class="gc-tile gc-roblox" title="Role Members">❖</div>
+                <div class="gc-tile gc-mm" title="Avatars, Banners, Decorations & Effects">✦</div>
               </div>
             </div>
           </div>
@@ -1489,16 +1657,32 @@
       </div>
 
       <div id="panel-staff" class="sub-panel">
-        <h3>Tracked Staff Roles &amp; Members</h3>
+        <h3>Members with Tracked Roles (<span id="staff-count-label">0</span>)</h3>
         <div class="custom-note-box">
-          Members holding any of the tracked staff role IDs (<code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, <code>1568387457752371270</code>) are synced automatically from the Discord server.
+          Showing members holding role IDs <code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, or <code>1568387457752371270</code> with profile image, banner image, avatar decoration, and effect overlay. Click any card to inspect.
         </div>
 
-        <h4>Role Icons Reference</h4>
-        <div class="role-legend-grid" id="role-legend-container"></div>
+        <div class="controls-toolbar">
+          <input
+            type="search"
+            id="staff-search-input"
+            class="search-input"
+            placeholder="Search by name, @username, or ID..."
+            oninput="renderStaffSection()"
+          />
+          <button
+            type="button"
+            id="btn-online-only"
+            class="mini-action-btn"
+            onclick="toggleOnlineOnly()"
+          >
+            Online Only: Off
+          </button>
+        </div>
 
-        <h4>Members with Staff Roles (<span id="staff-count-label">0</span>)</h4>
-        <div id="staff-members-container"></div>
+        <div class="filter-chips-row" id="role-filter-chips"></div>
+
+        <div class="member-showcase-grid" id="staff-members-container"></div>
       </div>
 
       <div id="panel-games" class="sub-panel">
@@ -1537,6 +1721,18 @@
     </div>
   </div>
 
+  <div id="member-inspector-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inspector-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="inspector-title">Member Profile Details</h3>
+        <button type="button" class="modal-close" onclick="closeInspectorModal()">✕</button>
+      </div>
+      <div id="inspector-banner" class="inspector-banner"></div>
+      <div id="inspector-meta" class="inspector-meta"></div>
+      <div id="inspector-roles" class="m-roles-row"></div>
+    </div>
+  </div>
+
   <script>
     let currentServerInvite = "https://discord.gg/3JPatMmyF";
     let currentServerId = "1542941315933667348";
@@ -1546,6 +1742,8 @@
     let allVouches = [];
     let roleCatalog = [];
     let staffMembers = [];
+    let selectedRoleFilter = "ALL";
+    let onlineOnlyFilter = false;
 
     function escapeHtml(str) {
       return String(str ?? "")
@@ -1624,6 +1822,14 @@
       panel.style.display = panel.style.display === "block" ? "none" : "block";
     }
 
+    function toggleOnlineOnly() {
+      onlineOnlyFilter = !onlineOnlyFilter;
+      const btn = document.getElementById("btn-online-only");
+      btn.textContent = onlineOnlyFilter ? "Online Only: On" : "Online Only: Off";
+      btn.classList.toggle("toggled", onlineOnlyFilter);
+      renderStaffSection();
+    }
+
     function openModal() {
       document.getElementById("mm-modal").classList.add("open");
     }
@@ -1632,8 +1838,49 @@
       document.getElementById("mm-modal").classList.remove("open");
     }
 
+    function openInspectorModal(member) {
+      document.getElementById("inspector-title").textContent = `${member.display_name || member.username} (@${member.username})`;
+      const bannerEl = document.getElementById("inspector-banner");
+      bannerEl.style.backgroundImage = member.banner_url ? `url("${member.banner_url}")` : "";
+
+      const eff = member.profile_effect || {};
+      document.getElementById("inspector-meta").innerHTML = `
+        <strong>User ID:</strong> <code>${escapeHtml(member.id)}</code><br />
+        <strong>Status:</strong> ${escapeHtml(member.status || "online")}<br />
+        <strong>Effect Source:</strong> ${escapeHtml(eff.source || "elwey.fr/effects")}${eff.name ? ` (${escapeHtml(eff.name)})` : ""}<br />
+        <strong>Decoration:</strong> ${member.avatar_decoration_url ? "Active" : "None"}
+      `;
+
+      const rolesBox = document.getElementById("inspector-roles");
+      rolesBox.innerHTML = "";
+      (member.roles || []).forEach((roleItem) => {
+        const pill = document.createElement("span");
+        pill.className = "staff-role-pill";
+        if (roleItem.icon_url) {
+          const rImg = document.createElement("img");
+          rImg.src = roleItem.icon_url;
+          rImg.alt = roleItem.name;
+          rImg.onerror = () => { rImg.remove(); };
+          pill.appendChild(rImg);
+        }
+        const labelSpan = document.createElement("span");
+        labelSpan.textContent = roleItem.name;
+        pill.appendChild(labelSpan);
+        rolesBox.appendChild(pill);
+      });
+
+      document.getElementById("member-inspector-modal").classList.add("open");
+    }
+
+    function closeInspectorModal() {
+      document.getElementById("member-inspector-modal").classList.remove("open");
+    }
+
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") closeModal();
+      if (e.key === "Escape") {
+        closeModal();
+        closeInspectorModal();
+      }
     });
 
     function switchTab(tabName) {
@@ -1654,58 +1901,155 @@
         .join("") || "VX";
     }
 
-    function renderStaffSection() {
-      const legendEl = document.getElementById("role-legend-container");
-      legendEl.innerHTML = "";
+    function renderFilterChips() {
+      const container = document.getElementById("role-filter-chips");
+      container.innerHTML = "";
+
+      const allChip = document.createElement("button");
+      allChip.type = "button";
+      allChip.className = `filter-chip ${selectedRoleFilter === "ALL" ? "active" : ""}`;
+      allChip.textContent = `All (${staffMembers.length})`;
+      allChip.onclick = () => {
+        selectedRoleFilter = "ALL";
+        renderFilterChips();
+        renderStaffSection();
+      };
+      container.appendChild(allChip);
 
       roleCatalog.forEach((r) => {
-        const card = document.createElement("div");
-        card.className = "role-legend-card";
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = `filter-chip ${selectedRoleFilter === r.id ? "active" : ""}`;
+        if (r.icon_url) {
+          const img = document.createElement("img");
+          img.src = r.icon_url;
+          img.alt = r.label;
+          img.onerror = () => { img.remove(); };
+          chip.appendChild(img);
+        }
+        const txt = document.createElement("span");
+        txt.textContent = r.short_label || r.label;
+        chip.appendChild(txt);
+        chip.onclick = () => {
+          selectedRoleFilter = r.id;
+          renderFilterChips();
+          renderStaffSection();
+        };
+        container.appendChild(chip);
+      });
+    }
 
-        const img = document.createElement("img");
-        img.className = "role-icon-badge";
-        img.src = r.icon_url;
-        img.alt = r.label;
-        img.onerror = () => { img.style.display = "none"; };
-
-        const info = document.createElement("div");
-        info.innerHTML = `<div class="role-legend-title">${escapeHtml(r.label)}</div><div class="role-legend-id">${escapeHtml(r.id || "Icon Role")}</div>`;
-
-        card.appendChild(img);
-        card.appendChild(info);
-        legendEl.appendChild(card);
+    function renderStaffSection() {
+      const queryVal = (document.getElementById("staff-search-input")?.value || "").trim().toLowerCase();
+      const filtered = staffMembers.filter((m) => {
+        if (onlineOnlyFilter && (m.status || "offline") === "offline") return false;
+        if (selectedRoleFilter !== "ALL") {
+          const hasRole = (m.roles || []).some(
+            (r) => r.id === selectedRoleFilter || r.role_key === selectedRoleFilter
+          );
+          if (!hasRole) return false;
+        }
+        if (queryVal) {
+          const hay = `${m.display_name || ""} ${m.username || ""} ${m.id || ""}`.toLowerCase();
+          if (!hay.includes(queryVal)) return false;
+        }
+        return true;
       });
 
       const membersEl = document.getElementById("staff-members-container");
       const countEl = document.getElementById("staff-count-label");
       membersEl.innerHTML = "";
-      countEl.textContent = String(staffMembers.length);
+      countEl.textContent = String(filtered.length);
 
-      if (!staffMembers.length) {
-        membersEl.innerHTML = `<div class="vouch-card"><p class="vouch-note">No members currently detected with the tracked staff role IDs yet (bot may still be syncing or members do not have those role IDs).</p></div>`;
+      if (!filtered.length) {
+        membersEl.innerHTML = `<div class="vouch-card"><p class="vouch-note">No matching members found for the current filter.</p></div>`;
         return;
       }
 
-      staffMembers.forEach((m) => {
-        const row = document.createElement("div");
-        row.className = "staff-member-card";
+      filtered.forEach((m) => {
+        const card = document.createElement("article");
+        card.className = "member-showcase-card";
+        card.onclick = () => openInspectorModal(m);
 
-        const left = document.createElement("div");
-        left.className = "staff-member-left";
+        const eff = m.profile_effect || {};
+        const effectLayer = document.createElement("div");
+        effectLayer.className = "member-card-effect";
+        if (eff.asset_url) {
+          const effImg = document.createElement("img");
+          effImg.className = "m-effect-img";
+          effImg.src = eff.asset_url;
+          effImg.alt = eff.name || "Profile Effect";
+          effImg.onerror = () => { effImg.remove(); };
+          effectLayer.appendChild(effImg);
+        }
+        const sweep = document.createElement("div");
+        sweep.className = "m-effect-sweep";
+        effectLayer.appendChild(sweep);
+        card.appendChild(effectLayer);
+
+        const banner = document.createElement("div");
+        banner.className = "member-banner-box";
+        if (m.banner_url) {
+          banner.style.backgroundImage = `url("${m.banner_url}")`;
+        }
+        card.appendChild(banner);
+
+        const body = document.createElement("div");
+        body.className = "member-card-body";
+
+        const idRow = document.createElement("div");
+        idRow.className = "member-identity-row";
+
+        const avWrap = document.createElement("div");
+        avWrap.className = "member-avatar-wrap";
+
+        const ring = document.createElement("div");
+        ring.className = "m-avatar-ring";
 
         const av = document.createElement("img");
-        av.className = "staff-member-avatar";
+        av.className = "m-avatar-photo";
         av.src = m.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
-        av.alt = m.display_name || m.username || "Staff";
+        av.alt = m.display_name || m.username || "Member";
+        ring.appendChild(av);
 
-        const textCol = document.createElement("div");
-        textCol.innerHTML = `<div class="staff-member-name">${escapeHtml(m.display_name || m.username)}</div><div class="staff-member-handle">@${escapeHtml(m.username)} • ID: ${escapeHtml(m.id)}</div>`;
+        if (m.avatar_decoration_url) {
+          const deco = document.createElement("img");
+          deco.className = "m-avatar-deco";
+          deco.src = m.avatar_decoration_url;
+          deco.alt = "Avatar Decoration";
+          deco.onerror = () => { deco.remove(); };
+          ring.appendChild(deco);
+        }
 
-        left.appendChild(av);
-        left.appendChild(textCol);
+        const stDot = document.createElement("span");
+        stDot.className = `m-status-badge ${m.status || "offline"}`;
+        ring.appendChild(stDot);
+
+        const nameBlock = document.createElement("div");
+        nameBlock.className = "m-name-block";
+        nameBlock.innerHTML = `<div class="m-display-name">${escapeHtml(m.display_name || m.username)}</div><div class="m-username-line">@${escapeHtml(m.username)}</div>`;
+
+        avWrap.appendChild(ring);
+        avWrap.appendChild(nameBlock);
+
+        const actionsWrap = document.createElement("div");
+        actionsWrap.className = "m-card-actions";
+        const copyIdBtn = document.createElement("button");
+        copyIdBtn.type = "button";
+        copyIdBtn.className = "m-copy-btn";
+        copyIdBtn.textContent = "Copy ID";
+        copyIdBtn.onclick = (ev) => {
+          ev.stopPropagation();
+          copyText(m.id, `Copied ID for ${m.display_name || m.username}.`);
+        };
+        actionsWrap.appendChild(copyIdBtn);
+
+        idRow.appendChild(avWrap);
+        idRow.appendChild(actionsWrap);
+        body.appendChild(idRow);
 
         const rolesWrap = document.createElement("div");
-        rolesWrap.className = "staff-roles-badges";
+        rolesWrap.className = "m-roles-row";
 
         (m.roles || []).forEach((roleItem) => {
           const pill = document.createElement("span");
@@ -1723,9 +2067,9 @@
           rolesWrap.appendChild(pill);
         });
 
-        row.appendChild(left);
-        row.appendChild(rolesWrap);
-        membersEl.appendChild(row);
+        body.appendChild(rolesWrap);
+        card.appendChild(body);
+        membersEl.appendChild(card);
       });
     }
 
@@ -1870,14 +2214,9 @@
 
         const effectLayer = document.getElementById("profile-effect-layer");
         const effectImg = document.getElementById("profile-effect-img");
-        const effectLabel = document.getElementById("profile-effect-label");
         const eff = d.profile_effect || {};
 
         effectLayer.classList.add("active");
-        effectLabel.textContent = eff.name
-          ? `Effect: ${eff.name} (${eff.source || "elwey.fr/effects"})`
-          : "Effect: Shimmer (elwey.fr/effects)";
-
         if (eff.asset_url) {
           effectImg.src = eff.asset_url;
           effectImg.style.display = "block";
@@ -1928,7 +2267,7 @@
           roleIconEl.style.display = "none";
           roleEmojiEl.style.display = "inline";
         }
-        document.getElementById("role-pill-text").textContent = d.role_badge_text || "VortexShop";
+        document.getElementById("role-pill-text").textContent = d.role_badge_text || "Founder • VortexShop";
         document.getElementById("owner-line").textContent = d.owner_line || "Owner of this server-";
 
         const invLink = document.getElementById("invite-link");
@@ -1967,6 +2306,7 @@
 
         roleCatalog = payload.role_catalog || [];
         staffMembers = payload.staff_members || [];
+        renderFilterChips();
         renderStaffSection();
 
         allGames = d.games || [];
