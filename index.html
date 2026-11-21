@@ -2299,7 +2299,7 @@
         transition: none !important;
       }
     }
-  
+
     /* Shop & Admin Item Features (Glassmorphism + Dark Mode + Gold/Violet Accents) */
     .shop-header-banner {
       display: flex;
@@ -2499,7 +2499,7 @@
     @media (max-width: 560px) {
       .shop-stats-strip { grid-template-columns: 1fr; }
     }
-  
+
     .secret-admin-dot {
       font-size: 0.72rem;
       font-weight: 700;
@@ -2595,7 +2595,6 @@
       padding: 8px 10px;
       margin-bottom: 10px;
     }
-
   </style>
 </head>
 <body>
@@ -3107,6 +3106,7 @@
         <h4>Active &amp; Closed Tickets (<span id="closed-tickets-count">0</span>)</h4>
         <div id="tickets-feed-container"></div>
       </div>
+
       <!-- Panel 6: VortexShop Storefront (Hidden Admin Post Box) -->
       <div id="panel-shop" class="sub-panel">
         <div class="shop-header-banner">
@@ -3273,6 +3273,7 @@
         <li><strong>3</strong> — Roblox Crosstrading</li>
         <li><strong>4</strong> — MM &amp; Rules</li>
         <li><strong>5</strong> — Ticket System</li>
+        <li><strong>6</strong> — Shop</li>
         <li><strong>/</strong> — Focus Member Search</li>
         <li><strong>?</strong> — Open This Shortcut Guide</li>
         <li><strong>Esc</strong> — Close Any Open Modal</li>
@@ -3330,7 +3331,6 @@
       </form>
     </div>
   </div>
-
 
   <div id="edit-shop-item-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-shop-item-title">
     <div class="modal-box">
@@ -3866,6 +3866,8 @@
         closeInspectorModal();
         closeModal();
         closeShortcutsModal();
+        closeAdminGateModal();
+        closeEditItemModal();
         return;
       }
       const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
@@ -4418,7 +4420,7 @@
 
     function buildTraderAvatarHtml(trader) {
       if (trader.avatar_url) {
-        return `<img class="trader-avatar" src="${escapeHtml(trader.avatar_url)}" alt="${escapeHtml(trader.name)}" onerror="this.outerHTML='<div class=\\'trader-avatar\\'>${escapeHtml(getInitials(trader.name))}</div>'" />`;
+        return `<img class="trader-avatar" src="${escapeHtml(trader.avatar_url)}" alt="${escapeHtml(trader.name)}" onerror="this.outerHTML='<div class=\'trader-avatar\'>${escapeHtml(getInitials(trader.name))}</div>'" />`;
       }
       return `<div class="trader-avatar">${escapeHtml(getInitials(trader.name))}</div>`;
     }
@@ -4741,7 +4743,7 @@
 
         const iconBox = document.getElementById("server-icon-box");
         if (s.icon_url) {
-          iconBox.innerHTML = `<img src="${escapeHtml(s.icon_url)}" alt="${escapeHtml(sName)}" onerror="this.outerHTML='<span class=\\'server-icon-fallback\\'>${escapeHtml(getInitials(sName))}</span>'" />`;
+          iconBox.innerHTML = `<img src="${escapeHtml(s.icon_url)}" alt="${escapeHtml(sName)}" onerror="this.outerHTML='<span class=\'server-icon-fallback\'>${escapeHtml(getInitials(sName))}</span>'" />`;
         } else {
           const initials = getInitials(sName);
           iconBox.innerHTML = `<span class="server-icon-fallback">${escapeHtml(initials)}</span>`;
@@ -4773,11 +4775,12 @@
       if (!autoSyncPaused) refreshShowcase(false);
     }, SYNC_INTERVAL_MS);
     setInterval(tickSyncCountdown, 250);
-  
+
     // Shop & Admin Item State + Sync
     let shopCatalogItems = [];
     let shopUploadedDataUrl = "";
     let verifiedAdminPassword = "";
+    const deletedShopItemIds = new Set();
 
     function openAdminGateModal() {
       switchTab("shop");
@@ -4790,8 +4793,6 @@
     function closeAdminGateModal() {
       document.getElementById("admin-gate-modal").classList.remove("open");
     }
-
-
 
     let editItemUploadedDataUrl = "";
     let isAdminUnlocked = false;
@@ -4933,19 +4934,19 @@
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ admin_password: verifiedAdminPassword }),
         });
-        const data = await res.json();
-        if (res.ok && data.ok !== false) {
-          shopCatalogItems = shopCatalogItems.filter((it) => it.id !== itemId);
-          renderShopItemsList();
-          showToast(`Deleted "${target.name}" & synced via webhook.`);
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.ok === false) {
+          showToast(data.error || "Delete failed on server. Item was not removed.");
           return;
         }
-      } catch {}
-
-      shopCatalogItems = shopCatalogItems.filter((it) => it.id !== itemId);
-      renderShopItemsList();
-      await dispatchShopWebhook("item_deleted", target);
-      showToast(`Deleted "${target.name}" & webhook triggered.`);
+        deletedShopItemIds.add(String(itemId));
+        shopCatalogItems = shopCatalogItems.filter((it) => String(it.id) !== String(itemId));
+        renderShopItemsList();
+        showToast(`Permanently deleted "${target.name}".`);
+        return;
+      } catch {
+        showToast("Network error while deleting item. Please try again.");
+      }
     }
 
     function openEditItemModal(itemId) {
@@ -5099,7 +5100,6 @@
         }
         showToast(`Added "${data.item.name}" & sent item-added webhook.`);
       } catch {
-        // Local preview fallback if backend isn't running locally
         if (adminPassword !== "vortexadmin2026") {
           showToast("Invalid admin password.");
           return;
@@ -5137,9 +5137,6 @@
       document.getElementById("ticket-notes").value = existingNotes ? `${existingNotes} | ${buyNote}` : buyNote;
       showToast(`Ticket ready for "${item.name}". Pay ${item.posted_by} inside your ticket.`);
     }
-
-
-
 
     function updateShopStats() {
       const totalEl = document.getElementById("shop-stat-total");
@@ -5229,7 +5226,7 @@
         if (res.ok) {
           const data = await res.json();
           if (Array.isArray(data.items)) {
-            shopCatalogItems = data.items;
+            shopCatalogItems = data.items.filter((it) => !deletedShopItemIds.has(String(it.id)));
             renderShopItemsList();
           }
           if (Array.isArray(data.closed_tickets) && data.closed_tickets.length) {
