@@ -1,0 +1,1783 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VortexShop — Roblox Crosstrading & Server Showcase</title>
+  <style>
+    :root {
+      --bg-dark: #07050c;
+      --purple-glow: rgba(168, 85, 247, 0.25);
+      --gold-glow: rgba(245, 158, 11, 0.17);
+      --accent-primary: #8b5cf6;
+      --accent-gold: #f59e0b;
+      --accent-pink: #e879f9;
+      --status-ring: #23a55a;
+      --server-border: rgba(245, 158, 11, 0.58);
+    }
+
+    body.theme-crimson {
+      --purple-glow: rgba(225, 29, 72, 0.25);
+      --gold-glow: rgba(245, 158, 11, 0.18);
+      --accent-primary: #e11d48;
+      --accent-pink: #fb7185;
+      --server-border: rgba(251, 113, 133, 0.58);
+    }
+
+    * { box-sizing: border-box; }
+
+    ::selection {
+      background: rgba(168, 85, 247, 0.45);
+      color: #ffffff;
+    }
+
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0b0714; }
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--accent-primary), #d97706);
+      border-radius: 999px;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 18px 48px;
+      background:
+        radial-gradient(circle at 16% 18%, var(--purple-glow), transparent 46%),
+        radial-gradient(circle at 84% 78%, var(--gold-glow), transparent 48%),
+        var(--bg-dark);
+      color: #f5f3ff;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      transition: background 0.3s ease;
+    }
+
+    .ambient-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(88px);
+      pointer-events: none;
+      z-index: 0;
+      animation: floatOrb 11s ease-in-out infinite alternate;
+    }
+    .orb-left {
+      width: 340px;
+      height: 340px;
+      top: 4%;
+      left: 6%;
+      background: var(--purple-glow);
+    }
+    .orb-right {
+      width: 320px;
+      height: 320px;
+      bottom: 6%;
+      right: 8%;
+      background: var(--gold-glow);
+      animation-delay: -5s;
+    }
+
+    @keyframes floatOrb {
+      0% { transform: translate(0px, 0px) scale(1); }
+      100% { transform: translate(18px, -16px) scale(1.06); }
+    }
+
+    @keyframes settleIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .top-nav {
+      position: relative;
+      z-index: 5;
+      width: 100%;
+      max-width: 980px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+      padding: 10px 14px;
+      border-radius: 16px;
+      background: rgba(20, 12, 34, 0.86);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(12px);
+      animation: settleIn 0.35s ease;
+    }
+
+    .nav-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .nav-tab {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #e9d5ff;
+      padding: 7px 13px;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .nav-tab:hover { background: rgba(168, 85, 247, 0.18); color: #ffffff; }
+    .nav-tab.active {
+      background: linear-gradient(135deg, var(--accent-primary), #d97706);
+      color: #ffffff;
+      border-color: transparent;
+      box-shadow: 0 6px 18px rgba(124, 58, 237, 0.34);
+    }
+
+    .sync-status-group {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: #cbd5e1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.35);
+      color: #86efac;
+      font-weight: 700;
+    }
+
+    .live-pulse {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--status-ring);
+      box-shadow: 0 0 8px var(--status-ring);
+    }
+
+    .mini-action-btn {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #f5f3ff;
+      padding: 5px 10px;
+      border-radius: 8px;
+      font-size: 0.77rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background 0.15s ease;
+    }
+    .mini-action-btn:hover { background: rgba(255, 255, 255, 0.14); }
+
+    .showcase-grid {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 34px;
+      max-width: 980px;
+      width: 100%;
+      animation: settleIn 0.45s ease;
+    }
+
+    .sync-fade {
+      transition: opacity 0.25s ease;
+    }
+    .sync-fade.refreshing {
+      opacity: 0.72;
+    }
+
+    .outer-stage {
+      position: relative;
+      width: 388px;
+      max-width: 100%;
+      padding-top: 26px;
+      flex-shrink: 0;
+    }
+
+    .top-decor {
+      position: absolute;
+      top: -12px;
+      left: 6px;
+      right: 6px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 0 8px;
+      z-index: 6;
+      pointer-events: none;
+    }
+
+    .hearts-group {
+      display: flex;
+      align-items: flex-end;
+      gap: 4px;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.65));
+    }
+
+    .bunny-mascot {
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
+    }
+
+    .frame-shell {
+      position: relative;
+      border-radius: 26px;
+      padding: 8px;
+      background: linear-gradient(180deg, #b057f5 0%, var(--accent-primary) 52%, #4c1d95 100%);
+      box-shadow:
+        0 0 0 2px rgba(216, 180, 254, 0.28),
+        0 24px 65px rgba(0, 0, 0, 0.85);
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .frame-shell:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 0 26px rgba(168, 85, 247, 0.36),
+        0 28px 70px rgba(0, 0, 0, 0.9);
+    }
+
+    .frame-shell::before,
+    .frame-shell::after {
+      content: "";
+      position: absolute;
+      top: 32px;
+      bottom: 24px;
+      width: 10px;
+      border-radius: 999px;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+    .frame-shell::before {
+      left: -4px;
+      background: linear-gradient(180deg, #f472b6, #a855f7 55%, #6366f1);
+    }
+    .frame-shell::after {
+      right: -4px;
+      background: linear-gradient(180deg, #e879f9, #7c3aed 60%, #4c1d95);
+    }
+
+    .card {
+      position: relative;
+      background: linear-gradient(180deg, #240d44 0%, #1c0936 55%, #150629 100%);
+      border-radius: 20px;
+      overflow: hidden;
+      z-index: 2;
+    }
+
+    .card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -130%;
+      width: 65%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.06),
+        transparent
+      );
+      transform: skewX(-20deg);
+      transition: left 0.65s ease;
+      pointer-events: none;
+      z-index: 5;
+    }
+    .card:hover::after { left: 160%; }
+
+    .banner {
+      position: relative;
+      height: 148px;
+      background-color: #1c0b36;
+      background-image:
+        linear-gradient(135deg, rgba(168, 85, 247, 0.42), rgba(236, 72, 153, 0.32)),
+        repeating-linear-gradient(
+          90deg,
+          rgba(255, 255, 255, 0.04) 0px,
+          rgba(255, 255, 255, 0.04) 24%,
+          rgba(0, 0, 0, 0.32) 24%,
+          rgba(0, 0, 0, 0.32) 25%
+        );
+      background-size: cover;
+      background-position: center;
+      z-index: 1;
+    }
+
+    .banner::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(7, 5, 12, 0.42) 0%,
+        rgba(7, 5, 12, 0.05) 55%,
+        rgba(21, 6, 41, 0.45) 100%
+      );
+      pointer-events: none;
+    }
+
+    .banner-top-actions {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      display: flex;
+      gap: 6px;
+      z-index: 6;
+    }
+
+    .circle-btn {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: rgba(15, 8, 28, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      color: #f5f3ff;
+      display: grid;
+      place-items: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .circle-btn:hover { background: rgba(124, 58, 237, 0.82); transform: scale(1.06); }
+
+    .card-body {
+      position: relative;
+      padding: 0 18px 18px;
+      z-index: 3;
+    }
+
+    .avatar-thought-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-top: -46px;
+      margin-bottom: 10px;
+    }
+
+    .avatar-box {
+      position: relative;
+      width: 92px;
+      height: 92px;
+      flex-shrink: 0;
+    }
+
+    .avatar-img {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 5px solid #220b40;
+      background: #140726;
+      box-shadow: 0 0 18px rgba(168, 85, 247, 0.25);
+    }
+
+    .avatar-deco {
+      position: absolute;
+      top: -12px;
+      left: -12px;
+      width: 116px;
+      height: 116px;
+      pointer-events: none;
+      z-index: 3;
+    }
+
+    .status-dot {
+      position: absolute;
+      right: 4px;
+      bottom: 4px;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      border: 4px solid #220b40;
+      background: #23a55a;
+      box-shadow: 0 0 10px var(--status-ring);
+      z-index: 4;
+    }
+    .status-dot.idle { background: #f0b232; }
+    .status-dot.dnd { background: #f23f43; }
+    .status-dot.offline { background: #747f8d; }
+
+    .status-bubble-wrap {
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .mini-dots {
+      display: flex;
+      gap: 4px;
+      margin-left: 10px;
+      margin-bottom: 3px;
+    }
+
+    .mini-dots span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #191624;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .status-bubble {
+      background: #171422;
+      color: #f3f4f6;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 14px;
+      padding: 9px 14px;
+      font-size: 0.92rem;
+      font-weight: 500;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+    }
+
+    .display-name-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 2px;
+    }
+
+    .display-name {
+      margin: 0;
+      font-size: 1.52rem;
+      font-weight: 800;
+      font-style: italic;
+      color: var(--accent-pink);
+      text-shadow: 0 2px 12px rgba(217, 70, 239, 0.35);
+    }
+
+    .note-icon-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      color: #e9d5ff;
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 0.78rem;
+      cursor: pointer;
+    }
+    .note-icon-btn:hover { background: rgba(168, 85, 247, 0.3); }
+
+    .username-sub {
+      margin: 2px 0 6px;
+      font-size: 0.92rem;
+      color: #e2e8f0;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .copy-handle-inline {
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #cbd5e1;
+      border-radius: 6px;
+      padding: 1px 6px;
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+    .copy-handle-inline:hover { color: #fff; background: rgba(168, 85, 247, 0.25); }
+
+    .bio-link {
+      font-size: 0.92rem;
+      color: #f3e8ff;
+      margin-bottom: 10px;
+      word-break: break-word;
+    }
+    .bio-link a { color: #f3e8ff; text-decoration: none; }
+    .bio-link a:hover { text-decoration: underline; color: #f0abfc; }
+
+    .tags-badges-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .clan-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: rgba(18, 7, 36, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 4px 9px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #f5f3ff;
+      min-height: 28px;
+    }
+
+    .clan-chip img {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+      border-radius: 3px;
+    }
+
+    .badge-pill-bar {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(18, 7, 36, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      border-radius: 8px;
+      padding: 4px 9px;
+      min-height: 28px;
+    }
+
+    .badge-icon-item {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 20px;
+      height: 20px;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: transform 0.14s ease;
+    }
+    .badge-icon-item:hover { transform: translateY(-2px) scale(1.1); }
+
+    .badge-icon-item img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+    }
+
+    .badge-icon-item:hover::after {
+      content: attr(data-tooltip);
+      position: absolute;
+      bottom: 135%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #090512;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 4px 8px;
+      border-radius: 6px;
+      white-space: nowrap;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      z-index: 30;
+    }
+
+    .mutual-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      margin-bottom: 14px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .mini-stack {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .mini-stack span {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: 0.65rem;
+      font-weight: 800;
+      margin-left: -4px;
+      border: 2px solid #1d0a38;
+    }
+    .mini-stack span:first-child { margin-left: 0; background: #111827; color: #fff; }
+    .mini-stack span:nth-child(2) { background: #1d4ed8; color: #fff; }
+    .mini-stack span:nth-child(3) { background: #4c1d95; color: #f5d0fe; }
+
+    .role-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid rgba(96, 165, 250, 0.45);
+      color: #e0f2fe;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+    }
+
+    .owner-text {
+      font-size: 0.9rem;
+      color: #f3e8ff;
+      line-height: 1.4;
+      margin-bottom: 12px;
+    }
+
+    .invite-link {
+      color: #60a5fa;
+      text-decoration: underline;
+      word-break: break-all;
+    }
+
+    .bio-actions-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 12px;
+      font-size: 0.84rem;
+    }
+
+    .link-btn {
+      background: none;
+      border: none;
+      padding: 0;
+      color: #e9d5ff;
+      font-size: 0.84rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+    }
+    .link-btn:hover { text-decoration: underline; color: #fbbf24; }
+
+    .full-bio-panel {
+      display: none;
+      margin-bottom: 14px;
+      padding: 9px 11px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      font-size: 0.82rem;
+      color: #e2e8f0;
+      line-height: 1.45;
+    }
+
+    .member-label {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #e9d5ff;
+      margin-bottom: 3px;
+    }
+
+    .member-date {
+      font-size: 0.88rem;
+      color: #cbd5e1;
+      margin-bottom: 14px;
+    }
+
+    .game-collection-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(13, 5, 26, 0.82);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 9px 12px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    .game-collection-bar:hover {
+      border-color: rgba(245, 158, 11, 0.5);
+      transform: translateY(-1px);
+    }
+
+    .gc-title { font-size: 0.92rem; font-weight: 600; color: #e2e8f0; }
+    .gc-icons { display: flex; align-items: center; gap: 7px; }
+
+    .gc-tile {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      font-size: 0.95rem;
+      transition: transform 0.14s ease;
+    }
+    .gc-tile:hover { transform: scale(1.08); }
+
+    .gc-roblox { background: #e2e8f0; color: #0f172a; }
+    .gc-mm {
+      background: rgba(168, 85, 247, 0.24);
+      color: #f5d0fe;
+      border: 1px solid rgba(232, 121, 249, 0.42);
+    }
+
+    .server-column {
+      width: 475px;
+      max-width: 100%;
+      padding-top: 26px;
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .server-card {
+      position: relative;
+      background: linear-gradient(165deg, rgba(36, 16, 62, 0.96), rgba(16, 10, 27, 0.98));
+      border-radius: 22px;
+      padding: 0 26px 22px;
+      border: 1.5px solid var(--server-border);
+      box-shadow:
+        0 0 30px rgba(245, 158, 11, 0.14),
+        0 24px 65px rgba(0, 0, 0, 0.82);
+      overflow: hidden;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .server-card:hover {
+      transform: translateY(-3px);
+      box-shadow:
+        0 0 36px rgba(245, 158, 11, 0.22),
+        0 28px 70px rgba(0, 0, 0, 0.9);
+    }
+
+    .server-card::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: -130%;
+      width: 65%;
+      height: 100%;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.05),
+        transparent
+      );
+      transform: skewX(-20deg);
+      transition: left 0.65s ease;
+      pointer-events: none;
+    }
+    .server-card:hover::after { left: 160%; }
+
+    .server-banner-strip {
+      display: none;
+      margin: 0 -26px 20px;
+      height: 112px;
+      background-color: #1c0b36;
+      background-size: cover;
+      background-position: center;
+      position: relative;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .server-banner-strip.has-banner { display: block; }
+    .server-banner-strip::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(7, 5, 12, 0.15), rgba(23, 12, 41, 0.85));
+    }
+
+    .server-card.no-banner { padding-top: 26px; }
+
+    .server-header {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 20px;
+    }
+
+    .server-icon-box {
+      width: 74px;
+      height: 74px;
+      border-radius: 18px;
+      background: linear-gradient(135deg, #3b0764, #1e1b4b);
+      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+    }
+
+    .server-icon-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .server-icon-fallback {
+      font-size: 1.65rem;
+      font-weight: 900;
+      color: var(--accent-gold);
+      letter-spacing: 0.04em;
+    }
+
+    .server-title {
+      margin: 0;
+      font-size: 1.65rem;
+      font-weight: 800;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+      line-height: 1.15;
+    }
+
+    .server-id-sub {
+      margin-top: 6px;
+      font-size: 0.88rem;
+      color: #a1a1aa;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .members-primary-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 1.12rem;
+      color: #e4e4e7;
+      margin-bottom: 12px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .members-left {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .members-primary-row strong {
+      color: #ffffff;
+      font-size: 1.24rem;
+      font-weight: 800;
+    }
+
+    .ratio-pill {
+      font-size: 0.76rem;
+      font-weight: 700;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.12);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #86efac;
+    }
+
+    .dot-green {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #22c55e;
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
+      display: inline-block;
+    }
+
+    .presence-boost-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      font-size: 0.9rem;
+      color: #cbd5e1;
+      margin-bottom: 16px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .stat-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .stat-inline strong {
+      color: #f4f4f5;
+      font-weight: 700;
+    }
+
+    .dot-gray {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #71717a;
+      display: inline-block;
+    }
+
+    .boost-gem {
+      color: #c084fc;
+      font-size: 1rem;
+    }
+
+    .boost-meter-wrap {
+      margin-bottom: 20px;
+    }
+
+    .boost-meter-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.76rem;
+      color: #cbd5e1;
+      margin-bottom: 6px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .boost-meter-track {
+      width: 100%;
+      height: 6px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      overflow: hidden;
+    }
+
+    .boost-meter-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-primary), #f59e0b);
+      transition: width 0.4s ease;
+    }
+
+    .server-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .btn-copy-invite {
+      background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
+      color: #120d1d;
+      border: none;
+      border-radius: 12px;
+      padding: 13px 18px;
+      font-size: 0.98rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
+      transition: transform 0.12s ease, filter 0.12s ease;
+    }
+    .btn-copy-invite:hover { filter: brightness(1.07); transform: translateY(-1px); }
+
+    .btn-copy-id {
+      background: rgba(24, 18, 36, 0.92);
+      color: #f4f4f5;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 12px;
+      padding: 13px 18px;
+      font-size: 0.98rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: background 0.12s ease, transform 0.12s ease;
+    }
+    .btn-copy-id:hover { background: rgba(42, 31, 62, 0.95); transform: translateY(-1px); }
+
+    .toast-msg {
+      margin-top: 12px;
+      min-height: 20px;
+      font-size: 0.84rem;
+      color: #fbbf24;
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .sub-panel {
+      display: none;
+      background: rgba(20, 12, 34, 0.94);
+      border: 1px solid rgba(168, 85, 247, 0.3);
+      border-radius: 18px;
+      padding: 18px 20px;
+      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.65);
+    }
+    .sub-panel.active { display: block; }
+
+    .sub-panel h3 {
+      margin: 0 0 10px;
+      font-size: 1.05rem;
+      color: #f5d0fe;
+    }
+
+    .sub-panel h4 {
+      margin: 14px 0 8px;
+      font-size: 0.95rem;
+      color: #fbbf24;
+    }
+
+    .custom-note-box {
+      padding: 11px 13px;
+      border-radius: 12px;
+      background: rgba(139, 92, 246, 0.12);
+      border: 1px solid rgba(192, 132, 252, 0.32);
+      color: #f3e8ff;
+      font-size: 0.84rem;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    .game-card-item {
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      margin-bottom: 10px;
+    }
+    .game-card-item strong { color: #fbbf24; display: block; margin-bottom: 4px; font-size: 0.95rem; }
+    .game-card-item span { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
+
+    .vouch-card {
+      padding: 11px 13px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      margin-bottom: 10px;
+    }
+
+    .vouch-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 6px;
+    }
+
+    .vouch-member {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+    }
+
+    .vouch-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      background: #240d44;
+      display: grid;
+      place-items: center;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: #fbbf24;
+      flex-shrink: 0;
+    }
+
+    .vouch-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .vouch-tag {
+      font-size: 0.72rem;
+      color: #cbd5e1;
+    }
+
+    .vouch-stars {
+      color: #fbbf24;
+      font-size: 0.86rem;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      font-weight: 700;
+    }
+
+    .vouch-note {
+      margin: 0;
+      font-size: 0.83rem;
+      color: #e2e8f0;
+      line-height: 1.42;
+    }
+
+    .safety-callout {
+      padding: 10px 12px;
+      border-radius: 10px;
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      color: #fde68a;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
+    .rules-list {
+      margin: 0 0 12px;
+      padding-left: 18px;
+      color: #e2e8f0;
+      font-size: 0.86rem;
+      line-height: 1.55;
+    }
+    .rules-list li { margin-bottom: 6px; }
+
+    .store-cta-btn {
+      display: inline-block;
+      margin-top: 4px;
+      padding: 9px 14px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--accent-primary), #ec4899);
+      color: #ffffff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(4, 2, 10, 0.78);
+      backdrop-filter: blur(5px);
+      z-index: 50;
+      place-items: center;
+      padding: 16px;
+    }
+    .modal-backdrop.open { display: grid; }
+
+    .modal-box {
+      width: 100%;
+      max-width: 430px;
+      background: #170c2b;
+      border: 1px solid rgba(245, 158, 11, 0.45);
+      border-radius: 18px;
+      padding: 20px 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .modal-header h3 { margin: 0; color: #fbbf24; font-size: 1.1rem; }
+    .modal-close {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #fff;
+      border-radius: 8px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-weight: 700;
+    }
+
+    @media (max-width: 520px) {
+      .server-actions { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ambient-orb orb-left"></div>
+  <div class="ambient-orb orb-right"></div>
+
+  <header class="top-nav" aria-label="Navigation and Sync Controls">
+    <div class="nav-tabs" role="tablist">
+      <button type="button" class="nav-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
+      <button type="button" class="nav-tab" data-tab="games" onclick="switchTab('games')">Roblox Crosstrading</button>
+      <button type="button" class="nav-tab" data-tab="rules" onclick="switchTab('rules')">MM &amp; Rules</button>
+    </div>
+
+    <div class="sync-status-group">
+      <span class="live-pill"><span class="live-pulse"></span> Live Sync</span>
+      <span id="last-synced-text">Synced just now</span>
+      <button type="button" class="mini-action-btn" id="btn-refresh-now" onclick="refreshShowcase(true)">Refresh Now</button>
+      <button type="button" class="mini-action-btn" id="btn-theme-toggle" onclick="toggleTheme()">Theme: Violet</button>
+      <button type="button" class="mini-action-btn" id="btn-share-page" onclick="sharePageLink()">Share Page</button>
+    </div>
+  </header>
+
+  <main class="showcase-grid sync-fade" id="showcase-grid">
+    <section class="outer-stage" aria-label="Owner Discord Profile">
+      <div class="top-decor">
+        <div class="hearts-group">
+          <svg width="42" height="38" viewBox="0 0 64 60" fill="none">
+            <path d="M32 54C32 54 6 37 6 19C6 10 13 4 21 4C26.5 4 30.5 7 32 10.5L28 22L36 28L29 41L32 54Z" fill="#ec4899" stroke="#140726" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M32 10.5C33.5 7 37.5 4 43 4C51 4 58 10 58 19C58 37 32 54 32 54L29 41L36 28L28 22L32 10.5Z" fill="#f472b6" stroke="#140726" stroke-width="4" stroke-linejoin="round"/>
+          </svg>
+          <svg width="36" height="34" viewBox="0 0 64 60" fill="none">
+            <path d="M32 54C32 54 6 37 6 19C6 10 13 4 21 4C26.5 4 30.5 7 32 10.5L27 24L35 30L32 54Z" fill="#6366f1" stroke="#140726" stroke-width="4" stroke-linejoin="round"/>
+            <path d="M32 10.5C33.5 7 37.5 4 43 4C51 4 58 10 58 19C58 37 32 54 32 54L35 30L27 24L32 10.5Z" fill="#818cf8" stroke="#140726" stroke-width="4" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+        <div class="bunny-mascot">
+          <svg width="64" height="48" viewBox="0 0 110 86" fill="none">
+            <ellipse cx="38" cy="20" rx="9" ry="20" transform="rotate(-18 38 20)" fill="#180b29" stroke="#d8b4fe" stroke-width="3"/>
+            <ellipse cx="72" cy="20" rx="9" ry="20" transform="rotate(18 72 20)" fill="#180b29" stroke="#d8b4fe" stroke-width="3"/>
+            <ellipse cx="55" cy="52" rx="28" ry="22" fill="#180b29" stroke="#d8b4fe" stroke-width="3"/>
+            <polygon points="44,44 52,48 44,52" fill="#e879f9"/>
+            <polygon points="66,44 58,48 66,52" fill="#e879f9"/>
+            <path d="M48 60C50 64 54 64 55 60C56 64 60 64 62 60" stroke="#f472b6" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+      </div>
+
+      <div class="frame-shell">
+        <div class="card">
+          <div id="banner" class="banner">
+            <div class="banner-top-actions">
+              <button type="button" class="circle-btn" title="Copy User ID" aria-label="Copy User ID" onclick="copyUserId()">ID</button>
+              <button type="button" class="circle-btn" title="MM Safety Guide" aria-label="MM Safety Guide" onclick="openModal()">!</button>
+            </div>
+          </div>
+
+          <div class="card-body">
+            <div class="avatar-thought-row">
+              <div class="avatar-box">
+                <img id="avatar" class="avatar-img" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" />
+                <img id="avatar-deco" class="avatar-deco" src="" alt="" style="display:none;" />
+                <span id="status-dot" class="status-dot"></span>
+              </div>
+
+              <div class="status-bubble-wrap">
+                <div class="mini-dots"><span></span><span></span></div>
+                <div id="status-bubble" class="status-bubble">Very nice day</div>
+              </div>
+            </div>
+
+            <div class="display-name-line">
+              <h1 id="display-name" class="display-name">VortexShop</h1>
+              <button type="button" class="note-icon-btn" title="Toggle Full Bio" aria-label="Toggle Full Bio" onclick="toggleFullBio()">📝+</button>
+            </div>
+
+            <div class="username-sub">
+              <span id="username">mvn412. •</span>
+              <button type="button" class="copy-handle-inline" id="btn-copy-handle" onclick="copyHandle()">Copy</button>
+            </div>
+
+            <div class="bio-link">
+              <a id="bio-link" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
+                Check out vortexshop.onrender.com
+              </a>
+            </div>
+
+            <div class="tags-badges-row">
+              <div id="clan-chip" class="clan-chip">
+                <img id="clan-badge-img" src="" alt="Clan Tag" style="display:none;" />
+                <span id="clan-emoji">🍃</span>
+                <span id="clan-tag">VEM</span>
+              </div>
+              <div id="badge-pill-bar" class="badge-pill-bar"></div>
+            </div>
+
+            <div class="mutual-row">
+              <div class="mini-stack">
+                <span></span>
+                <span>BL</span>
+                <span>▤</span>
+              </div>
+              <span id="mutual-text">4 Mutual Servers</span>
+              <span id="vouches-text" style="color:#fbbf24;font-weight:700;">• 120+ Vouches</span>
+            </div>
+
+            <div id="role-pill" class="role-pill">
+              <span>👑</span>
+              <span id="role-pill-text">VortexShop</span>
+            </div>
+
+            <div class="owner-text">
+              <span id="owner-line">Owner of this server-</span><br />
+              <a id="invite-link" class="invite-link" href="https://discord.gg/3JPatMmyF" target="_blank" rel="noopener">
+                https://discord.gg/3JPatMmyF...
+              </a>
+            </div>
+
+            <div class="bio-actions-row">
+              <button type="button" class="link-btn" onclick="toggleFullBio()">View Full Bio</button>
+              <button type="button" class="link-btn" onclick="openModal()">How MM Works</button>
+            </div>
+            <div id="full-bio-panel" class="full-bio-panel"></div>
+
+            <div class="member-label">Member Since</div>
+            <div id="member-since" class="member-date">Aug 22, 2026</div>
+
+            <div class="game-collection-bar" onclick="switchTab('games')" title="View Roblox Crosstrading & Vouches">
+              <span class="gc-title">Roblox Crosstrading</span>
+              <div class="gc-icons">
+                <div class="gc-tile gc-roblox" title="Roblox Any Game">❖</div>
+                <div class="gc-tile gc-mm" title="Verified Escrow & Vouches">✦</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="server-column" aria-label="Target Discord Server">
+      <div class="server-card no-banner" id="server-card">
+        <div class="server-banner-strip" id="server-banner-strip"></div>
+
+        <div class="server-header">
+          <div class="server-icon-box" id="server-icon-box">
+            <span class="server-icon-fallback" id="server-icon-initials">VX</span>
+          </div>
+          <div>
+            <h2 class="server-title" id="server-name">Vortex Exchange &amp; MM</h2>
+            <div class="server-id-sub" id="server-id-text">ID: 1542941315933667348</div>
+          </div>
+        </div>
+
+        <div class="members-primary-row">
+          <div class="members-left">
+            <span class="dot-green"></span>
+            <span><strong id="server-members">0</strong> members</span>
+          </div>
+          <span class="ratio-pill" id="online-ratio-pill">0% online</span>
+        </div>
+
+        <div class="presence-boost-row">
+          <span class="stat-inline">
+            <span class="dot-green"></span>
+            <span><strong id="server-online">0</strong> online</span>
+          </span>
+          <span class="stat-inline">
+            <span class="dot-gray"></span>
+            <span><strong id="server-offline">0</strong> offline</span>
+          </span>
+          <span class="stat-inline">
+            <span class="boost-gem">✦</span>
+            <span><strong id="server-boosts">0</strong> boosts</span>
+          </span>
+        </div>
+
+        <div class="boost-meter-wrap">
+          <div class="boost-meter-label">
+            <span id="boost-tier-label">Boost Progress</span>
+            <span id="boost-progress-text">0 / 2 boosts</span>
+          </div>
+          <div class="boost-meter-track">
+            <div class="boost-meter-fill" id="boost-meter-fill"></div>
+          </div>
+        </div>
+
+        <div class="server-actions">
+          <button type="button" class="btn-copy-invite" id="btn-copy-invite" onclick="copyInviteLink()">
+            <span>🔗</span>
+            <span id="btn-copy-invite-text">Copy Invite</span>
+          </button>
+          <button type="button" class="btn-copy-id" id="btn-copy-id" onclick="copyServerId()">
+            <span>#</span>
+            <span id="btn-copy-id-text">Copy ID</span>
+          </button>
+        </div>
+
+        <div class="toast-msg" id="toast-msg"></div>
+      </div>
+
+      <div id="panel-games" class="sub-panel">
+        <h3>Roblox Crosstrading (Any Game) &amp; Shop</h3>
+        <div class="custom-note-box" id="custom-trade-note-box"></div>
+        <div id="games-list-container"></div>
+
+        <h4>Member Vouches (5★ &amp; 4★ Combined)</h4>
+        <div id="vouches-list-container"></div>
+
+        <a id="store-cta-link" class="store-cta-btn" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
+          Visit vortexshop.onrender.com →
+        </a>
+      </div>
+
+      <div id="panel-rules" class="sub-panel">
+        <h3>Middleman &amp; Safety Rules</h3>
+        <div class="safety-callout">
+          Anti-Scam Reminder: Always open an official server ticket and verify the Middleman's Discord ID before trading. Avoid unverified direct in-game trade windows or off-server impersonators.
+        </div>
+        <ol class="rules-list" id="rules-list-container"></ol>
+      </div>
+    </section>
+  </main>
+
+  <div id="mm-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="mm-modal-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="mm-modal-title">Middleman &amp; Trade Safety</h3>
+        <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="safety-callout">
+        Verify tickets &amp; middleman IDs inside the server before completing any crosstrade.
+      </div>
+      <ol class="rules-list" id="modal-rules-list"></ol>
+    </div>
+  </div>
+
+  <script>
+    let currentServerInvite = "https://discord.gg/3JPatMmyF";
+    let currentServerId = "1542941315933667348";
+    let currentUserId = "1540575139538796634";
+    let currentHandle = "mvn412.";
+    let allGames = [];
+    let allVouches = [];
+
+    function showToast(msg) {
+      const el = document.getElementById("toast-msg");
+      el.textContent = msg;
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => { el.textContent = ""; }, 2500);
+    }
+
+    function flashLabel(elId, tempText, originalText) {
+      const el = document.getElementById(elId);
+      if (!el) return;
+      el.textContent = tempText;
+      clearTimeout(el._flashTimer);
+      el._flashTimer = setTimeout(() => { el.textContent = originalText; }, 1600);
+    }
+
+    async function copyText(text, successMsg, flashFn) {
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        const inp = document.createElement("input");
+        inp.value = text;
+        document.body.appendChild(inp);
+        inp.select();
+        document.execCommand("copy");
+        inp.remove();
+      }
+      showToast(successMsg);
+      if (flashFn) flashFn();
+    }
+
+    function copyInviteLink() {
+      copyText(currentServerInvite, "Server invite copied.", () => {
+        flashLabel("btn-copy-invite-text", "Copied!", "Copy Invite");
+      });
+    }
+
+    function copyServerId() {
+      copyText(currentServerId, "Server ID copied.", () => {
+        flashLabel("btn-copy-id-text", "Copied!", "Copy ID");
+      });
+    }
+
+    function copyUserId() {
+      copyText(currentUserId, "Owner User ID copied.");
+    }
+
+    function copyHandle() {
+      copyText(currentHandle, `Copied handle: ${currentHandle}`, () => {
+        flashLabel("btn-copy-handle", "Copied", "Copy");
+      });
+    }
+
+    function sharePageLink() {
+      copyText(window.location.href, "Page URL copied to clipboard.", () => {
+        flashLabel("btn-share-page", "Copied!", "Share Page");
+      });
+    }
+
+    function toggleTheme() {
+      const isCrimson = document.body.classList.toggle("theme-crimson");
+      document.getElementById("btn-theme-toggle").textContent = isCrimson ? "Theme: Crimson" : "Theme: Violet";
+    }
+
+    function toggleFullBio() {
+      const panel = document.getElementById("full-bio-panel");
+      panel.style.display = panel.style.display === "block" ? "none" : "block";
+    }
+
+    function openModal() {
+      document.getElementById("mm-modal").classList.add("open");
+    }
+
+    function closeModal() {
+      document.getElementById("mm-modal").classList.remove("open");
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") closeModal();
+    });
+
+    function switchTab(tabName) {
+      document.querySelectorAll(".nav-tab").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === tabName);
+      });
+      document.getElementById("panel-games").classList.toggle("active", tabName === "games");
+      document.getElementById("panel-rules").classList.toggle("active", tabName === "rules");
+    }
+
+    function renderGames() {
+      const container = document.getElementById("games-list-container");
+      container.innerHTML = "";
+      allGames.forEach((g) => {
+        const box = document.createElement("div");
+        box.className = "game-card-item";
+        box.innerHTML = `<strong>${g.tag || "•"} ${g.title}</strong><span>${g.note}</span>`;
+        container.appendChild(box);
+      });
+    }
+
+    function getInitials(name) {
+      return (name || "MM")
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((w) => w[0].toUpperCase())
+        .join("") || "MM";
+    }
+
+    function renderVouches() {
+      const container = document.getElementById("vouches-list-container");
+      container.innerHTML = "";
+
+      if (!allVouches.length) {
+        container.innerHTML = `<div class="vouch-card"><p class="vouch-note">No member vouches listed yet.</p></div>`;
+        return;
+      }
+
+      allVouches.forEach((v) => {
+        const starsNum = Math.max(1, Math.min(5, Number(v.stars || 5)));
+        const starsDisplay = "★".repeat(starsNum) + "☆".repeat(5 - starsNum);
+        const card = document.createElement("div");
+        card.className = "vouch-card";
+
+        const top = document.createElement("div");
+        top.className = "vouch-top";
+
+        const memberWrap = document.createElement("div");
+        memberWrap.className = "vouch-member";
+
+        if (v.avatar_url) {
+          const img = document.createElement("img");
+          img.className = "vouch-avatar";
+          img.src = v.avatar_url;
+          img.alt = v.name || "Member";
+          img.onerror = () => {
+            const fb = document.createElement("div");
+            fb.className = "vouch-avatar";
+            fb.textContent = getInitials(v.name);
+            img.replaceWith(fb);
+          };
+          memberWrap.appendChild(img);
+        } else {
+          const fb = document.createElement("div");
+          fb.className = "vouch-avatar";
+          fb.textContent = getInitials(v.name);
+          memberWrap.appendChild(fb);
+        }
+
+        const nameCol = document.createElement("div");
+        nameCol.innerHTML = `<div class="vouch-name">${v.name || "Server Member"}</div><div class="vouch-tag">${v.trade_tag || "Roblox Crosstrade"}</div>`;
+        memberWrap.appendChild(nameCol);
+
+        const starEl = document.createElement("div");
+        starEl.className = "vouch-stars";
+        starEl.textContent = `${starsDisplay} (${starsNum}/5)`;
+
+        top.appendChild(memberWrap);
+        top.appendChild(starEl);
+
+        const noteEl = document.createElement("p");
+        noteEl.className = "vouch-note";
+        noteEl.textContent = v.note || "";
+
+        card.appendChild(top);
+        card.appendChild(noteEl);
+        container.appendChild(card);
+      });
+    }
+
+    function applyStatusGlow(status) {
+      const colors = {
+        online: "#23a55a",
+        idle: "#f0b232",
+        dnd: "#f23f43",
+        offline: "#747f8d",
+      };
+      document.documentElement.style.setProperty("--status-ring", colors[status] || "#23a55a");
+    }
+
+    function updateBoostMeter(boosts) {
+      const count = Math.max(0, Number(boosts || 0));
+      let goal = 2;
+      let tier = "Boost Level 1";
+      if (count >= 14) { goal = 14; tier = "Boost Level 3 (Max)"; }
+      else if (count >= 7) { goal = 14; tier = "Boost Level 2"; }
+      else if (count >= 2) { goal = 7; tier = "Boost Level 1"; }
+      else { goal = 2; tier = "Starting Boosts"; }
+
+      const pct = Math.min(100, Math.round((count / goal) * 100));
+      document.getElementById("boost-tier-label").textContent = tier;
+      document.getElementById("boost-progress-text").textContent = `${count} / ${goal} boosts`;
+      document.getElementById("boost-meter-fill").style.width = `${pct}%`;
+    }
+
+    async function refreshShowcase(manual = false) {
+      const grid = document.getElementById("showcase-grid");
+      grid.classList.add("refreshing");
+      try {
+        const res = await fetch("/api/showcase", { cache: "no-store" });
+        if (!res.ok) return;
+        const payload = await res.json();
+
+        if (payload.last_synced) {
+          document.getElementById("last-synced-text").textContent = `Synced ${payload.last_synced}`;
+        }
+
+        const d = payload.profile || {};
+        currentUserId = d.id || "1540575139538796634";
+        currentHandle = d.username || "mvn412.";
+
+        document.getElementById("display-name").textContent = d.display_name || "VortexShop";
+        document.getElementById("username").textContent = `${currentHandle} •`;
+
+        const bioLink = document.getElementById("bio-link");
+        bioLink.textContent = d.bio_link_text || "Check out vortexshop.onrender.com";
+        bioLink.href = d.store_url || "https://vortexshop.onrender.com";
+        document.getElementById("store-cta-link").href = d.store_url || "https://vortexshop.onrender.com";
+
+        if (d.avatar_url) document.getElementById("avatar").src = d.avatar_url;
+
+        const bannerEl = document.getElementById("banner");
+        if (d.banner_position) {
+          bannerEl.style.backgroundPosition = d.banner_position;
+        }
+        if (d.banner_url) {
+          bannerEl.style.backgroundImage = `url("${d.banner_url}")`;
+        }
+
+        const decoEl = document.getElementById("avatar-deco");
+        if (d.avatar_decoration_url) {
+          decoEl.src = d.avatar_decoration_url;
+          decoEl.style.display = "block";
+        }
+
+        const st = d.status || "online";
+        document.getElementById("status-dot").className = `status-dot ${st}`;
+        applyStatusGlow(st);
+
+        const bubble = document.getElementById("status-bubble");
+        if (d.custom_status && (d.custom_status.emoji || d.custom_status.text)) {
+          bubble.textContent = `${d.custom_status.emoji ? d.custom_status.emoji + " " : ""}${d.custom_status.text || ""}`.trim();
+        } else {
+          bubble.textContent = "Very nice day";
+        }
+
+        const clanImg = document.getElementById("clan-badge-img");
+        const clanEmoji = document.getElementById("clan-emoji");
+        if (d.clan_badge_url) {
+          clanImg.src = d.clan_badge_url;
+          clanImg.style.display = "inline-block";
+          clanEmoji.style.display = "none";
+          clanImg.onerror = () => {
+            clanImg.style.display = "none";
+            clanEmoji.style.display = "inline";
+          };
+        } else {
+          clanImg.style.display = "none";
+          clanEmoji.style.display = "inline";
+        }
+        clanEmoji.textContent = d.clan_emoji || "🍃";
+        document.getElementById("clan-tag").textContent = d.clan_tag || "VEM";
+
+        document.getElementById("role-pill-text").textContent = d.role_badge_text || "VortexShop";
+        document.getElementById("owner-line").textContent = d.owner_line || "Owner of this server-";
+
+        const invLink = document.getElementById("invite-link");
+        if (d.invite_url) {
+          invLink.href = d.invite_url;
+          invLink.textContent = d.invite_url.length > 27 ? d.invite_url.slice(0, 27) + "..." : d.invite_url;
+        }
+
+        document.getElementById("full-bio-panel").textContent = d.full_bio || "";
+        document.getElementById("member-since").textContent = d.member_since || "Aug 22, 2026";
+        document.getElementById("mutual-text").textContent = `${d.mutual_servers_count ?? 4} Mutual Servers`;
+        document.getElementById("vouches-text").textContent = `• ${d.vouches_count ?? 120}+ Vouches`;
+        document.getElementById("custom-trade-note-box").textContent =
+          d.custom_trade_note || "Verified Roblox crosstrading across any game via official server tickets.";
+
+        const badgeBar = document.getElementById("badge-pill-bar");
+        badgeBar.innerHTML = "";
+        (d.badges || []).forEach((b) => {
+          const item = document.createElement("span");
+          item.className = "badge-icon-item";
+          item.setAttribute("data-tooltip", b.label || b.id);
+          if (b.icon_url) {
+            const img = document.createElement("img");
+            img.src = b.icon_url;
+            img.alt = b.label || b.id;
+            img.onerror = () => {
+              img.remove();
+              item.textContent = b.fallback_icon || "✦";
+            };
+            item.appendChild(img);
+          } else {
+            item.textContent = b.fallback_icon || "✦";
+          }
+          badgeBar.appendChild(item);
+        });
+
+        allGames = d.games || [];
+        renderGames();
+
+        allVouches = d.vouches || [];
+        renderVouches();
+
+        const rules = d.mm_rules || [];
+        const rulesHtml = rules.map((r) => `<li>${r}</li>`).join("");
+        document.getElementById("rules-list-container").innerHTML = rulesHtml;
+        document.getElementById("modal-rules-list").innerHTML = rulesHtml;
+
+        const s = payload.server || {};
+        currentServerId = s.id || "1542941315933667348";
+        currentServerInvite = s.invite_url || "https://discord.gg/3JPatMmyF";
+
+        const sName = s.name || "Discord Server";
+        const totalMembers = Number(s.member_count || 0);
+        const onlineMembers = Number(s.online_count || 0);
+        const offlineMembers = Number(s.offline_count || 0);
+        const boostCount = Number(s.boost_count || 0);
+
+        document.getElementById("server-name").textContent = sName;
+        document.getElementById("server-id-text").textContent = `ID: ${currentServerId}`;
+        document.getElementById("server-members").textContent = totalMembers.toLocaleString();
+        document.getElementById("server-online").textContent = onlineMembers.toLocaleString();
+        document.getElementById("server-offline").textContent = offlineMembers.toLocaleString();
+        document.getElementById("server-boosts").textContent = boostCount.toLocaleString();
+
+        const ratio = totalMembers > 0 ? Math.round((onlineMembers / totalMembers) * 100) : 0;
+        document.getElementById("online-ratio-pill").textContent = `${ratio}% online`;
+        updateBoostMeter(boostCount);
+
+        const bannerStrip = document.getElementById("server-banner-strip");
+        const serverCard = document.getElementById("server-card");
+        if (s.banner_url) {
+          bannerStrip.style.backgroundImage = `url("${s.banner_url}")`;
+          bannerStrip.classList.add("has-banner");
+          serverCard.classList.remove("no-banner");
+        } else {
+          bannerStrip.classList.remove("has-banner");
+          serverCard.classList.add("no-banner");
+        }
+
+        const iconBox = document.getElementById("server-icon-box");
+        if (s.icon_url) {
+          iconBox.innerHTML = `<img src="${s.icon_url}" alt="${sName}" />`;
+        } else {
+          const initials = getInitials(sName);
+          iconBox.innerHTML = `<span class="server-icon-fallback">${initials}</span>`;
+        }
+
+        if (manual) showToast("Showcase synced with latest bot data.");
+      } catch (err) {
+        console.error("Failed to refresh showcase:", err);
+      } finally {
+        setTimeout(() => grid.classList.remove("refreshing"), 140);
+      }
+    }
+
+    refreshShowcase(false);
+    setInterval(() => refreshShowcase(false), 12000);
+  </script>
+</body>
+</html>
