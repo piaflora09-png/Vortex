@@ -2,6 +2,7 @@ import os
 import json
 import time
 import asyncio
+import sqlite3
 import datetime
 import threading
 import urllib.request
@@ -24,44 +25,382 @@ WEBHOOK_ITEM_ADDED = os.getenv("WEBHOOK_ITEM_ADDED", "").strip()
 WEBHOOK_ITEM_SOLD = os.getenv("WEBHOOK_ITEM_SOLD", "").strip()
 WEBHOOK_TICKET_CLOSED = os.getenv("WEBHOOK_TICKET_CLOSED", "").strip()
 
-STATE_FILE = "vortex_state.json"
+DB_PATH = os.getenv("DB_PATH", "vortexshop.db").strip()
+LEGACY_JSON_FILE = "vortex_state.json"
 HTML_FILE = "index-v2.html"
 
 # =========================================================
-# PERSISTENT JSON STATE (Shop Items & Closed Tickets)
+# SQLITE DATABASE LAYER (Shop Items, Closed Tickets & Logs)
 # =========================================================
-DEFAULT_STATE = {
-    "items": [],
-    "closed_tickets": [],
-}
+DEFAULT_SEED_ITEMS = [
+    {
+        "id": "vx-seed-1",
+        "name": "Harvester + Icepiercer Bundle",
+        "category": "Murder Mystery 2",
+        "stock": 3,
+        "price": "24.00",
+        "currency": "USD",
+        "posted_by": "@mvn412.",
+        "description": "High-tier MM2 bundle. Verified official ticket & MM escrow only.",
+        "image_url": "",
+        "status": "AVAILABLE",
+    },
+    {
+        "id": "vx-seed-2",
+        "name": "Raccoon + Dragonfly Pack",
+        "category": "Grow a Garden 2",
+        "stock": 5,
+        "price": "12.50",
+        "currency": "USD",
+        "posted_by": "@mvn412.",
+        "description": "Grow a Garden 2 pets stock ready for fast ticket delivery.",
+        "image_url": "",
+        "status": "AVAILABLE",
+    },
+]
 
-state_lock = threading.Lock()
+db_lock = threading.Lock()
 
 
-def load_state():
-    if not os.path.exists(STATE_FILE):
-        save_state(DEFAULT_STATE)
-        return json.loads(json.dumps(DEFAULT_STATE))
+def get_db_connection():
+    parent_dir = os.path.dirname(os.path.abspath(DB_PATH))
+    if parent_dir and not os.path.exists(parent_dir):
+        os.makedirs(parent_dir, exist_ok=True)
+    conn = sqlite3.connect(DB_PATH, check_same_thread=False)
+    conn.row_factory = sqlite3.Row
+    return conn
+
+
+def _row_to_item(row):
+    stock = max(0, int(row["stock"] if row["stock"] is not None else 0))
+    status = "SOLD" if stock <= 0 else (row["status"] or "AVAILABLE")
+    return {
+        "id": row["id"],
+        "name": row["name"],
+        "category": row["category"],
+        "stock": stock,
+        "price": row["price"],
+        "currency": row["currency"],
+        "posted_by": row["posted_by"],
+        "description": row["description"] or "",
+        "image_url": row["image_url"] or "",
+        "status": status,
+        "created_at": row["created_at"],
+        "updated_at": row["updated_at"],
+    }
+
+
+def _row_to_ticket(row):
     try:
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-            if "items" not in data:
-                data["items"] = DEFAULT_STATE["items"]
-            if "closed_tickets" not in data:
-                data["closed_tickets"] = []
-            return data
+        t1 = json.loads(row["trader_1_json"] or "{}")
     except Exception:
-        return json.loads(json.dumps(DEFAULT_STATE))
+        t1 = {}
+    try:
+        t2 = json.loads(row["trader_2_json"] or "{}")
+    except Exception:
+        t2 = {}
+    return {
+        "ticket_id": row["ticket_id"],
+        "status": row["status"] or "CLOSED",
+        "ticket_type": row["ticket_type"] or "Middleman Escrow",
+        "game": row["game"] or "Any Game",
+        "trade_value": row["trade_value"] or "Standard",
+        "trader_1": t1,
+        "trader_2": t2,
+        "claimed_by": row["claimed_by"] or "@mvn412.",
+        "notes": row["notes"] or "",
+        "server_id": row["server_id"] or "",
+        "synced_to_website": bool(row["synced_to_website"]),
+        "closed_at": row["closed_at"],
+    }
 
 
-def save_state(data):
-    with open(STATE_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=2, ensure_ascii=False)
+def init_database():
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    with db_lock:
+        conn = get_db_connection()
+        cur = conn.cursor()
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS shop_items (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                category TEXT NOT NULL DEFAULT 'General',
+                stock INTEGER NOT NULL DEFAULT 1,
+                price TEXT NOT NULL DEFAULT '0.00',
+                currency TEXT NOT NULL DEFAULT 'USD',
+                posted_by TEXT NOT NULL DEFAULT '@mvn412.',
+                description TEXT NOT NULL DEFAULT '',
+                image_url TEXT NOT NULL DEFAULT '',
+                status TEXT NOT NULL DEFAULT 'AVAILABLE',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL
+            )
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS closed_tickets (
+                ticket_id TEXT PRIMARY KEY,
+                status TEXT NOT NULL DEFAULT 'CLOSED',
+                ticket_type TEXT NOT NULL DEFAULT 'Middleman Escrow',
+                game TEXT NOT NULL DEFAULT 'Any Game',
+                trade_value TEXT NOT NULL DEFAULT 'Standard',
+                trader_1_json TEXT NOT NULL DEFAULT '{}',
+                trader_2_json TEXT NOT NULL DEFAULT '{}',
+                claimed_by TEXT NOT NULL DEFAULT '@mvn412.',
+                notes TEXT NOT NULL DEFAULT '',
+                server_id TEXT NOT NULL DEFAULT '',
+                synced_to_website INTEGER NOT NULL DEFAULT 1,
+                closed_at TEXT NOT NULL
+            )
+        """)
+
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS activity_logs (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                event_type TEXT NOT NULL,
+                ref_id TEXT,
+                summary TEXT NOT NULL,
+                created_at TEXT NOT NULL
+            )
+        """)
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM shop_items")
+        item_count = cur.fetchone()["cnt"]
+        cur.execute("SELECT COUNT(*) AS cnt FROM closed_tickets")
+        ticket_count = cur.fetchone()["cnt"]
+
+        if item_count == 0 and ticket_count == 0 and os.path.exists(LEGACY_JSON_FILE):
+            try:
+                with open(LEGACY_JSON_FILE, "r", encoding="utf-8") as f:
+                    legacy = json.load(f)
+                for idx, it in enumerate(legacy.get("items", [])):
+                    st = max(0, int(it.get("stock", 1)))
+                    item_id = str(it.get("id") or f"vx-legacy-{int(time.time() * 1000)}-{idx}")
+                    created = str(it.get("created_at") or now_iso)
+                    cur.execute(
+                        """
+                        INSERT OR IGNORE INTO shop_items (
+                            id, name, category, stock, price, currency, posted_by,
+                            description, image_url, status, created_at, updated_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        """,
+                        (
+                            item_id,
+                            str(it.get("name") or "Untitled Item"),
+                            str(it.get("category") or "General"),
+                            st,
+                            str(it.get("price") or "0.00"),
+                            str(it.get("currency") or "USD").upper(),
+                            str(it.get("posted_by") or "@mvn412."),
+                            str(it.get("description") or ""),
+                            str(it.get("image_url") or ""),
+                            "SOLD" if st <= 0 else str(it.get("status") or "AVAILABLE"),
+                            created,
+                            now_iso,
+                        ),
+                    )
+                for idx, tk in enumerate(legacy.get("closed_tickets", [])):
+                    tid = str(tk.get("ticket_id") or f"VX-LEG-{idx + 1}")
+                    cur.execute(
+                        """
+                        INSERT OR IGNORE INTO closed_tickets (
+                            ticket_id, status, ticket_type, game, trade_value,
+                            trader_1_json, trader_2_json, claimed_by, notes,
+                            server_id, synced_to_website, closed_at
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+                        """,
+                        (
+                            tid,
+                            str(tk.get("status") or "CLOSED"),
+                            str(tk.get("ticket_type") or "Middleman Escrow"),
+                            str(tk.get("game") or "Any Game"),
+                            str(tk.get("trade_value") or "Standard"),
+                            json.dumps(tk.get("trader_1") or {}, ensure_ascii=False),
+                            json.dumps(tk.get("trader_2") or {}, ensure_ascii=False),
+                            str(tk.get("claimed_by") or "@mvn412."),
+                            str(tk.get("notes") or ""),
+                            str(tk.get("server_id") or ""),
+                            str(tk.get("closed_at") or now_iso),
+                        ),
+                    )
+            except Exception as exc:
+                print(f"[DB Legacy Import Warning] {exc}")
+
+        cur.execute("SELECT COUNT(*) AS cnt FROM shop_items")
+        if cur.fetchone()["cnt"] == 0:
+            for seed in DEFAULT_SEED_ITEMS:
+                cur.execute(
+                    """
+                    INSERT OR IGNORE INTO shop_items (
+                        id, name, category, stock, price, currency, posted_by,
+                        description, image_url, status, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    (
+                        seed["id"],
+                        seed["name"],
+                        seed["category"],
+                        seed["stock"],
+                        seed["price"],
+                        seed["currency"],
+                        seed["posted_by"],
+                        seed["description"],
+                        seed["image_url"],
+                        seed["status"],
+                        now_iso,
+                        now_iso,
+                    ),
+                )
+
+        conn.commit()
+        conn.close()
 
 
-store_state = load_state()
+def record_activity(event_type: str, ref_id: str, summary: str):
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    with db_lock:
+        conn = get_db_connection()
+        conn.execute(
+            "INSERT INTO activity_logs (event_type, ref_id, summary, created_at) VALUES (?, ?, ?, ?)",
+            (event_type, ref_id, summary, now_iso),
+        )
+        conn.commit()
+        conn.close()
 
-# Live Discord Showcase Cache updated by background bot task
+
+def get_store_state():
+    with db_lock:
+        conn = get_db_connection()
+        item_rows = conn.execute("SELECT * FROM shop_items ORDER BY created_at DESC").fetchall()
+        ticket_rows = conn.execute("SELECT * FROM closed_tickets ORDER BY closed_at DESC LIMIT 50").fetchall()
+        conn.close()
+    return {
+        "items": [_row_to_item(r) for r in item_rows],
+        "closed_tickets": [_row_to_ticket(r) for r in ticket_rows],
+    }
+
+
+def db_add_item(item: dict):
+    with db_lock:
+        conn = get_db_connection()
+        conn.execute(
+            """
+            INSERT INTO shop_items (
+                id, name, category, stock, price, currency, posted_by,
+                description, image_url, status, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item["id"],
+                item["name"],
+                item["category"],
+                item["stock"],
+                item["price"],
+                item["currency"],
+                item["posted_by"],
+                item["description"],
+                item["image_url"],
+                item["status"],
+                item["created_at"],
+                item["updated_at"],
+            ),
+        )
+        conn.commit()
+        conn.close()
+    record_activity("ITEM_ADDED", item["id"], f"Added {item['name']} (stock={item['stock']}, {item['price']} {item['currency']})")
+
+
+def db_adjust_stock(item_id: str, delta: int):
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    with db_lock:
+        conn = get_db_connection()
+        row = conn.execute("SELECT * FROM shop_items WHERE id = ?", (item_id,)).fetchone()
+        if not row:
+            conn.close()
+            return None
+        current_stock = max(0, int(row["stock"] if row["stock"] is not None else 0))
+        next_stock = max(0, current_stock + int(delta))
+        next_status = "SOLD" if next_stock <= 0 else "AVAILABLE"
+        conn.execute(
+            "UPDATE shop_items SET stock = ?, status = ?, updated_at = ? WHERE id = ?",
+            (next_stock, next_status, now_iso, item_id),
+        )
+        updated_row = conn.execute("SELECT * FROM shop_items WHERE id = ?", (item_id,)).fetchone()
+        conn.commit()
+        conn.close()
+    updated = _row_to_item(updated_row)
+    record_activity("STOCK_ADJUSTED", item_id, f"{updated['name']} stock -> {next_stock} ({next_status})")
+    return updated
+
+
+def db_delete_item(item_id: str):
+    with db_lock:
+        conn = get_db_connection()
+        row = conn.execute("SELECT * FROM shop_items WHERE id = ?", (item_id,)).fetchone()
+        if not row:
+            conn.close()
+            return None
+        deleted = _row_to_item(row)
+        conn.execute("DELETE FROM shop_items WHERE id = ?", (item_id,))
+        conn.commit()
+        conn.close()
+    record_activity("ITEM_DELETED", item_id, f"Deleted {deleted['name']}")
+    return deleted
+
+
+def db_upsert_closed_ticket(rec: dict):
+    with db_lock:
+        conn = get_db_connection()
+        conn.execute(
+            """
+            INSERT OR REPLACE INTO closed_tickets (
+                ticket_id, status, ticket_type, game, trade_value,
+                trader_1_json, trader_2_json, claimed_by, notes,
+                server_id, synced_to_website, closed_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1, ?)
+            """,
+            (
+                rec["ticket_id"],
+                rec["status"],
+                rec["ticket_type"],
+                rec["game"],
+                rec["trade_value"],
+                json.dumps(rec.get("trader_1") or {}, ensure_ascii=False),
+                json.dumps(rec.get("trader_2") or {}, ensure_ascii=False),
+                rec["claimed_by"],
+                rec["notes"],
+                rec["server_id"],
+                rec["closed_at"],
+            ),
+        )
+        conn.commit()
+        conn.close()
+    record_activity("TICKET_CLOSED", rec["ticket_id"], f"Closed ticket {rec['ticket_id']} ({rec['game']})")
+
+
+def get_db_stats():
+    with db_lock:
+        conn = get_db_connection()
+        total_items = conn.execute("SELECT COUNT(*) AS c FROM shop_items").fetchone()["c"]
+        available_items = conn.execute("SELECT COUNT(*) AS c FROM shop_items WHERE stock > 0").fetchone()["c"]
+        total_tickets = conn.execute("SELECT COUNT(*) AS c FROM closed_tickets").fetchone()["c"]
+        total_logs = conn.execute("SELECT COUNT(*) AS c FROM activity_logs").fetchone()["c"]
+        conn.close()
+    return {
+        "db_path": os.path.abspath(DB_PATH),
+        "shop_items_count": total_items,
+        "available_items_count": available_items,
+        "closed_tickets_count": total_tickets,
+        "activity_logs_count": total_logs,
+    }
+
+
+init_database()
+
+# =========================================================
+# LIVE SHOWCASE CACHE & WEBHOOK HELPER
+# =========================================================
 showcase_cache = {
     "last_synced": "Starting...",
     "profile": {
@@ -130,7 +469,7 @@ def post_discord_webhook(webhook_url: str, title: str, fields: list, color: int 
         "color": color,
         "fields": fields,
         "timestamp": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "footer": {"text": "VortexShop Live Sync"},
+        "footer": {"text": "VortexShop SQLite Live Sync"},
     }
     if image_url and image_url.startswith("http"):
         embed["thumbnail"] = {"url": image_url}
@@ -162,7 +501,12 @@ def serve_index():
 
 @app.route("/health")
 def health_check():
-    return jsonify({"status": "ok", "service": "VortexShop", "bot_ready": bot.is_ready()})
+    return jsonify({
+        "status": "ok",
+        "service": "VortexShop",
+        "bot_ready": bot.is_ready(),
+        "database": get_db_stats(),
+    })
 
 
 @app.route("/api/showcase", methods=["GET"])
@@ -172,8 +516,7 @@ def api_showcase():
 
 @app.route("/api/state", methods=["GET"])
 def api_state():
-    with state_lock:
-        return jsonify(store_state)
+    return jsonify(get_store_state())
 
 
 @app.route("/api/shop/items", methods=["POST"])
@@ -187,7 +530,7 @@ def api_add_shop_item():
     if not name:
         return jsonify({"ok": False, "error": "Item name is required."}), 400
 
-    stock = max(1, int(data.get("stock", 1)))
+    stock = max(0, int(data.get("stock", 1)))
     price = str(data.get("price", "0.00")).strip()
     currency = str(data.get("currency", "USD")).strip().upper()
     posted_by = str(data.get("posted_by", "@mvn412.")).strip()
@@ -195,6 +538,7 @@ def api_add_shop_item():
         posted_by = f"@{posted_by}"
     description = str(data.get("description", "")).strip()
     image_url = str(data.get("image_url", "")).strip()
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
 
     item = {
         "id": f"vx-{int(time.time() * 1000)}",
@@ -206,13 +550,12 @@ def api_add_shop_item():
         "posted_by": posted_by,
         "description": description,
         "image_url": image_url,
-        "status": "AVAILABLE",
-        "created_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
+        "status": "SOLD" if stock <= 0 else "AVAILABLE",
+        "created_at": now_iso,
+        "updated_at": now_iso,
     }
 
-    with state_lock:
-        store_state["items"].insert(0, item)
-        save_state(store_state)
+    db_add_item(item)
 
     threading.Thread(
         target=post_discord_webhook,
@@ -234,23 +577,30 @@ def api_add_shop_item():
     return jsonify({"ok": True, "item": item})
 
 
+@app.route("/api/shop/items/<item_id>/minus", methods=["POST"])
+def api_minus_shop_item(item_id):
+    data = request.get_json(silent=True) or {}
+    if data.get("admin_password") != ADMIN_PASSWORD:
+        return jsonify({"ok": False, "error": "Invalid admin password."}), 403
+
+    delta = int(data.get("delta", -1))
+    if delta >= 0:
+        delta = -abs(delta)
+
+    updated_item = db_adjust_stock(item_id, delta)
+    if not updated_item:
+        return jsonify({"ok": False, "error": "Item not found."}), 404
+
+    return jsonify({"ok": True, "item": updated_item})
+
+
 @app.route("/api/shop/items/<item_id>/sold", methods=["POST"])
 def api_mark_item_sold(item_id):
     data = request.get_json(silent=True) or {}
     buyer = str(data.get("buyer", "@buyer")).strip()
+    sold_qty = max(1, int(data.get("sold_qty", 1)))
 
-    updated_item = None
-    with state_lock:
-        for it in store_state["items"]:
-            if it.get("id") == item_id:
-                next_stock = max(0, int(it.get("stock", 1)) - 1)
-                it["stock"] = next_stock
-                it["status"] = "SOLD" if next_stock <= 0 else "AVAILABLE"
-                updated_item = dict(it)
-                break
-        if updated_item:
-            save_state(store_state)
-
+    updated_item = db_adjust_stock(item_id, -sold_qty)
     if not updated_item:
         return jsonify({"ok": False, "error": "Item not found."}), 404
 
@@ -274,30 +624,50 @@ def api_mark_item_sold(item_id):
     return jsonify({"ok": True, "item": updated_item})
 
 
+@app.route("/api/shop/items/<item_id>", methods=["DELETE"])
+def api_delete_shop_item(item_id):
+    data = request.get_json(silent=True) or {}
+    if data.get("admin_password") != ADMIN_PASSWORD:
+        return jsonify({"ok": False, "error": "Invalid admin password."}), 403
+
+    deleted = db_delete_item(item_id)
+    if not deleted:
+        return jsonify({"ok": False, "error": "Item not found."}), 404
+
+    return jsonify({"ok": True, "deleted": deleted})
+
+
 @app.route("/api/tickets/closed", methods=["POST"])
 def api_ticket_closed():
     rec = request.get_json(silent=True) or {}
-    if not rec.get("ticket_id"):
-        rec["ticket_id"] = f"VX-{int(time.time()) % 10000}"
-    rec["status"] = "CLOSED"
-    rec["synced_to_website"] = True
-    rec.setdefault("closed_at", datetime.datetime.now(datetime.timezone.utc).isoformat())
+    ticket_id = str(rec.get("ticket_id") or f"VX-{int(time.time()) % 10000}").strip()
+    normalized = {
+        "ticket_id": ticket_id,
+        "status": "CLOSED",
+        "ticket_type": str(rec.get("ticket_type") or "Middleman Escrow").strip(),
+        "game": str(rec.get("game") or "Any Game").strip(),
+        "trade_value": str(rec.get("trade_value") or "Standard").strip(),
+        "trader_1": rec.get("trader_1") if isinstance(rec.get("trader_1"), dict) else {},
+        "trader_2": rec.get("trader_2") if isinstance(rec.get("trader_2"), dict) else {},
+        "claimed_by": str(rec.get("claimed_by") or "@mvn412.").strip(),
+        "notes": str(rec.get("notes") or "").strip(),
+        "server_id": str(rec.get("server_id") or GUILD_ID).strip(),
+        "synced_to_website": True,
+        "closed_at": str(rec.get("closed_at") or datetime.datetime.now(datetime.timezone.utc).isoformat()),
+    }
 
-    with state_lock:
-        store_state["closed_tickets"].insert(0, rec)
-        store_state["closed_tickets"] = store_state["closed_tickets"][:50]
-        save_state(store_state)
+    db_upsert_closed_ticket(normalized)
 
-    t1 = rec.get("trader_1", {})
-    t2 = rec.get("trader_2", {})
+    t1 = normalized.get("trader_1", {})
+    t2 = normalized.get("trader_2", {})
     threading.Thread(
         target=post_discord_webhook,
         args=(
             WEBHOOK_TICKET_CLOSED,
-            f"🔒 Closed Trade Ticket: {rec['ticket_id']}",
+            f"🔒 Closed Trade Ticket: {normalized['ticket_id']}",
             [
-                {"name": "Game / Category", "value": f"{rec.get('game', 'N/A')} ({rec.get('ticket_type', 'Escrow')})", "inline": True},
-                {"name": "Claimed By", "value": rec.get("claimed_by", "@staff"), "inline": True},
+                {"name": "Game / Category", "value": f"{normalized.get('game', 'N/A')} ({normalized.get('ticket_type', 'Escrow')})", "inline": True},
+                {"name": "Claimed By", "value": normalized.get("claimed_by", "@staff"), "inline": True},
                 {"name": f"Trader 1: {t1.get('name', 'Trader 1')}", "value": f"Gave: {t1.get('giving_items', '-')}", "inline": False},
                 {"name": f"Trader 2: {t2.get('name', 'Trader 2')}", "value": f"Gave: {t2.get('giving_items', '-')}", "inline": False},
             ],
@@ -306,11 +676,11 @@ def api_ticket_closed():
         daemon=True,
     ).start()
 
-    return jsonify({"ok": True, "ticket": rec})
+    return jsonify({"ok": True, "ticket": normalized})
 
 
 # =========================================================
-# DISCORD BOT (Live Guild & Staff Sync + Slash/Prefix Cmds)
+# DISCORD BOT (Live Guild & Staff Sync + Prefix Cmds)
 # =========================================================
 intents = discord.Intents.default()
 intents.members = True
@@ -357,7 +727,6 @@ def sync_discord_data_to_cache():
             },
         })
 
-    # Track non-bot members with elevated / staff / MM roles
     tracked_roles = [
         r for r in sorted(guild.roles, key=lambda x: x.position, reverse=True)
         if not r.is_default() and not r.managed and (
@@ -441,7 +810,7 @@ def run_flask():
 if __name__ == "__main__":
     flask_thread = threading.Thread(target=run_flask, daemon=True)
     flask_thread.start()
-    print(f"[VortexShop Web] Serving {HTML_FILE} on http://0.0.0.0:{PORT}")
+    print(f"[VortexShop Web] Serving {HTML_FILE} on http://0.0.0.0:{PORT} | DB: {os.path.abspath(DB_PATH)}")
 
     if DISCORD_TOKEN:
         bot.run(DISCORD_TOKEN)
