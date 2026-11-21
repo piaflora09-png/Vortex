@@ -1418,6 +1418,15 @@
     let allGames = [];
     let allVouches = [];
 
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
     function showToast(msg) {
       const el = document.getElementById("toast-msg");
       el.textContent = msg;
@@ -1512,14 +1521,14 @@
       allGames.forEach((g) => {
         const box = document.createElement("div");
         box.className = "game-card-item";
-        box.innerHTML = `<strong>${g.tag || "•"} ${g.title}</strong><span>${g.note}</span>`;
+        box.innerHTML = `<strong>${escapeHtml(g.tag || "•")} ${escapeHtml(g.title)}</strong><span>${escapeHtml(g.note)}</span>`;
         container.appendChild(box);
       });
     }
 
     function getInitials(name) {
       return (name || "MM")
-        .split(/\s+/)
+        .split(/\\s+/)
         .filter(Boolean)
         .slice(0, 2)
         .map((w) => w[0].toUpperCase())
@@ -1567,7 +1576,7 @@
         }
 
         const nameCol = document.createElement("div");
-        nameCol.innerHTML = `<div class="vouch-name">${v.name || "Server Member"}</div><div class="vouch-tag">${v.trade_tag || "Roblox Crosstrade"}</div>`;
+        nameCol.innerHTML = `<div class="vouch-name">${escapeHtml(v.name || "Server Member")}</div><div class="vouch-tag">${escapeHtml(v.trade_tag || "Roblox Crosstrade")}</div>`;
         memberWrap.appendChild(nameCol);
 
         const starEl = document.createElement("div");
@@ -1639,17 +1648,19 @@
         if (d.avatar_url) document.getElementById("avatar").src = d.avatar_url;
 
         const bannerEl = document.getElementById("banner");
-        if (d.banner_position) {
-          bannerEl.style.backgroundPosition = d.banner_position;
-        }
+        bannerEl.style.backgroundPosition = d.banner_position || "center";
         if (d.banner_url) {
           bannerEl.style.backgroundImage = `url("${d.banner_url}")`;
+        } else {
+          bannerEl.style.backgroundImage = "";
         }
 
         const decoEl = document.getElementById("avatar-deco");
         if (d.avatar_decoration_url) {
           decoEl.src = d.avatar_decoration_url;
           decoEl.style.display = "block";
+        } else {
+          decoEl.style.display = "none";
         }
 
         const st = d.status || "online";
@@ -1724,7 +1735,7 @@
         renderVouches();
 
         const rules = d.mm_rules || [];
-        const rulesHtml = rules.map((r) => `<li>${r}</li>`).join("");
+        const rulesHtml = rules.map((r) => `<li>${escapeHtml(r)}</li>`).join("");
         document.getElementById("rules-list-container").innerHTML = rulesHtml;
         document.getElementById("modal-rules-list").innerHTML = rulesHtml;
 
@@ -1762,10 +1773,10 @@
 
         const iconBox = document.getElementById("server-icon-box");
         if (s.icon_url) {
-          iconBox.innerHTML = `<img src="${s.icon_url}" alt="${sName}" />`;
+          iconBox.innerHTML = `<img src="${escapeHtml(s.icon_url)}" alt="${escapeHtml(sName)}" />`;
         } else {
           const initials = getInitials(sName);
-          iconBox.innerHTML = `<span class="server-icon-fallback">${initials}</span>`;
+          iconBox.innerHTML = `<span class="server-icon-fallback">${escapeHtml(initials)}</span>`;
         }
 
         if (manual) showToast("Showcase synced with latest bot data.");
