@@ -3,27 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VortexShop — Roblox Crosstrading, Role Members &amp; Server Showcase</title>
+  <title>VortexShop — 3D Roblox Crosstrading, Role Members &amp; Server Showcase</title>
   <style>
     :root {
       --bg-dark: #07050c;
-      --purple-glow: rgba(168, 85, 247, 0.26);
-      --gold-glow: rgba(245, 158, 11, 0.18);
-      --rose-glow: rgba(236, 72, 153, 0.14);
+      --purple-glow: rgba(168, 85, 247, 0.28);
+      --gold-glow: rgba(245, 158, 11, 0.2);
+      --rose-glow: rgba(236, 72, 153, 0.15);
       --accent-primary: #8b5cf6;
       --accent-gold: #f59e0b;
       --accent-pink: #e879f9;
       --status-ring: #23a55a;
-      --server-border: rgba(245, 158, 11, 0.58);
+      --server-border: rgba(245, 158, 11, 0.62);
     }
 
     body.theme-crimson {
-      --purple-glow: rgba(225, 29, 72, 0.26);
-      --gold-glow: rgba(245, 158, 11, 0.18);
+      --purple-glow: rgba(225, 29, 72, 0.28);
+      --gold-glow: rgba(245, 158, 11, 0.2);
       --rose-glow: rgba(251, 113, 133, 0.18);
       --accent-primary: #e11d48;
       --accent-pink: #fb7185;
-      --server-border: rgba(251, 113, 133, 0.62);
+      --server-border: rgba(251, 113, 133, 0.65);
     }
 
     * { box-sizing: border-box; }
@@ -97,6 +97,21 @@
       35% { opacity: 0.8; }
       70% { opacity: 0.45; }
       100% { transform: translateX(240%) rotate(14deg); opacity: 0; }
+    }
+
+    .tilt-3d {
+      transform-style: preserve-3d;
+      will-change: transform;
+      transition: transform 0.14s ease-out, box-shadow 0.22s ease, border-color 0.2s ease;
+    }
+    .tilt-3d.resetting {
+      transition: transform 0.38s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.22s ease, border-color 0.2s ease;
+    }
+    .depth-lift {
+      transform: translateZ(18px);
+    }
+    .depth-peak {
+      transform: translateZ(28px);
     }
 
     .top-nav {
@@ -218,6 +233,7 @@
       max-width: 100%;
       padding-top: 26px;
       flex-shrink: 0;
+      perspective: 1150px;
     }
 
     .top-decor {
@@ -251,15 +267,13 @@
       background: linear-gradient(180deg, #b057f5 0%, var(--accent-primary) 52%, #4c1d95 100%);
       box-shadow:
         0 0 0 2px rgba(216, 180, 254, 0.28),
-        0 24px 65px rgba(0, 0, 0, 0.85);
-      transition: transform 0.22s ease, box-shadow 0.22s ease;
+        0 26px 70px rgba(0, 0, 0, 0.88);
     }
 
     .frame-shell:hover {
-      transform: translateY(-3px);
       box-shadow:
-        0 0 28px rgba(168, 85, 247, 0.38),
-        0 28px 70px rgba(0, 0, 0, 0.9);
+        0 0 30px rgba(168, 85, 247, 0.42),
+        0 32px 76px rgba(0, 0, 0, 0.92);
     }
 
     .card {
@@ -268,6 +282,7 @@
       border-radius: 20px;
       overflow: hidden;
       z-index: 2;
+      transform-style: preserve-3d;
     }
 
     .profile-effect-layer {
@@ -364,6 +379,7 @@
       position: relative;
       padding: 0 18px 18px;
       z-index: 3;
+      transform-style: preserve-3d;
     }
 
     .avatar-thought-row {
@@ -379,6 +395,7 @@
       width: 92px;
       height: 92px;
       flex-shrink: 0;
+      transform: translateZ(24px);
     }
 
     .avatar-img {
@@ -388,7 +405,7 @@
       object-fit: cover;
       border: 5px solid #220b40;
       background: #140726;
-      box-shadow: 0 0 18px rgba(168, 85, 247, 0.25);
+      box-shadow: 0 10px 22px rgba(0, 0, 0, 0.65), 0 0 18px rgba(168, 85, 247, 0.28);
     }
 
     .avatar-deco {
@@ -422,6 +439,7 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
+      transform: translateZ(16px);
     }
 
     .mini-dots {
@@ -733,53 +751,95 @@
       display: flex;
       flex-direction: column;
       gap: 18px;
+      perspective: 1150px;
     }
 
     .server-card {
       position: relative;
-      background: linear-gradient(165deg, rgba(36, 16, 62, 0.96), rgba(16, 10, 27, 0.98));
+      background: linear-gradient(165deg, rgba(36, 16, 62, 0.97), rgba(16, 10, 27, 0.99));
       border-radius: 22px;
       padding: 0 26px 22px;
       border: 1.5px solid var(--server-border);
       box-shadow:
-        0 0 30px rgba(245, 158, 11, 0.14),
-        0 24px 65px rgba(0, 0, 0, 0.82);
+        0 0 34px rgba(245, 158, 11, 0.16),
+        0 26px 70px rgba(0, 0, 0, 0.88);
       overflow: hidden;
-      transition: transform 0.22s ease, box-shadow 0.22s ease;
+      transform-style: preserve-3d;
     }
 
     .server-card:hover {
-      transform: translateY(-3px);
       box-shadow:
-        0 0 36px rgba(245, 158, 11, 0.22),
-        0 28px 70px rgba(0, 0, 0, 0.9);
+        0 0 42px rgba(245, 158, 11, 0.26),
+        0 32px 76px rgba(0, 0, 0, 0.92);
     }
 
     .server-banner-strip {
-      display: none;
+      display: block;
       margin: 0 -26px 20px;
-      height: 112px;
-      background-color: #1c0b36;
+      height: 118px;
+      background:
+        radial-gradient(circle at 88% 20%, rgba(168, 85, 247, 0.38), transparent 52%),
+        linear-gradient(180deg, rgba(16, 10, 28, 0.96), rgba(24, 12, 42, 0.92));
       background-size: cover;
       background-position: center;
       position: relative;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    .server-banner-strip.has-banner { display: block; }
-    .server-banner-strip::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(7, 5, 12, 0.15), rgba(23, 12, 41, 0.85));
+      border-bottom: 1px solid rgba(245, 158, 11, 0.24);
+      padding: 12px 18px;
+      overflow: hidden;
     }
 
-    .server-card.no-banner { padding-top: 26px; }
+    .server-banner-strip.custom-guild-banner .banner-3d-items {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .banner-3d-items {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      height: 100%;
+      transition: opacity 0.2s ease;
+    }
+
+    .banner-3d-slot {
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      padding: 6px;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      transform: translateZ(14px);
+    }
+
+    .banner-3d-tag {
+      font-size: 0.58rem;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      padding: 1px 6px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.8);
+      color: #fde68a;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+
+    .banner-3d-art {
+      font-size: 1.15rem;
+      line-height: 1;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
+    }
 
     .server-header {
       display: flex;
       align-items: center;
       gap: 18px;
       margin-bottom: 20px;
+      transform: translateZ(20px);
     }
 
     .server-icon-box {
@@ -787,12 +847,12 @@
       height: 74px;
       border-radius: 18px;
       background: linear-gradient(135deg, #3b0764, #1e1b4b);
-      border: 1.5px solid rgba(245, 158, 11, 0.5);
+      border: 1.5px solid rgba(245, 158, 11, 0.55);
       display: grid;
       place-items: center;
       overflow: hidden;
       flex-shrink: 0;
-      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.65), 0 0 18px rgba(168, 85, 247, 0.25);
     }
 
     .server-icon-box img {
@@ -835,6 +895,7 @@
       color: #e4e4e7;
       margin-bottom: 12px;
       font-variant-numeric: tabular-nums;
+      transform: translateZ(14px);
     }
 
     .members-left {
@@ -877,6 +938,7 @@
       color: #cbd5e1;
       margin-bottom: 16px;
       font-variant-numeric: tabular-nums;
+      transform: translateZ(12px);
     }
 
     .stat-inline {
@@ -909,6 +971,7 @@
 
     .boost-meter-wrap {
       margin-bottom: 20px;
+      transform: translateZ(12px);
     }
 
     .boost-meter-label {
@@ -940,6 +1003,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 14px;
+      transform: translateZ(22px);
     }
 
     .btn-copy-invite {
@@ -955,7 +1019,7 @@
       align-items: center;
       justify-content: center;
       gap: 9px;
-      box-shadow: 0 8px 24px rgba(245, 158, 11, 0.25);
+      box-shadow: 0 10px 26px rgba(245, 158, 11, 0.3);
       transition: transform 0.12s ease, filter 0.12s ease;
     }
     .btn-copy-invite:hover { filter: brightness(1.07); transform: translateY(-1px); }
@@ -973,6 +1037,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
       transition: background 0.12s ease, transform 0.12s ease;
     }
     .btn-copy-id:hover { background: rgba(42, 31, 62, 0.95); transform: translateY(-1px); }
@@ -1084,6 +1149,7 @@
       display: grid;
       grid-template-columns: 1fr;
       gap: 14px;
+      perspective: 1100px;
     }
 
     .member-showcase-card {
@@ -1092,15 +1158,14 @@
       overflow: hidden;
       background: linear-gradient(180deg, rgba(35, 14, 62, 0.96), rgba(16, 8, 29, 0.98));
       border: 1px solid rgba(232, 121, 249, 0.28);
-      box-shadow: 0 14px 32px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.7);
       cursor: pointer;
-      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      transform-style: preserve-3d;
     }
 
     .member-showcase-card:hover {
-      transform: translateY(-2px);
       border-color: rgba(245, 158, 11, 0.58);
-      box-shadow: 0 18px 40px rgba(0, 0, 0, 0.78), 0 0 22px rgba(168, 85, 247, 0.22);
+      box-shadow: 0 22px 44px rgba(0, 0, 0, 0.82), 0 0 24px rgba(168, 85, 247, 0.24);
     }
 
     .member-card-effect {
@@ -1157,6 +1222,7 @@
       position: relative;
       padding: 0 16px 15px;
       z-index: 3;
+      transform-style: preserve-3d;
     }
 
     .member-identity-row {
@@ -1174,6 +1240,7 @@
       align-items: flex-end;
       gap: 12px;
       min-width: 0;
+      transform: translateZ(18px);
     }
 
     .m-avatar-ring {
@@ -1190,7 +1257,7 @@
       object-fit: cover;
       border: 3.5px solid #210c3e;
       background: #120624;
-      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.65);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.7);
     }
 
     .m-avatar-deco {
@@ -1243,6 +1310,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
+      transform: translateZ(16px);
     }
 
     .m-copy-btn {
@@ -1264,6 +1332,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
+      transform: translateZ(12px);
     }
 
     .staff-role-pill {
@@ -1448,6 +1517,8 @@
 
     @media (max-width: 520px) {
       .server-actions { grid-template-columns: 1fr; }
+      .banner-3d-items { grid-template-columns: repeat(2, 1fr); }
+      .server-banner-strip { height: auto; min-height: 112px; }
     }
   </style>
 </head>
@@ -1498,7 +1569,7 @@
         </div>
       </div>
 
-      <div class="frame-shell">
+      <div class="frame-shell tilt-3d" data-tilt-max="7">
         <div class="card">
           <div id="profile-effect-layer" class="profile-effect-layer active">
             <img id="profile-effect-img" class="effect-asset" src="" alt="" style="display:none;" />
@@ -1526,7 +1597,7 @@
               </div>
             </div>
 
-            <div class="display-name-line">
+            <div class="display-name-line depth-lift">
               <h1 id="display-name" class="display-name">VortexShop</h1>
               <button type="button" class="note-icon-btn" title="Toggle Full Bio" aria-label="Toggle Full Bio" onclick="toggleFullBio()">📝+</button>
             </div>
@@ -1596,8 +1667,27 @@
     </section>
 
     <section class="server-column" aria-label="Target Discord Server">
-      <div class="server-card no-banner" id="server-card">
-        <div class="server-banner-strip" id="server-banner-strip"></div>
+      <div class="server-card tilt-3d" id="server-card" data-tilt-max="6">
+        <div class="server-banner-strip" id="server-banner-strip">
+          <div class="banner-3d-items" aria-hidden="true">
+            <div class="banner-3d-slot">
+              <span class="banner-3d-tag">EXCLUSIVE</span>
+              <span class="banner-3d-art">🍓</span>
+            </div>
+            <div class="banner-3d-slot">
+              <span class="banner-3d-tag">LIMITED</span>
+              <span class="banner-3d-art">🏹</span>
+            </div>
+            <div class="banner-3d-slot">
+              <span class="banner-3d-tag">LIMITED</span>
+              <span class="banner-3d-art">🔫</span>
+            </div>
+            <div class="banner-3d-slot">
+              <span class="banner-3d-tag">CHROMA</span>
+              <span class="banner-3d-art">🧪</span>
+            </div>
+          </div>
+        </div>
 
         <div class="server-header">
           <div class="server-icon-box" id="server-icon-box">
@@ -1659,7 +1749,7 @@
       <div id="panel-staff" class="sub-panel">
         <h3>Members with Tracked Roles (<span id="staff-count-label">0</span>)</h3>
         <div class="custom-note-box">
-          Showing members holding role IDs <code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, or <code>1568387457752371270</code> with profile image, banner image, avatar decoration, and effect overlay. Click any card to inspect.
+          Showing members holding role IDs <code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, or <code>1568387457752371270</code> with profile image, banner image, avatar decoration, and effect overlay. Hover cards for 3D depth or click to inspect.
         </div>
 
         <div class="controls-toolbar">
@@ -1744,6 +1834,33 @@
     let staffMembers = [];
     let selectedRoleFilter = "ALL";
     let onlineOnlyFilter = false;
+
+    function attach3DTilt(el) {
+      if (!el || el.dataset.tiltBound === "1") return;
+      el.dataset.tiltBound = "1";
+      const maxDeg = Number(el.dataset.tiltMax || "6");
+
+      el.addEventListener("pointermove", (e) => {
+        if (e.pointerType === "touch") return;
+        const rect = el.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+        const px = (e.clientX - rect.left) / rect.width - 0.5;
+        const py = (e.clientY - rect.top) / rect.height - 0.5;
+        const rotY = (px * maxDeg * 2).toFixed(2);
+        const rotX = (-py * maxDeg * 2).toFixed(2);
+        el.classList.remove("resetting");
+        el.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.012, 1.012, 1.012)`;
+      });
+
+      el.addEventListener("pointerleave", () => {
+        el.classList.add("resetting");
+        el.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
+      });
+    }
+
+    function initAll3DTilts() {
+      document.querySelectorAll(".tilt-3d").forEach(attach3DTilt);
+    }
 
     function escapeHtml(str) {
       return String(str ?? "")
@@ -1968,7 +2085,8 @@
 
       filtered.forEach((m) => {
         const card = document.createElement("article");
-        card.className = "member-showcase-card";
+        card.className = "member-showcase-card tilt-3d";
+        card.dataset.tiltMax = "5";
         card.onclick = () => openInspectorModal(m);
 
         const eff = m.profile_effect || {};
@@ -2069,6 +2187,7 @@
 
         body.appendChild(rolesWrap);
         card.appendChild(body);
+        attach3DTilt(card);
         membersEl.appendChild(card);
       });
     }
@@ -2342,14 +2461,12 @@
         updateBoostMeter(boostCount);
 
         const bannerStrip = document.getElementById("server-banner-strip");
-        const serverCard = document.getElementById("server-card");
         if (s.banner_url) {
           bannerStrip.style.backgroundImage = `url("${s.banner_url}")`;
-          bannerStrip.classList.add("has-banner");
-          serverCard.classList.remove("no-banner");
+          bannerStrip.classList.add("custom-guild-banner");
         } else {
-          bannerStrip.classList.remove("has-banner");
-          serverCard.classList.add("no-banner");
+          bannerStrip.style.backgroundImage = "";
+          bannerStrip.classList.remove("custom-guild-banner");
         }
 
         const iconBox = document.getElementById("server-icon-box");
@@ -2368,6 +2485,7 @@
       }
     }
 
+    initAll3DTilts();
     refreshShowcase(false);
     setInterval(() => refreshShowcase(false), 12000);
   </script>
