@@ -1,8 +1,10 @@
 import asyncio
 import json
 import os
+import re
 import threading
 import traceback
+import urllib.request
 from datetime import datetime, timezone
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
@@ -11,12 +13,36 @@ import discord
 from discord.ext import commands, tasks
 
 BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
-DISABLE_DISCORD_BOT = os.getenv("DISABLE_DISCORD_BOT", "0").strip().lower() in ("1", "true", "yes")
 TARGET_USER_ID = 1540575139538796634
 TARGET_GUILD_ID = 1542941315933667348
 PORT = int(os.getenv("PORT", "8080"))
 BASE_DIR = Path(__file__).resolve().parent
 INDEX_HTML_PATH = BASE_DIR / "index.html"
+
+ELWEY_EFFECTS_URL = "https://elwey.fr/effects/"
+
+STAFF_ROLE_IDS = [
+    1568386943945801839,
+    1568387066709024788,
+    1568387138322694268,
+    1568387457752371270,
+]
+
+ROLE_ICONS = {
+    "founder": "https://cdn.discordapp.com/attachments/1400483862273851553/1573617003909087273/f0Y7LKdtE0xaAAAAAElFTkSuQmCC.png?ex=6b02a88a&is=6b01570a&hm=7a7ccb5f62c414545ce0af68ee27783bbfcfc313c4ea8f4dd84dd887d0253b7d",
+    "server_manager": "https://media.discordapp.net/attachments/1400483862273851553/1573617317273673860/344441-communitymanager.png?ex=6b02a8d4&is=6b015754&hm=b723bf6c131749a7051f2e32859d807ebfd1b7df87ac669e5e704067b579022b&format=webp&quality=lossless&width=320&height=320",
+    "senior_moderator": "https://media.discordapp.net/attachments/1400483862273851553/1573618296643649586/download.png?ex=6b02a9be&is=6b01583e&hm=c3a9a803edf2341f16a6d323bd239f347f47c77601c323526522b41a52910ecd&format=webp&quality=lossless&width=320&height=320",
+    "support_server": "https://media.discordapp.net/attachments/1400483862273851553/1573619256468180992/269160-support.gif?ex=6b02aaa3&is=6b015923&hm=aff56438c85d06c263383b6b2ce42f98cff8c68d50a0e87a98da6871d69b6c06",
+    "head_moderator": "https://media.discordapp.net/attachments/1400483862273851553/1573619265356169346/19683-senior-moderator-head-moderator.png?ex=6b02aaa5&is=6b015925&hm=62760f162af7acfe52a8a7d2a0f93d85e7448c6fdd1edc6faab43653b708dbfb&format=webp&quality=lossless&width=384&height=384",
+}
+
+ROLE_CATALOG_ITEMS = [
+    {"id": str(STAFF_ROLE_IDS[0]), "label": "Staff Role 1 (Founder Icon)", "icon_url": ROLE_ICONS["founder"]},
+    {"id": str(STAFF_ROLE_IDS[1]), "label": "Staff Role 2 (Server Manager Icon)", "icon_url": ROLE_ICONS["server_manager"]},
+    {"id": str(STAFF_ROLE_IDS[2]), "label": "Staff Role 3 (Senior Moderator Icon)", "icon_url": ROLE_ICONS["senior_moderator"]},
+    {"id": str(STAFF_ROLE_IDS[3]), "label": "Staff Role 4 (Head Moderator Icon)", "icon_url": ROLE_ICONS["head_moderator"]},
+    {"id": "support_server", "label": "Support Server Badge", "icon_url": ROLE_ICONS["support_server"]},
+]
 
 DEFAULT_AVATAR_DECORATION = (
     "https://cdn.discordapp.com/media/v1/collectibles-shop/1570925242799497256/static"
@@ -73,7 +99,8 @@ PROFILE_CONFIG = {
     "clan_badge_url": DEFAULT_CLAN_BADGE_URL,
     "clan_emoji": "🍃",
     "clan_tag": "VEM",
-    "role_badge_text": "VortexShop",
+    "role_badge_text": "Founder • VortexShop",
+    "role_badge_icon_url": ROLE_ICONS["founder"],
     "owner_line": "Owner of this server-",
     "invite_url": "https://discord.gg/3JPatMmyF",
     "full_bio": (
@@ -164,6 +191,11 @@ LATEST_DATA: dict = {
         "banner_url": PROFILE_CONFIG["custom_banner_url"],
         "banner_position": PROFILE_CONFIG["banner_position"],
         "avatar_decoration_url": DEFAULT_AVATAR_DECORATION,
+        "profile_effect": {
+            "name": "Shimmer Effect",
+            "asset_url": None,
+            "source": "elwey.fr/effects",
+        },
         "badges": USER_BADGES,
         "status": "online",
         "custom_status": {"emoji": None, "text": "Very nice day"},
@@ -171,6 +203,7 @@ LATEST_DATA: dict = {
         "clan_emoji": PROFILE_CONFIG["clan_emoji"],
         "clan_tag": PROFILE_CONFIG["clan_tag"],
         "role_badge_text": PROFILE_CONFIG["role_badge_text"],
+        "role_badge_icon_url": PROFILE_CONFIG["role_badge_icon_url"],
         "bio_link_text": PROFILE_CONFIG["bio_link_text"],
         "store_url": PROFILE_CONFIG["store_url"],
         "owner_line": PROFILE_CONFIG["owner_line"],
@@ -185,7 +218,79 @@ LATEST_DATA: dict = {
         "games": PROFILE_CONFIG["games"],
     },
     "server": dict(SERVER_DEFAULTS),
+    "role_catalog": ROLE_CATALOG_ITEMS,
+    "staff_members": [],
 }
+
+_ELWEY_CACHE: dict = {"fetched_at": 0.0, "entries": []}
+
+
+def _fetch_elwey_effects_sync() -> list[dict]:
+    now = datetime.now(timezone.utc).timestamp()
+    if _ELWEY_CACHE["entries"] and (now - _ELWEY_CACHE["fetched_at"]) < 900:
+        return _ELWEY_CACHE["entries"]
+
+    try:
+        req = urllib.request.Request(
+            ELWEY_EFFECTS_URL,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; VortexShowcaseBot/1.0)"},
+        )
+        with urllib.request.urlopen(req, timeout=8) as resp:
+            html = resp.read().decode("utf-8", errors="ignore")
+
+        img_matches = re.findall(r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>', html, flags=re.IGNORECASE)
+        entries = []
+        for raw_src in img_matches:
+            if raw_src.startswith("//"):
+                full_url = "https:" + raw_src
+            elif raw_src.startswith("/"):
+                full_url = "https://elwey.fr" + raw_src
+            elif raw_src.startswith("http"):
+                full_url = raw_src
+            else:
+                continue
+
+            slug = raw_src.split("/")[-1].split("?")[0]
+            clean_name = re.sub(r"[-_]+", " ", Path(slug).stem).strip().title()
+            if clean_name:
+                entries.append({"name": clean_name, "asset_url": full_url})
+
+        if entries:
+            _ELWEY_CACHE["fetched_at"] = now
+            _ELWEY_CACHE["entries"] = entries
+        return entries
+    except Exception:
+        return _ELWEY_CACHE["entries"]
+
+
+async def resolve_profile_effect(user: discord.User | None) -> dict:
+    effect_obj = getattr(user, "profile_effect", None) if user else None
+    effect_id = getattr(effect_obj, "id", None) if effect_obj else None
+    effect_name = getattr(effect_obj, "name", None) if effect_obj else None
+
+    entries = await asyncio.to_thread(_fetch_elwey_effects_sync)
+    matched_asset = None
+
+    if entries:
+        if effect_name:
+            target_key = effect_name.lower().strip()
+            for item in entries:
+                if target_key in item["name"].lower() or item["name"].lower() in target_key:
+                    matched_asset = item["asset_url"]
+                    break
+        if not matched_asset and effect_id:
+            id_str = str(effect_id)
+            for item in entries:
+                if id_str in item["asset_url"]:
+                    matched_asset = item["asset_url"]
+                    break
+
+    return {
+        "id": str(effect_id) if effect_id else None,
+        "name": effect_name or ("Profile Effect" if matched_asset else "Shimmer Effect"),
+        "asset_url": matched_asset,
+        "source": "elwey.fr/effects",
+    }
 
 
 def load_index_html() -> bytes:
@@ -209,6 +314,54 @@ def find_member(user_id: int) -> discord.Member | None:
         if m is not None:
             return m
     return None
+
+
+def resolve_role_icon(role: discord.Role) -> str | None:
+    lower = role.name.lower()
+    if "founder" in lower or "owner" in lower:
+        return ROLE_ICONS["founder"]
+    if "server manager" in lower or "community manager" in lower or "manager" in lower:
+        return ROLE_ICONS["server_manager"]
+    if "head moderator" in lower or "head mod" in lower:
+        return ROLE_ICONS["head_moderator"]
+    if "senior moderator" in lower or "senior mod" in lower or "mod" in lower:
+        return ROLE_ICONS["senior_moderator"]
+    if "support" in lower:
+        return ROLE_ICONS["support_server"]
+    if role.icon:
+        return role.icon.url
+    return None
+
+
+def collect_staff_members(guild: discord.Guild | None) -> list[dict]:
+    if not guild:
+        return []
+
+    tracked_set = set(STAFF_ROLE_IDS)
+    results = []
+
+    for member in guild.members:
+        matched_roles = [r for r in member.roles if r.id in tracked_set]
+        if not matched_roles:
+            continue
+
+        matched_roles.sort(key=lambda r: r.position, reverse=True)
+        results.append({
+            "id": str(member.id),
+            "username": member.name,
+            "display_name": member.display_name,
+            "avatar_url": member.display_avatar.url,
+            "roles": [
+                {
+                    "id": str(r.id),
+                    "name": r.name,
+                    "icon_url": resolve_role_icon(r),
+                }
+                for r in matched_roles
+            ],
+        })
+
+    return results
 
 
 async def resolve_guild_invite(guild: discord.Guild) -> str:
@@ -249,6 +402,8 @@ async def refresh_showcase_data(bot_status: str = "online"):
     live_deco = getattr(user, "avatar_decoration", None) if user else None
     deco_url = live_deco.url if live_deco else DEFAULT_AVATAR_DECORATION
 
+    profile_effect_payload = await resolve_profile_effect(user)
+
     primary_guild = getattr(user, "primary_guild", None) if user else None
     clan_tag = getattr(primary_guild, "tag", None) if primary_guild else PROFILE_CONFIG["clan_tag"]
 
@@ -266,6 +421,7 @@ async def refresh_showcase_data(bot_status: str = "online"):
         "banner_url": banner_url,
         "banner_position": PROFILE_CONFIG["banner_position"],
         "avatar_decoration_url": deco_url,
+        "profile_effect": profile_effect_payload,
         "badges": USER_BADGES,
         "status": status,
         "custom_status": custom_status,
@@ -273,6 +429,7 @@ async def refresh_showcase_data(bot_status: str = "online"):
         "clan_emoji": PROFILE_CONFIG["clan_emoji"],
         "clan_tag": clan_tag,
         "role_badge_text": PROFILE_CONFIG["role_badge_text"],
+        "role_badge_icon_url": PROFILE_CONFIG["role_badge_icon_url"],
         "bio_link_text": PROFILE_CONFIG["bio_link_text"],
         "store_url": PROFILE_CONFIG["store_url"],
         "owner_line": PROFILE_CONFIG["owner_line"],
@@ -318,14 +475,18 @@ async def refresh_showcase_data(bot_status: str = "online"):
             "boost_count": guild.premium_subscription_count or 0,
             "invite_url": invite_url,
         }
+        staff_list = collect_staff_members(guild)
     else:
         server_payload = dict(SERVER_DEFAULTS)
+        staff_list = []
 
     LATEST_DATA = {
         "last_synced": datetime.now(timezone.utc).strftime("%H:%M:%S UTC"),
         "bot_status": bot_status,
         "profile": profile_payload,
         "server": server_payload,
+        "role_catalog": ROLE_CATALOG_ITEMS,
+        "staff_members": staff_list,
     }
 
 
@@ -378,12 +539,18 @@ async def on_presence_update(before: discord.Member, after: discord.Member):
         await refresh_showcase_data(bot_status="online")
 
 
+@bot.event
+async def on_member_update(before: discord.Member, after: discord.Member):
+    if after.guild and after.guild.id == TARGET_GUILD_ID:
+        await refresh_showcase_data(bot_status="online")
+
+
 @bot.command(name="badgesync")
 async def sync_command(ctx: commands.Context):
     if ctx.author.id != TARGET_USER_ID:
         return
     await refresh_showcase_data(bot_status="online")
-    await ctx.send("Synced full showcase, profile badges, and server stats.")
+    await ctx.send("Synced showcase, staff roles, profile media, and server stats.")
 
 
 async def idle_forever():
@@ -392,12 +559,6 @@ async def idle_forever():
 
 
 async def run_bot_loop():
-    if DISABLE_DISCORD_BOT:
-        print("Discord bot login disabled via DISABLE_DISCORD_BOT=1. Showcase only.", flush=True)
-        LATEST_DATA["bot_status"] = "disabled"
-        await idle_forever()
-        return
-
     if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN":
         print("ERROR: DISCORD_BOT_TOKEN is missing or placeholder. Keeping web server alive.", flush=True)
         LATEST_DATA["bot_status"] = "missing_token"
