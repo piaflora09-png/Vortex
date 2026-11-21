@@ -11,6 +11,7 @@ import discord
 from discord.ext import commands, tasks
 
 BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
+DISABLE_DISCORD_BOT = os.getenv("DISABLE_DISCORD_BOT", "0").strip().lower() in ("1", "true", "yes")
 TARGET_USER_ID = 1540575139538796634
 TARGET_GUILD_ID = 1542941315933667348
 PORT = int(os.getenv("PORT", "8080"))
@@ -391,6 +392,12 @@ async def idle_forever():
 
 
 async def run_bot_loop():
+    if DISABLE_DISCORD_BOT:
+        print("Discord bot login disabled via DISABLE_DISCORD_BOT=1. Showcase only.", flush=True)
+        LATEST_DATA["bot_status"] = "disabled"
+        await idle_forever()
+        return
+
     if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN":
         print("ERROR: DISCORD_BOT_TOKEN is missing or placeholder. Keeping web server alive.", flush=True)
         LATEST_DATA["bot_status"] = "missing_token"
