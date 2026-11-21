@@ -22,7 +22,13 @@
       --status-ring: #23a55a;
       --server-border: rgba(245, 158, 11, 0.62);
       --bg-grid-stroke: rgba(192, 132, 252, 0.06);
-      --bg-ring-stroke: rgba(245, 158, 11, 0.11);
+      --bg-ring-stroke: rgba(245, 158, 11, 0.12);
+      --vortex-core-a: #a855f7;
+      --vortex-core-b: #f59e0b;
+      --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.14);
+      --card-shadow-x: 0px;
+      --card-shadow-y: 26px;
+      --card-shadow-blur: 70px;
     }
 
     body.theme-crimson {
@@ -33,7 +39,22 @@
       --accent-pink: #fb7185;
       --server-border: rgba(251, 113, 133, 0.65);
       --bg-grid-stroke: rgba(251, 113, 133, 0.065);
-      --bg-ring-stroke: rgba(245, 158, 11, 0.12);
+      --bg-ring-stroke: rgba(251, 113, 133, 0.16);
+      --vortex-core-a: #e11d48;
+      --vortex-core-b: #f59e0b;
+    }
+
+    body.theme-gold {
+      --purple-glow: rgba(245, 158, 11, 0.26);
+      --gold-glow: rgba(251, 191, 36, 0.22);
+      --rose-glow: rgba(217, 119, 6, 0.16);
+      --accent-primary: #d97706;
+      --accent-pink: #fbbf24;
+      --server-border: rgba(251, 191, 36, 0.72);
+      --bg-grid-stroke: rgba(251, 191, 36, 0.065);
+      --bg-ring-stroke: rgba(251, 191, 36, 0.17);
+      --vortex-core-a: #f59e0b;
+      --vortex-core-b: #fde68a;
     }
 
     @property --rim-angle {
@@ -76,12 +97,42 @@
 
     .site-bg-art {
       position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+      inset: -12%;
+      width: 124%;
+      height: 124%;
       pointer-events: none;
       z-index: 0;
       opacity: 0.9;
+    }
+
+    .vortex-ring-outer {
+      transform-origin: 720px 450px;
+      animation: vortexSpinSlow 95s linear infinite;
+    }
+
+    .vortex-ring-inner {
+      transform-origin: 720px 450px;
+      animation: vortexSpinReverse 68s linear infinite;
+    }
+
+    .vortex-core-pulse {
+      transform-origin: 720px 450px;
+      animation: vortexPulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes vortexSpinSlow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes vortexSpinReverse {
+      from { transform: rotate(360deg); }
+      to { transform: rotate(0deg); }
+    }
+
+    @keyframes vortexPulse {
+      0% { opacity: 0.85; transform: scale(0.98); }
+      100% { opacity: 1; transform: scale(1.03); }
     }
 
     #sparkle-canvas {
@@ -145,6 +196,11 @@
       100% { transform: scale(1); }
     }
 
+    @keyframes holoSweep {
+      0% { background-position: -150% 0; }
+      100% { background-position: 250% 0; }
+    }
+
     .copied-pulse {
       animation: copyBounce 0.32s cubic-bezier(0.22, 1, 0.36, 1);
       background: rgba(34, 197, 94, 0.24) !important;
@@ -163,6 +219,9 @@
       --par-bg-y: 0px;
       --par-fg-x: 0px;
       --par-fg-y: 0px;
+      --card-shadow-x: 0px;
+      --card-shadow-y: 18px;
+      --card-shadow-blur: 40px;
       transition: transform 0.14s ease-out, box-shadow 0.22s ease, border-color 0.2s ease;
     }
     .tilt-3d.resetting {
@@ -212,7 +271,7 @@
       border-radius: 18px;
       background: rgba(20, 12, 34, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.11);
-      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
+      box-shadow: var(--glass-edge), 0 14px 36px rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(14px);
       overflow: hidden;
       animation: settleIn 0.35s ease;
@@ -392,15 +451,17 @@
         conic-gradient(from var(--rim-angle), rgba(245, 158, 11, 0.75), rgba(232, 121, 249, 0.8), rgba(139, 92, 246, 0.75), rgba(245, 158, 11, 0.75)) border-box;
       border: 2px solid transparent;
       box-shadow:
+        var(--glass-edge),
         0 0 0 1px rgba(216, 180, 254, 0.22),
-        0 26px 70px rgba(0, 0, 0, 0.88);
+        var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.88);
       animation: spinRim 9s linear infinite;
     }
 
     .frame-shell:hover {
       box-shadow:
+        var(--glass-edge),
         0 0 32px rgba(168, 85, 247, 0.45),
-        0 32px 76px rgba(0, 0, 0, 0.92);
+        var(--card-shadow-x) calc(var(--card-shadow-y) + 4px) calc(var(--card-shadow-blur) + 8px) rgba(0, 0, 0, 0.92);
     }
 
     .card {
@@ -410,6 +471,7 @@
       overflow: hidden;
       z-index: 2;
       transform-style: preserve-3d;
+      box-shadow: var(--glass-edge);
     }
 
     .profile-effect-layer {
@@ -597,7 +659,7 @@
       padding: 9px 14px;
       font-size: 0.92rem;
       font-weight: 500;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+      box-shadow: var(--glass-edge), 0 8px 20px rgba(0, 0, 0, 0.45);
     }
 
     .display-name-line {
@@ -679,12 +741,13 @@
       font-weight: 700;
       color: #f5f3ff;
       min-height: 28px;
+      box-shadow: var(--glass-edge);
       transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
     }
     .clan-chip:hover {
       transform: translateZ(16px) translateY(-2px);
       border-color: rgba(245, 158, 11, 0.55);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.25);
+      box-shadow: var(--glass-edge), 0 8px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.25);
     }
 
     .clan-chip img {
@@ -703,6 +766,7 @@
       border-radius: 8px;
       padding: 4px 9px;
       min-height: 28px;
+      box-shadow: var(--glass-edge);
       transform-style: preserve-3d;
     }
 
@@ -713,13 +777,30 @@
       justify-content: center;
       width: 20px;
       height: 20px;
+      border-radius: 5px;
       font-size: 0.92rem;
       cursor: pointer;
-      transition: transform 0.16s ease, filter 0.16s ease;
+      overflow: hidden;
+      transition: transform 0.16s ease, filter 0.16s ease, box-shadow 0.16s ease;
+    }
+    .badge-icon-item::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(125deg, transparent 25%, rgba(255, 255, 255, 0.42) 48%, rgba(245, 158, 11, 0.35) 56%, transparent 78%);
+      background-size: 220% 100%;
+      background-position: -150% 0;
+      opacity: 0;
+      pointer-events: none;
     }
     .badge-icon-item:hover {
       transform: translateZ(20px) translateY(-3px) scale(1.16);
       filter: drop-shadow(0 6px 12px rgba(232, 121, 249, 0.55));
+      box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
+    }
+    .badge-icon-item:hover::after {
+      opacity: 1;
+      animation: holoSweep 1.25s ease forwards;
     }
 
     .badge-icon-item img {
@@ -728,12 +809,10 @@
       object-fit: contain;
     }
 
-    .badge-icon-item:hover::after {
+    .badge-icon-item[data-tooltip]:hover::before {
       content: attr(data-tooltip);
-      position: absolute;
-      bottom: 135%;
-      left: 50%;
-      transform: translateX(-50%);
+      position: fixed;
+      transform: translate(-50%, -130%);
       background: #090512;
       color: #fff;
       font-size: 0.7rem;
@@ -742,7 +821,8 @@
       border-radius: 6px;
       white-space: nowrap;
       border: 1px solid rgba(255, 255, 255, 0.16);
-      z-index: 30;
+      z-index: 40;
+      pointer-events: none;
     }
 
     .mutual-row {
@@ -777,6 +857,7 @@
     .mini-stack span:nth-child(3) { background: #4c1d95; color: #f5d0fe; }
 
     .role-pill {
+      position: relative;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -788,12 +869,28 @@
       padding: 4px 10px;
       border-radius: 8px;
       margin-bottom: 10px;
+      box-shadow: var(--glass-edge);
+      overflow: hidden;
       transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+    .role-pill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, 0.25) 50%, transparent 80%);
+      background-size: 220% 100%;
+      background-position: -150% 0;
+      opacity: 0;
+      pointer-events: none;
     }
     .role-pill:hover {
       transform: translateZ(16px) translateY(-2px);
       border-color: rgba(245, 158, 11, 0.65);
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.5), 0 0 14px rgba(96, 165, 250, 0.35);
+      box-shadow: var(--glass-edge), 0 8px 18px rgba(0, 0, 0, 0.5), 0 0 14px rgba(96, 165, 250, 0.35);
+    }
+    .role-pill:hover::after {
+      opacity: 1;
+      animation: holoSweep 1.1s ease forwards;
     }
 
     .owner-text {
@@ -836,6 +933,7 @@
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--glass-edge);
       font-size: 0.82rem;
       color: #e2e8f0;
       line-height: 1.45;
@@ -862,6 +960,7 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 9px 12px;
+      box-shadow: var(--glass-edge);
       cursor: pointer;
       transition: border-color 0.15s ease, transform 0.15s ease;
     }
@@ -912,8 +1011,9 @@
       padding: 0 26px 22px;
       border: 1.5px solid transparent;
       box-shadow:
+        var(--glass-edge),
         0 0 34px rgba(245, 158, 11, 0.16),
-        0 26px 70px rgba(0, 0, 0, 0.88);
+        var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.88);
       overflow: hidden;
       transform-style: preserve-3d;
       animation: spinRim 11s linear infinite;
@@ -921,8 +1021,9 @@
 
     .server-card:hover {
       box-shadow:
+        var(--glass-edge),
         0 0 42px rgba(245, 158, 11, 0.26),
-        0 32px 76px rgba(0, 0, 0, 0.92);
+        var(--card-shadow-x) calc(var(--card-shadow-y) + 4px) calc(var(--card-shadow-blur) + 8px) rgba(0, 0, 0, 0.92);
     }
 
     .server-banner-strip {
@@ -967,7 +1068,7 @@
       justify-content: center;
       gap: 4px;
       padding: 6px;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      box-shadow: var(--glass-edge), 0 8px 18px rgba(0, 0, 0, 0.45);
       transform: translateZ(14px);
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
@@ -975,7 +1076,7 @@
     .server-banner-strip:hover .banner-3d-slot {
       transform: translateZ(26px) translateY(-2px);
       border-color: rgba(245, 158, 11, 0.45);
-      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.65), 0 0 14px rgba(168, 85, 247, 0.25);
+      box-shadow: var(--glass-edge), 0 14px 26px rgba(0, 0, 0, 0.65), 0 0 14px rgba(168, 85, 247, 0.25);
     }
 
     .banner-3d-tag {
@@ -1114,6 +1215,7 @@
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--glass-edge);
     }
 
     .stat-inline strong {
@@ -1184,7 +1286,7 @@
       align-items: center;
       justify-content: center;
       gap: 9px;
-      box-shadow: 0 10px 26px rgba(245, 158, 11, 0.3);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 26px rgba(245, 158, 11, 0.3);
       transition: transform 0.12s ease, filter 0.12s ease;
     }
     .btn-copy-invite:hover { filter: brightness(1.07); transform: translateY(-1px); }
@@ -1202,7 +1304,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
+      box-shadow: var(--glass-edge), 0 8px 20px rgba(0, 0, 0, 0.45);
       transition: background 0.12s ease, transform 0.12s ease;
     }
     .btn-copy-id:hover { background: rgba(42, 31, 62, 0.95); transform: translateY(-1px); }
@@ -1222,7 +1324,7 @@
       border: 1px solid rgba(168, 85, 247, 0.34);
       border-radius: 20px;
       padding: 20px;
-      box-shadow: 0 20px 46px rgba(0, 0, 0, 0.72);
+      box-shadow: var(--glass-edge), 0 20px 46px rgba(0, 0, 0, 0.72);
     }
     .sub-panel.active { display: block; animation: settleIn 0.26s ease; }
 
@@ -1243,6 +1345,7 @@
       border-radius: 12px;
       background: rgba(139, 92, 246, 0.12);
       border: 1px solid rgba(192, 132, 252, 0.32);
+      box-shadow: var(--glass-edge);
       color: #f3e8ff;
       font-size: 0.84rem;
       line-height: 1.45;
@@ -1288,6 +1391,7 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--glass-edge);
       color: #e2e8f0;
       font-size: 0.75rem;
       font-weight: 700;
@@ -1326,7 +1430,7 @@
       overflow: hidden;
       background: linear-gradient(180deg, rgba(35, 14, 62, 0.96), rgba(16, 8, 29, 0.98));
       border: 1px solid rgba(232, 121, 249, 0.28);
-      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.7);
+      box-shadow: var(--glass-edge), var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.72);
       cursor: pointer;
       transform-style: preserve-3d;
       animation: settleIn 0.24s ease;
@@ -1334,7 +1438,7 @@
 
     .member-showcase-card:hover {
       border-color: rgba(245, 158, 11, 0.58);
-      box-shadow: 0 22px 44px rgba(0, 0, 0, 0.82), 0 0 24px rgba(168, 85, 247, 0.24);
+      box-shadow: var(--glass-edge), var(--card-shadow-x) calc(var(--card-shadow-y) + 4px) calc(var(--card-shadow-blur) + 8px) rgba(0, 0, 0, 0.84), 0 0 24px rgba(168, 85, 247, 0.24);
     }
 
     .member-card-effect {
@@ -1510,6 +1614,7 @@
     }
 
     .staff-role-pill {
+      position: relative;
       display: inline-flex;
       align-items: center;
       gap: 5px;
@@ -1517,15 +1622,31 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(245, 158, 11, 0.34);
+      box-shadow: var(--glass-edge);
       font-size: 0.74rem;
       font-weight: 700;
       color: #fef3c7;
+      overflow: hidden;
       transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+    }
+    .staff-role-pill::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, 0.28) 50%, transparent 80%);
+      background-size: 220% 100%;
+      background-position: -150% 0;
+      opacity: 0;
+      pointer-events: none;
     }
     .staff-role-pill:hover {
       transform: translateZ(18px) translateY(-2px);
       border-color: rgba(232, 121, 249, 0.65);
-      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.55), 0 0 12px rgba(245, 158, 11, 0.3);
+      box-shadow: var(--glass-edge), 0 8px 16px rgba(0, 0, 0, 0.55), 0 0 12px rgba(245, 158, 11, 0.3);
+    }
+    .staff-role-pill:hover::after {
+      opacity: 1;
+      animation: holoSweep 1.15s ease forwards;
     }
 
     .staff-role-pill img {
@@ -1540,14 +1661,49 @@
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: var(--glass-edge), var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.45);
       margin-bottom: 10px;
     }
     .game-card-item:hover {
       border-color: rgba(245, 158, 11, 0.42);
-      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55), 0 0 16px rgba(168, 85, 247, 0.18);
+      box-shadow: var(--glass-edge), var(--card-shadow-x) calc(var(--card-shadow-y) + 3px) calc(var(--card-shadow-blur) + 6px) rgba(0, 0, 0, 0.65), 0 0 16px rgba(168, 85, 247, 0.18);
     }
-    .game-card-item strong { color: #fbbf24; display: block; margin-bottom: 4px; font-size: 0.95rem; }
-    .game-card-item span { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
+    .game-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    .game-card-item strong { color: #fbbf24; font-size: 0.95rem; }
+    .game-tier-badge {
+      font-size: 0.68rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(168, 85, 247, 0.18);
+      border: 1px solid rgba(232, 121, 249, 0.36);
+      color: #f5d0fe;
+    }
+    .game-card-item span.game-desc { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
+
+    .vouch-summary-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      box-shadow: var(--glass-edge);
+      margin-bottom: 10px;
+      font-size: 0.8rem;
+      color: #e2e8f0;
+      font-variant-numeric: tabular-nums;
+    }
 
     .vouch-filter-row {
       display: flex;
@@ -1561,12 +1717,13 @@
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.09);
+      box-shadow: var(--glass-edge), var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.42);
       margin-bottom: 10px;
       animation: settleIn 0.22s ease;
     }
     .vouch-card:hover {
       border-color: rgba(245, 158, 11, 0.42);
-      box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55), 0 0 16px rgba(245, 158, 11, 0.16);
+      box-shadow: var(--glass-edge), var(--card-shadow-x) calc(var(--card-shadow-y) + 3px) calc(var(--card-shadow-blur) + 6px) rgba(0, 0, 0, 0.62), 0 0 16px rgba(245, 158, 11, 0.16);
     }
 
     .vouch-top {
@@ -1624,15 +1781,43 @@
       line-height: 1.42;
     }
 
+    .scam-alert-banner {
+      padding: 10px 13px;
+      border-radius: 12px;
+      background: rgba(225, 29, 72, 0.14);
+      border: 1px solid rgba(251, 113, 133, 0.45);
+      box-shadow: var(--glass-edge);
+      color: #fecdd3;
+      font-size: 0.82rem;
+      line-height: 1.45;
+      margin-bottom: 12px;
+    }
+
     .safety-callout {
       padding: 10px 12px;
       border-radius: 10px;
       background: rgba(245, 158, 11, 0.1);
       border: 1px solid rgba(245, 158, 11, 0.35);
+      box-shadow: var(--glass-edge);
       color: #fde68a;
       font-size: 0.82rem;
       line-height: 1.45;
       margin-bottom: 12px;
+    }
+
+    .mm-quick-ref {
+      padding: 11px 13px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: var(--glass-edge);
+      margin-bottom: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.8rem;
     }
 
     .checklist-box {
@@ -1640,14 +1825,39 @@
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(168, 85, 247, 0.28);
+      box-shadow: var(--glass-edge);
       margin-top: 12px;
+    }
+
+    .checklist-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin-bottom: 8px;
     }
 
     .checklist-title {
       font-size: 0.85rem;
       font-weight: 800;
       color: #fbbf24;
-      margin-bottom: 8px;
+    }
+
+    .checklist-progress-pill {
+      font-size: 0.73rem;
+      font-weight: 800;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      color: #e2e8f0;
+      font-variant-numeric: tabular-nums;
+      transition: all 0.2s ease;
+    }
+    .checklist-progress-pill.complete {
+      background: rgba(34, 197, 94, 0.2);
+      border-color: rgba(74, 222, 128, 0.55);
+      color: #86efac;
     }
 
     .checklist-item {
@@ -1681,6 +1891,7 @@
       font-size: 0.85rem;
       font-weight: 700;
       text-decoration: none;
+      box-shadow: var(--glass-edge);
     }
 
     .modal-backdrop {
@@ -1693,7 +1904,7 @@
       place-items: center;
       padding: 16px;
     }
-    .modal-backdrop.open { display: grid; }
+    .modal-backdrop.open { display: grid; animation: settleIn 0.18s ease; }
     #lightbox-modal { z-index: 65; }
 
     .modal-box {
@@ -1703,7 +1914,7 @@
       border: 1px solid rgba(245, 158, 11, 0.45);
       border-radius: 18px;
       padding: 20px 22px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
+      box-shadow: var(--glass-edge), 0 24px 60px rgba(0, 0, 0, 0.85);
       animation: settleIn 0.2s ease;
     }
     .modal-header {
@@ -1776,7 +1987,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .ambient-orb, .profile-effect-sweep, #sparkle-canvas, .frame-shell, .server-card, .nav-tab.active, .filter-chip.active {
+      .ambient-orb, .profile-effect-sweep, #sparkle-canvas, .frame-shell, .server-card, .nav-tab.active, .filter-chip.active, .vortex-ring-outer, .vortex-ring-inner, .vortex-core-pulse {
         animation: none !important;
       }
       .tilt-3d, .parallax-bg, .parallax-fg {
@@ -1793,17 +2004,23 @@
         <path d="M 72 0 L 0 0 0 72" fill="none" stroke="var(--bg-grid-stroke)" stroke-width="1" />
       </pattern>
       <radialGradient id="vortex-core" cx="50%" cy="45%" r="55%">
-        <stop offset="0%" stop-color="#a855f7" stop-opacity="0.16" />
-        <stop offset="60%" stop-color="#f59e0b" stop-opacity="0.06" />
+        <stop offset="0%" stop-color="var(--vortex-core-a)" stop-opacity="0.18" />
+        <stop offset="60%" stop-color="var(--vortex-core-b)" stop-opacity="0.07" />
         <stop offset="100%" stop-color="#07050c" stop-opacity="0" />
       </radialGradient>
     </defs>
     <rect width="1440" height="900" fill="url(#vortex-grid)" />
-    <rect width="1440" height="900" fill="url(#vortex-core)" />
-    <circle cx="720" cy="450" r="210" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" stroke-dasharray="6 8" />
-    <circle cx="720" cy="450" r="340" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1" />
-    <path d="M 0 740 Q 360 660 720 740 T 1440 720" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.5" />
-    <path d="M 0 170 Q 420 250 860 150 T 1440 190" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" />
+    <g class="vortex-core-pulse">
+      <rect width="1440" height="900" fill="url(#vortex-core)" />
+    </g>
+    <g class="vortex-ring-outer">
+      <circle cx="720" cy="450" r="340" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" stroke-dasharray="10 12" />
+      <path d="M 0 170 Q 420 250 860 150 T 1440 190" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" />
+    </g>
+    <g class="vortex-ring-inner">
+      <circle cx="720" cy="450" r="210" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" stroke-dasharray="6 8" />
+      <path d="M 0 740 Q 360 660 720 740 T 1440 720" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.5" />
+    </g>
   </svg>
 
   <canvas id="sparkle-canvas" aria-hidden="true"></canvas>
@@ -1839,7 +2056,7 @@
       <span id="last-synced-text">Synced just now</span>
       <span id="sync-countdown-label">Next sync in 12s</span>
       <button type="button" class="mini-action-btn" id="btn-refresh-now" onclick="refreshShowcase(true)">Refresh Now</button>
-      <button type="button" class="mini-action-btn" id="btn-theme-toggle" onclick="toggleTheme()">Theme: Violet</button>
+      <button type="button" class="mini-action-btn" id="btn-theme-toggle" onclick="cycleTheme()">Aura: Violet</button>
       <button type="button" class="mini-action-btn" id="btn-share-page" onclick="sharePageLink()">Share Page</button>
     </div>
 
@@ -1971,7 +2188,7 @@
       </div>
     </section>
 
-    <section class="server-column" aria-label="Target Discord Server">
+    <section class="server-column" id="server-column" aria-label="Target Discord Server">
       <div class="server-card tilt-3d" id="server-card" data-tilt-max="6">
         <div class="server-banner-strip parallax-bg" id="server-banner-strip">
           <div class="banner-3d-items" aria-hidden="true">
@@ -2062,7 +2279,7 @@
             type="search"
             id="staff-search-input"
             class="search-input"
-            placeholder="Search by name, @username, or ID..."
+            placeholder="Search by name, @username, or ID... (press /)"
             oninput="renderStaffSection()"
           />
           <button
@@ -2083,9 +2300,23 @@
       <div id="panel-games" class="sub-panel">
         <h3>Roblox Crosstrading (Any Game) &amp; Shop</h3>
         <div class="custom-note-box" id="custom-trade-note-box"></div>
+
+        <div class="filter-chips-row" id="game-filter-chips">
+          <button type="button" class="filter-chip active" data-game="ALL" onclick="setGameFilter('ALL')">All Games</button>
+          <button type="button" class="filter-chip" data-game="MM2" onclick="setGameFilter('MM2')">MM2</button>
+          <button type="button" class="filter-chip" data-game="Grow a Garden 2" onclick="setGameFilter('Grow a Garden 2')">Grow a Garden 2</button>
+          <button type="button" class="filter-chip" data-game="Adopt Me!" onclick="setGameFilter('Adopt Me!')">Adopt Me!</button>
+          <button type="button" class="filter-chip" data-game="PS99" onclick="setGameFilter('PS99')">PS99</button>
+          <button type="button" class="filter-chip" data-game="Any Game" onclick="setGameFilter('Any Game')">Any Game</button>
+        </div>
+
         <div id="games-list-container"></div>
 
         <h4>Member Vouches</h4>
+        <div class="vouch-summary-bar" id="vouch-summary-bar">
+          <span id="vouch-summary-stats">0 vouches • ★ 5.0 avg</span>
+          <span id="vouch-summary-breakdown">5★: 0 • 4★: 0</span>
+        </div>
         <div class="vouch-filter-row" id="vouch-filter-row">
           <button type="button" class="filter-chip active" data-stars="ALL" onclick="setVouchFilter('ALL')">All Vouches</button>
           <button type="button" class="filter-chip" data-stars="5" onclick="setVouchFilter('5')">5★ Only</button>
@@ -2100,23 +2331,33 @@
 
       <div id="panel-rules" class="sub-panel">
         <h3>Middleman &amp; Safety Rules</h3>
+        <div class="scam-alert-banner">
+          Scam Alert: Never trade directly in-game with unverified users or trust lookalike profiles claiming to be staff. Always verify the Middleman's Discord ID inside an official server ticket.
+        </div>
         <div class="safety-callout">
-          Anti-Scam Reminder: Always open an official server ticket and verify the Middleman's Discord ID before trading. Avoid unverified direct in-game trade windows or off-server impersonators.
+          Anti-Scam Reminder: Always open an official server ticket and verify the Middleman's Discord ID before trading.
+        </div>
+        <div class="mm-quick-ref">
+          <span><strong>Server ID:</strong> <code id="rules-server-id">1542941315933667348</code></span>
+          <button type="button" class="mini-action-btn" onclick="copyInviteLink(this)">Copy Official Invite</button>
         </div>
         <ol class="rules-list" id="rules-list-container"></ol>
 
         <div class="checklist-box">
-          <div class="checklist-title">✓ Verify Ticket Checklist</div>
+          <div class="checklist-header">
+            <span class="checklist-title">✓ Verify Ticket Checklist</span>
+            <span class="checklist-progress-pill" id="checklist-progress-pill">0 / 3 checks complete</span>
+          </div>
           <label class="checklist-item">
-            <input type="checkbox" />
+            <input type="checkbox" class="mm-check-input" onchange="updateChecklistProgress()" />
             <span>Opened an official ticket inside Vortex Exchange &amp; MM</span>
           </label>
           <label class="checklist-item">
-            <input type="checkbox" />
+            <input type="checkbox" class="mm-check-input" onchange="updateChecklistProgress()" />
             <span>Confirmed the Middleman's Discord ID &amp; role in the ticket</span>
           </label>
           <label class="checklist-item">
-            <input type="checkbox" />
+            <input type="checkbox" class="mm-check-input" onchange="updateChecklistProgress()" />
             <span>Double-checked both sides' items and trade terms</span>
           </label>
         </div>
@@ -2179,12 +2420,19 @@
     let currentUserId = "1540575139538796634";
     let currentHandle = "mvn412.";
     let allGames = [];
+    let selectedGameFilter = "ALL";
     let allVouches = [];
     let selectedVouchStars = "ALL";
     let roleCatalog = [];
     let staffMembers = [];
     let selectedRoleFilter = "ALL";
     let onlineOnlyFilter = false;
+    let themeIndex = 0;
+    const THEME_MODES = [
+      { cls: "", label: "Aura: Violet", c1: "%23a855f7", c2: "%23ec4899", c3: "%23f59e0b" },
+      { cls: "theme-crimson", label: "Aura: Crimson", c1: "%23e11d48", c2: "%23fb7185", c3: "%23f59e0b" },
+      { cls: "theme-gold", label: "Aura: Amber Gold", c1: "%23f59e0b", c2: "%23fbbf24", c3: "%23fef08a" },
+    ];
 
     const displayedCounts = {
       members: 0,
@@ -2194,6 +2442,22 @@
     };
 
     const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    function updateFaviconForTheme(mode) {
+      const link = document.getElementById("dynamic-favicon");
+      if (!link) return;
+      const svg = `%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='${mode.c1}'/%3E%3Cstop offset='55%25' stop-color='${mode.c2}'/%3E%3Cstop offset='100%25' stop-color='${mode.c3}'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%23120824'/%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Cpath d='M16 18L32 48L48 18' fill='none' stroke='url(%23g)' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='22' r='4' fill='%23fde68a'/%3E%3C/svg%3E`;
+      link.setAttribute("href", `data:image/svg+xml,${svg}`);
+    }
+
+    function cycleTheme() {
+      themeIndex = (themeIndex + 1) % THEME_MODES.length;
+      const mode = THEME_MODES[themeIndex];
+      document.body.classList.remove("theme-crimson", "theme-gold");
+      if (mode.cls) document.body.classList.add(mode.cls);
+      document.getElementById("btn-theme-toggle").textContent = mode.label;
+      updateFaviconForTheme(mode);
+    }
 
     function animateCounter(elId, key, targetVal) {
       const el = document.getElementById(elId);
@@ -2244,6 +2508,9 @@
         const bgY = (-py * 10).toFixed(1);
         const fgX = (px * 8).toFixed(1);
         const fgY = (py * 6).toFixed(1);
+        const shadowX = (-px * 18).toFixed(1);
+        const shadowY = (20 - py * 12).toFixed(1);
+        const shadowBlur = (56 + Math.abs(px) * 14).toFixed(0);
 
         el.classList.remove("resetting");
         el.style.setProperty("--spot-x", `${x.toFixed(1)}px`);
@@ -2253,6 +2520,9 @@
         el.style.setProperty("--par-bg-y", `${bgY}px`);
         el.style.setProperty("--par-fg-x", `${fgX}px`);
         el.style.setProperty("--par-fg-y", `${fgY}px`);
+        el.style.setProperty("--card-shadow-x", `${shadowX}px`);
+        el.style.setProperty("--card-shadow-y", `${shadowY}px`);
+        el.style.setProperty("--card-shadow-blur", `${shadowBlur}px`);
         el.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.012, 1.012, 1.012)`;
       });
 
@@ -2263,6 +2533,9 @@
         el.style.setProperty("--par-bg-y", "0px");
         el.style.setProperty("--par-fg-x", "0px");
         el.style.setProperty("--par-fg-y", "0px");
+        el.style.setProperty("--card-shadow-x", "0px");
+        el.style.setProperty("--card-shadow-y", "18px");
+        el.style.setProperty("--card-shadow-blur", "40px");
         el.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
       });
     }
@@ -2301,6 +2574,7 @@
       function draw() {
         ctx.clearRect(0, 0, width, height);
         const isCrimson = document.body.classList.contains("theme-crimson");
+        const isGold = document.body.classList.contains("theme-gold");
         for (const s of stars) {
           s.y -= s.vy;
           if (s.y < -10) {
@@ -2311,9 +2585,11 @@
           const drawY = (s.y + pointerOffsetY * (s.r * 0.6) + height) % height;
           ctx.beginPath();
           ctx.arc(drawX, drawY, s.r, 0, Math.PI * 2);
-          ctx.fillStyle = isCrimson
-            ? `rgba(253, 164, 175, ${s.alpha})`
-            : `rgba(216, 180, 254, ${s.alpha})`;
+          ctx.fillStyle = isGold
+            ? `rgba(253, 224, 71, ${s.alpha})`
+            : isCrimson
+              ? `rgba(253, 164, 175, ${s.alpha})`
+              : `rgba(216, 180, 254, ${s.alpha})`;
           ctx.fill();
         }
         requestAnimationFrame(draw);
@@ -2399,11 +2675,6 @@
       }, btnEl);
     }
 
-    function toggleTheme() {
-      const isCrimson = document.body.classList.toggle("theme-crimson");
-      document.getElementById("btn-theme-toggle").textContent = isCrimson ? "Theme: Crimson" : "Theme: Violet";
-    }
-
     function toggleFullBio() {
       const panel = document.getElementById("full-bio-panel");
       panel.style.display = panel.style.display === "block" ? "none" : "block";
@@ -2415,6 +2686,43 @@
       btn.textContent = onlineOnlyFilter ? "Online Only: On" : "Online Only: Off";
       btn.classList.toggle("toggled", onlineOnlyFilter);
       renderStaffSection();
+    }
+
+    function resetAllFilters() {
+      selectedRoleFilter = "ALL";
+      onlineOnlyFilter = false;
+      const searchEl = document.getElementById("staff-search-input");
+      if (searchEl) searchEl.value = "";
+      const onlineBtn = document.getElementById("btn-online-only");
+      if (onlineBtn) {
+        onlineBtn.textContent = "Online Only: Off";
+        onlineBtn.classList.remove("toggled");
+      }
+      renderFilterChips();
+      renderStaffSection();
+    }
+
+    function resetCrosstradeFilters() {
+      selectedGameFilter = "ALL";
+      selectedVouchStars = "ALL";
+      document.querySelectorAll("#game-filter-chips .filter-chip").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-game") === "ALL");
+      });
+      document.querySelectorAll("#vouch-filter-row .filter-chip").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-stars") === "ALL");
+      });
+      renderGames();
+      renderVouches();
+    }
+
+    function updateChecklistProgress() {
+      const inputs = Array.from(document.querySelectorAll(".mm-check-input"));
+      const checkedCount = inputs.filter((i) => i.checked).length;
+      const total = inputs.length;
+      const pill = document.getElementById("checklist-progress-pill");
+      if (!pill) return;
+      pill.textContent = `${checkedCount} / ${total} checks complete`;
+      pill.classList.toggle("complete", total > 0 && checkedCount === total);
     }
 
     function openModal() {
@@ -2504,6 +2812,20 @@
         closeLightbox();
         closeInspectorModal();
         closeModal();
+        return;
+      }
+      const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
+      if (activeTag === "input" || activeTag === "textarea") return;
+
+      if (e.key === "1") switchTab("overview");
+      else if (e.key === "2") switchTab("staff");
+      else if (e.key === "3") switchTab("games");
+      else if (e.key === "4") switchTab("rules");
+      else if (e.key === "/") {
+        e.preventDefault();
+        switchTab("staff");
+        const inp = document.getElementById("staff-search-input");
+        if (inp) inp.focus();
       }
     });
 
@@ -2514,6 +2836,11 @@
       document.getElementById("panel-staff").classList.toggle("active", tabName === "staff");
       document.getElementById("panel-games").classList.toggle("active", tabName === "games");
       document.getElementById("panel-rules").classList.toggle("active", tabName === "rules");
+
+      if (window.innerWidth <= 900 && tabName !== "overview") {
+        const col = document.getElementById("server-column");
+        if (col) col.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
+      }
     }
 
     function getInitials(name) {
@@ -2593,7 +2920,12 @@
       countEl.textContent = String(filtered.length);
 
       if (!filtered.length) {
-        membersEl.innerHTML = `<div class="vouch-card"><p class="vouch-note">No matching members found for the current filter.</p></div>`;
+        membersEl.innerHTML = `
+          <div class="vouch-card">
+            <p class="vouch-note" style="margin-bottom:8px;">No matching members found for the current filter.</p>
+            <button type="button" class="mini-action-btn" onclick="resetAllFilters()">Reset Filters</button>
+          </div>
+        `;
         return;
       }
 
@@ -2718,17 +3050,83 @@
       });
     }
 
+    function setGameFilter(gameVal) {
+      selectedGameFilter = gameVal;
+      document.querySelectorAll("#game-filter-chips .filter-chip").forEach((btn) => {
+        btn.classList.toggle("active", btn.getAttribute("data-game") === gameVal);
+      });
+      renderGames();
+    }
+
+    function inferTierBadge(gameObj) {
+      if (gameObj.tier) return gameObj.tier;
+      const text = `${gameObj.title || ""} ${gameObj.note || ""}`.toLowerCase();
+      if (text.includes("pet") || text.includes("seed") || text.includes("garden")) return "Pets & Seeds";
+      if (text.includes("mm2") || text.includes("knife") || text.includes("gun") || text.includes("set")) return "Weapons & Sets";
+      if (text.includes("high") || text.includes("adopt") || text.includes("ps99")) return "High-Tier";
+      return "Any Game";
+    }
+
     function renderGames() {
       const container = document.getElementById("games-list-container");
       container.innerHTML = "";
-      allGames.forEach((g) => {
+
+      const list = selectedGameFilter === "ALL"
+        ? allGames
+        : allGames.filter((g) => {
+            const hay = `${g.title || ""} ${g.note || ""} ${g.tag || ""}`.toLowerCase();
+            if (selectedGameFilter === "Any Game") {
+              return hay.includes("any") || hay.includes("all") || allGames.length > 0;
+            }
+            return hay.includes(selectedGameFilter.toLowerCase());
+          });
+
+      if (!list.length) {
+        container.innerHTML = `
+          <div class="vouch-card">
+            <p class="vouch-note" style="margin-bottom:8px;">No crosstrading notes match "${escapeHtml(selectedGameFilter)}".</p>
+            <button type="button" class="mini-action-btn" onclick="resetCrosstradeFilters()">Reset Filters</button>
+          </div>
+        `;
+        return;
+      }
+
+      list.forEach((g) => {
         const box = document.createElement("div");
         box.className = "game-card-item tilt-3d";
         box.dataset.tiltMax = "4";
-        box.innerHTML = `<strong>${escapeHtml(g.tag || "•")} ${escapeHtml(g.title)}</strong><span>${escapeHtml(g.note)}</span>`;
+        const tierLabel = inferTierBadge(g);
+        box.innerHTML = `
+          <div class="game-card-header">
+            <strong>${escapeHtml(g.tag || "•")} ${escapeHtml(g.title)}</strong>
+            <span class="game-tier-badge">${escapeHtml(tierLabel)}</span>
+          </div>
+          <span class="game-desc">${escapeHtml(g.note)}</span>
+        `;
         attach3DTilt(box);
         container.appendChild(box);
       });
+    }
+
+    function updateVouchSummary() {
+      const statsEl = document.getElementById("vouch-summary-stats");
+      const breakEl = document.getElementById("vouch-summary-breakdown");
+      if (!statsEl || !breakEl) return;
+
+      const total = allVouches.length;
+      if (!total) {
+        statsEl.textContent = "0 vouches • ★ 0.0 avg";
+        breakEl.textContent = "5★: 0 • 4★: 0";
+        return;
+      }
+
+      const sum = allVouches.reduce((acc, item) => acc + Math.max(1, Math.min(5, Number(item.stars || 5))), 0);
+      const avg = (sum / total).toFixed(1);
+      const count5 = allVouches.filter((item) => Number(item.stars || 5) === 5).length;
+      const count4 = allVouches.filter((item) => Number(item.stars || 5) === 4).length;
+
+      statsEl.textContent = `${total} vouches • ★ ${avg} avg`;
+      breakEl.textContent = `5★: ${count5} • 4★: ${count4}`;
     }
 
     function setVouchFilter(starVal) {
@@ -2740,6 +3138,7 @@
     }
 
     function renderVouches() {
+      updateVouchSummary();
       const container = document.getElementById("vouches-list-container");
       container.innerHTML = "";
 
@@ -2748,7 +3147,12 @@
         : allVouches.filter((v) => String(Number(v.stars || 5)) === selectedVouchStars);
 
       if (!list.length) {
-        container.innerHTML = `<div class="vouch-card"><p class="vouch-note">No member vouches match this star filter.</p></div>`;
+        container.innerHTML = `
+          <div class="vouch-card">
+            <p class="vouch-note" style="margin-bottom:8px;">No member vouches match this star filter.</p>
+            <button type="button" class="mini-action-btn" onclick="resetCrosstradeFilters()">Reset Filters</button>
+          </div>
+        `;
         return;
       }
 
@@ -2997,6 +3401,8 @@
         const s = payload.server || {};
         currentServerId = s.id || "1542941315933667348";
         currentServerInvite = s.invite_url || "https://discord.gg/3JPatMmyF";
+        const rulesServerIdEl = document.getElementById("rules-server-id");
+        if (rulesServerIdEl) rulesServerIdEl.textContent = currentServerId;
 
         const sName = s.name || "Discord Server";
         const totalMembers = Number(s.member_count || 0);
