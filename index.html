@@ -2929,11 +2929,11 @@
         <h4>Active &amp; Closed Tickets (<span id="closed-tickets-count">0</span>)</h4>
         <div id="tickets-feed-container"></div>
       </div>
-      <!-- Panel 6: VortexShop Storefront & Admin Item Manager -->
+      <!-- Panel 6: VortexShop Storefront (Hidden Admin Post Box) -->
       <div id="panel-shop" class="sub-panel">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
           <h3 style="margin:0;">VortexShop Listings</h3>
-          <button type="button" class="mini-action-btn" onclick="document.getElementById('shop-admin-section').scrollIntoView({behavior:'smooth'})">+ Admin Add Item</button>
+          <button type="button" class="mini-action-btn" id="btn-admin-unlock" onclick="openAdminGateModal()">Admin</button>
         </div>
         <div class="safety-callout">
           <strong>No Pre-Payment on Website:</strong> Items listed in the Shop do not charge upfront on the site. Click <strong>Make Ticket to Buy</strong> to auto-fill a ticket with the item details and pay the seller who posted it directly inside your ticket.
@@ -2956,31 +2956,22 @@
 
         <div class="shop-items-grid" id="shop-items-grid"></div>
 
-        <div class="admin-divider-box" id="shop-admin-section">
-          <h4>Add a new item (Admin Password Protected)</h4>
+        <div class="admin-divider-box" id="shop-admin-section" style="display:none;">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
+            <h4 style="margin:0;">Admin Post Item (Unlocked)</h4>
+            <button type="button" class="mini-action-btn" onclick="lockAdminPanel()">Lock Admin</button>
+          </div>
           <form id="shop-admin-item-form" onsubmit="handleShopAddItem(event)">
-            <div class="ticket-grid-2">
-              <div class="ticket-field">
-                <label for="shop-admin-password">Admin Password *</label>
-                <input
-                  type="password"
-                  id="shop-admin-password"
-                  class="ticket-input"
-                  placeholder="Enter admin password (default: vortexadmin2026)"
-                  required
-                />
-              </div>
-              <div class="ticket-field">
-                <label for="shop-item-poster">Posted By (@user / Seller) *</label>
-                <input
-                  type="text"
-                  id="shop-item-poster"
-                  class="ticket-input"
-                  value="@mvn412."
-                  placeholder="@seller"
-                  required
-                />
-              </div>
+            <div class="ticket-field">
+              <label for="shop-item-poster">Posted By (@user / Seller) *</label>
+              <input
+                type="text"
+                id="shop-item-poster"
+                class="ticket-input"
+                value="@mvn412."
+                placeholder="@seller"
+                required
+              />
             </div>
 
             <label class="shop-upload-box" for="shop-image-file">
@@ -3037,7 +3028,7 @@
             </div>
 
             <div class="ticket-actions-bar">
-              <button type="submit" class="btn-ticket-close">Add product &#8599;</button>
+              <button type="submit" class="btn-ticket-close">Post Item to Shop &#8599;</button>
             </div>
           </form>
         </div>
@@ -3109,6 +3100,24 @@
         <button type="button" class="modal-close" onclick="closeLightbox()">✕</button>
       </div>
       <img id="lightbox-img" class="lightbox-img" src="" alt="Full size preview" />
+    </div>
+  </div>
+
+  <div id="admin-gate-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="admin-gate-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="admin-gate-title">Admin Login</h3>
+        <button type="button" class="modal-close" onclick="closeAdminGateModal()">&#10005;</button>
+      </div>
+      <form onsubmit="verifyAdminPassword(event)">
+        <div class="ticket-field">
+          <label for="admin-gate-password">Enter Admin Password</label>
+          <input type="password" id="admin-gate-password" class="ticket-input" placeholder="Admin password..." required />
+        </div>
+        <div class="ticket-actions-bar">
+          <button type="submit" class="btn-ticket-close">Unlock Post Form</button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -4502,45 +4511,39 @@
     setInterval(tickSyncCountdown, 250);
   
     // Shop & Admin Item State + Sync
-    let shopCatalogItems = [
-      {
-        id: "vx-item-1",
-        name: "Harvester + Icepiercer Bundle",
-        category: "MM2",
-        stock: 2,
-        price: "18.00",
-        currency: "USD",
-        posted_by: "@mvn412.",
-        description: "Verified MM2 Godly duo. Pay seller directly inside your official Vortex ticket.",
-        image_url: "https://cdn.discordapp.com/embed/avatars/1.png",
-        status: "AVAILABLE"
-      },
-      {
-        id: "vx-item-2",
-        name: "Dragonfly + Raccoon Pet Pack",
-        category: "Grow a Garden 2",
-        stock: 3,
-        price: "450.00",
-        currency: "PHP",
-        posted_by: "@mvn412.",
-        description: "Fast escrow trade via official ticket. No website pre-payment.",
-        image_url: "https://cdn.discordapp.com/embed/avatars/2.png",
-        status: "AVAILABLE"
-      },
-      {
-        id: "vx-item-3",
-        name: "Sakura Set + Dark Set",
-        category: "MM2",
-        stock: 1,
-        price: "24.00",
-        currency: "USD",
-        posted_by: "@mvn412.",
-        description: "Full matching MM2 sets. Open ticket to confirm availability and pay seller.",
-        image_url: "https://cdn.discordapp.com/embed/avatars/4.png",
-        status: "AVAILABLE"
-      }
-    ];
+    let shopCatalogItems = [];
     let shopUploadedDataUrl = "";
+    let verifiedAdminPassword = "";
+
+    function openAdminGateModal() {
+      switchTab("shop");
+      const inp = document.getElementById("admin-gate-password");
+      if (inp) inp.value = "";
+      document.getElementById("admin-gate-modal").classList.add("open");
+      setTimeout(() => inp && inp.focus(), 50);
+    }
+
+    function closeAdminGateModal() {
+      document.getElementById("admin-gate-modal").classList.remove("open");
+    }
+
+    function lockAdminPanel() {
+      verifiedAdminPassword = "";
+      const sec = document.getElementById("shop-admin-section");
+      if (sec) sec.style.display = "none";
+      showToast("Admin panel locked.");
+    }
+
+    async function verifyAdminPassword(e) {
+      e.preventDefault();
+      const pwd = document.getElementById("admin-gate-password").value;
+      if (!pwd) return;
+      verifiedAdminPassword = pwd;
+      closeAdminGateModal();
+      const sec = document.getElementById("shop-admin-section");
+      if (sec) sec.style.display = "block";
+      showToast("Admin post form unlocked.");
+    }
 
     function handleShopImageFile(e) {
       const file = e.target.files && e.target.files[0];
@@ -4564,7 +4567,11 @@
 
     async function handleShopAddItem(e) {
       e.preventDefault();
-      const adminPassword = document.getElementById("shop-admin-password").value;
+      const adminPassword = verifiedAdminPassword;
+      if (!adminPassword) {
+        openAdminGateModal();
+        return;
+      }
       const imageUrl = document.getElementById("shop-image-url").value.trim() || shopUploadedDataUrl;
       const payload = {
         admin_password: adminPassword,
@@ -4683,7 +4690,7 @@
       });
 
       if (!items.length) {
-        grid.innerHTML = `<div class="vouch-card"><p class="vouch-note">No shop items yet. Add one below using your Admin Password.</p></div>`;
+        grid.innerHTML = `<div class="vouch-card"><p class="vouch-note">No items posted in Shop yet.</p></div>`;
         return;
       }
 
