@@ -14,9 +14,9 @@ from discord import app_commands, ui
 # ==============================================================================
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "YOUR_DISCORD_BOT_TOKEN")
 GUILD_ID = int(os.getenv("GUILD_ID", "1542941315933667348"))
-TICKET_CATEGORY_ID = int(os.getenv("TICKET_CATEGORY_ID", "0"))  # Optional category ID
+TICKET_CATEGORY_ID = int(os.getenv("TICKET_CATEGORY_ID", "1572062945016414310"))  # Optional category ID
 MM_ROLE_ID = int(os.getenv("MM_ROLE_ID", "0"))  # Optional Middleman/Staff role ID
-TRANSCRIPT_CHANNEL_ID = int(os.getenv("TRANSCRIPT_CHANNEL_ID", "0"))  # Optional log channel ID
+TRANSCRIPT_CHANNEL_ID = int(os.getenv("TRANSCRIPT_CHANNEL_ID", "1569058957404803153"))  # Optional log channel ID
 
 # Where closed tickets are sent (e.g., https://vortexshop.onrender.com/api/tickets/closed)
 WEBSITE_TICKET_WEBHOOK_URL = os.getenv("WEBSITE_TICKET_WEBHOOK_URL", "").strip()
