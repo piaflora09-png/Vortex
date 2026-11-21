@@ -9,7 +9,7 @@ from pathlib import Path
 import discord
 from discord.ext import commands, tasks
 
-BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "YOUR_BOT_TOKEN")
+BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
 TARGET_USER_ID = 1540575139538796634
 TARGET_GUILD_ID = 1542941315933667348
 PORT = int(os.getenv("PORT", "8080"))
@@ -153,6 +153,7 @@ SERVER_DEFAULTS = {
 
 LATEST_DATA: dict = {
     "last_synced": datetime.now(timezone.utc).strftime("%H:%M:%S UTC"),
+    "bot_status": "starting",
     "profile": {
         "id": str(TARGET_USER_ID),
         "username": "mvn412.",
@@ -221,13 +222,13 @@ async def resolve_guild_invite(guild: discord.Guild) -> str:
     return PROFILE_CONFIG["invite_url"]
 
 
-async def refresh_showcase_data():
+async def refresh_showcase_data(bot_status: str = "online"):
     global LATEST_DATA
 
     try:
         user = await bot.fetch_user(TARGET_USER_ID)
     except Exception as exc:
-        print(f"Error fetching user {TARGET_USER_ID}: {exc}")
+        print(f"Error fetching user {TARGET_USER_ID}: {exc}", flush=True)
         user = None
 
     member = find_member(TARGET_USER_ID)
@@ -320,6 +321,7 @@ async def refresh_showcase_data():
 
     LATEST_DATA = {
         "last_synced": datetime.now(timezone.utc).strftime("%H:%M:%S UTC"),
+        "bot_status": bot_status,
         "profile": profile_payload,
         "server": server_payload,
     }
@@ -351,19 +353,19 @@ class ShowcaseHTTPHandler(BaseHTTPRequestHandler):
 
 def start_http_server():
     server = HTTPServer(("0.0.0.0", PORT), ShowcaseHTTPHandler)
-    print(f"Showcase running at http://0.0.0.0:{PORT}/ | JSON at /api/showcase")
+    print(f"Showcase running at http://0.0.0.0:{PORT}/ | JSON at /api/showcase", flush=True)
     server.serve_forever()
 
 
 @tasks.loop(seconds=20)
 async def sync_loop():
-    await refresh_showcase_data()
+    await refresh_showcase_data(bot_status="online")
 
 
 @bot.event
 async def on_ready():
-    print(f"Bot online as {bot.user} | User: {TARGET_USER_ID} | Server: {TARGET_GUILD_ID}")
-    await refresh_showcase_data()
+    print(f"Bot online as {bot.user} | User: {TARGET_USER_ID} | Server: {TARGET_GUILD_ID}", flush=True)
+    await refresh_showcase_data(bot_status="online")
     if not sync_loop.is_running():
         sync_loop.start()
 
@@ -371,36 +373,49 @@ async def on_ready():
 @bot.event
 async def on_presence_update(before: discord.Member, after: discord.Member):
     if after.id == TARGET_USER_ID or (after.guild and after.guild.id == TARGET_GUILD_ID):
-        await refresh_showcase_data()
+        await refresh_showcase_data(bot_status="online")
 
 
 @bot.command(name="badgesync")
 async def sync_command(ctx: commands.Context):
     if ctx.author.id != TARGET_USER_ID:
         return
-    await refresh_showcase_data()
+    await refresh_showcase_data(bot_status="online")
     await ctx.send("Synced full showcase, profile badges, and server stats.")
 
 
-async def run_bot_with_retry():
+async def run_bot_loop():
+    if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN":
+        print("ERROR: DISCORD_BOT_TOKEN is missing or placeholder.", flush=True)
+        LATEST_DATA["bot_status"] = "missing_token"
+        return
+
     retry_delay = 90
     while True:
         try:
-            await bot.start(BOT_TOKEN)
+            LATEST_DATA["bot_status"] = "logging_in"
+            await bot.login(BOT_TOKEN)
+            await bot.connect(reconnect=True)
             break
         except discord.HTTPException as exc:
             if exc.status == 429:
-                print(f"Discord HTTP 429 rate limit hit. Retrying login in {retry_delay}s...")
+                LATEST_DATA["bot_status"] = "rate_limited_429"
+                print(
+                    f"Discord HTTP 429 rate limit hit. Retrying login in {retry_delay}s...",
+                    flush=True,
+                )
                 await asyncio.sleep(retry_delay)
                 retry_delay = min(retry_delay * 2, 600)
             else:
-                print(f"Discord HTTPException during start: {exc}. Retrying in 60s...")
+                LATEST_DATA["bot_status"] = "http_error"
+                print(f"Discord HTTPException: {exc}. Retrying in 60s...", flush=True)
                 await asyncio.sleep(60)
         except Exception as exc:
-            print(f"Unexpected error starting bot: {exc}. Retrying in 60s...")
+            LATEST_DATA["bot_status"] = "error"
+            print(f"Bot loop error: {exc}. Retrying in 60s...", flush=True)
             await asyncio.sleep(60)
 
 
 if __name__ == "__main__":
     threading.Thread(target=start_http_server, daemon=True).start()
-    asyncio.run(run_bot_with_retry())
+    asyncio.run(run_bot_loop())
