@@ -31,44 +31,7 @@ HTML_FILE = "index-v2.html"
 # PERSISTENT JSON STATE (Shop Items & Closed Tickets)
 # =========================================================
 DEFAULT_STATE = {
-    "items": [
-        {
-            "id": "vx-item-1",
-            "name": "Harvester + Icepiercer Bundle",
-            "category": "MM2",
-            "stock": 2,
-            "price": "18.00",
-            "currency": "USD",
-            "posted_by": "@mvn412.",
-            "description": "Verified MM2 Godly duo. Pay seller directly inside your official Vortex ticket.",
-            "image_url": "https://cdn.discordapp.com/embed/avatars/1.png",
-            "status": "AVAILABLE",
-        },
-        {
-            "id": "vx-item-2",
-            "name": "Dragonfly + Raccoon Pet Pack",
-            "category": "Grow a Garden 2",
-            "stock": 3,
-            "price": "450.00",
-            "currency": "PHP",
-            "posted_by": "@mvn412.",
-            "description": "Fast escrow trade via official ticket. No website pre-payment.",
-            "image_url": "https://cdn.discordapp.com/embed/avatars/2.png",
-            "status": "AVAILABLE",
-        },
-        {
-            "id": "vx-item-3",
-            "name": "Sakura Set + Dark Set",
-            "category": "MM2",
-            "stock": 1,
-            "price": "24.00",
-            "currency": "USD",
-            "posted_by": "@mvn412.",
-            "description": "Full matching MM2 sets. Open ticket to confirm availability and pay seller.",
-            "image_url": "https://cdn.discordapp.com/embed/avatars/4.png",
-            "status": "AVAILABLE",
-        },
-    ],
+    "items": [],
     "closed_tickets": [],
 }
 
