@@ -1,645 +1,527 @@
 import asyncio
 import json
 import os
-import re
-import threading
-import traceback
-import urllib.request
 from datetime import datetime, timezone
-from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
+import aiohttp
+from aiohttp import web
 import discord
-from discord.ext import commands, tasks
+from discord import app_commands, ui
 
-BOT_TOKEN = os.getenv("DISCORD_BOT_TOKEN", "").strip()
-TARGET_USER_ID = 1540575139538796634
-TARGET_GUILD_ID = 1542941315933667348
-PORT = int(os.getenv("PORT", "8080"))
-BASE_DIR = Path(__file__).resolve().parent
-INDEX_HTML_PATH = BASE_DIR / "index.html"
+# ==============================================================================
+# CONFIGURATION (Set via environment variables or defaults)
+# ==============================================================================
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "YOUR_DISCORD_BOT_TOKEN")
+GUILD_ID = int(os.getenv("GUILD_ID", "1542941315933667348"))
+TICKET_CATEGORY_ID = int(os.getenv("TICKET_CATEGORY_ID", "0"))  # Optional category ID
+MM_ROLE_ID = int(os.getenv("MM_ROLE_ID", "0"))  # Optional Middleman/Staff role ID
+TRANSCRIPT_CHANNEL_ID = int(os.getenv("TRANSCRIPT_CHANNEL_ID", "0"))  # Optional log channel ID
 
-ELWEY_EFFECTS_URL = "https://elwey.fr/effects/"
+# Where closed tickets are sent (e.g., https://vortexshop.onrender.com/api/tickets/closed)
+WEBSITE_TICKET_WEBHOOK_URL = os.getenv("WEBSITE_TICKET_WEBHOOK_URL", "").strip()
+WEBSITE_WEBHOOK_SECRET = os.getenv("WEBSITE_WEBHOOK_SECRET", "").strip()
 
-STAFF_ROLE_IDS = [
-    1568386943945801839,
-    1568387066709024788,
-    1568387138322694268,
-    1568387457752371270,
-]
+WEB_HOST = os.getenv("HOST", "0.0.0.0")
+WEB_PORT = int(os.getenv("PORT", "8080"))
+DATA_FILE = Path("closed_tickets_log.json")
 
-ROLE_ICONS = {
-    "founder": "https://cdn.discordapp.com/attachments/1400483862273851553/1573617003909087273/f0Y7LKdtE0xaAAAAAElFTkSuQmCC.png?ex=6b02a88a&is=6b01570a&hm=7a7ccb5f62c414545ce0af68ee27783bbfcfc313c4ea8f4dd84dd887d0253b7d",
-    "server_manager": "https://media.discordapp.net/attachments/1400483862273851553/1573617317273673860/344441-communitymanager.png?ex=6b02a8d4&is=6b015754&hm=b723bf6c131749a7051f2e32859d807ebfd1b7df87ac669e5e704067b579022b&format=webp&quality=lossless&width=320&height=320",
-    "senior_moderator": "https://media.discordapp.net/attachments/1400483862273851553/1573618296643649586/download.png?ex=6b02a9be&is=6b01583e&hm=c3a9a803edf2341f16a6d323bd239f347f47c77601c323526522b41a52910ecd&format=webp&quality=lossless&width=320&height=320",
-    "support_server": "https://media.discordapp.net/attachments/1400483862273851553/1573619256468180992/269160-support.gif?ex=6b02aaa3&is=6b015923&hm=aff56438c85d06c263383b6b2ce42f98cff8c68d50a0e87a98da6871d69b6c06",
-    "head_moderator": "https://media.discordapp.net/attachments/1400483862273851553/1573619265356169346/19683-senior-moderator-head-moderator.png?ex=6b02aaa5&is=6b015925&hm=62760f162af7acfe52a8a7d2a0f93d85e7448c6fdd1edc6faab43653b708dbfb&format=webp&quality=lossless&width=384&height=384",
-}
-
-ROLE_CATALOG_ITEMS = [
-    {"id": str(STAFF_ROLE_IDS[0]), "label": "Founder Role", "short_label": "Founder", "icon_url": ROLE_ICONS["founder"]},
-    {"id": str(STAFF_ROLE_IDS[1]), "label": "Server Manager Role", "short_label": "Manager", "icon_url": ROLE_ICONS["server_manager"]},
-    {"id": str(STAFF_ROLE_IDS[2]), "label": "Senior Moderator Role", "short_label": "Senior Mod", "icon_url": ROLE_ICONS["senior_moderator"]},
-    {"id": str(STAFF_ROLE_IDS[3]), "label": "Head Moderator Role", "short_label": "Head Mod", "icon_url": ROLE_ICONS["head_moderator"]},
-    {"id": "support_server", "label": "Support Server Role", "short_label": "Support", "icon_url": ROLE_ICONS["support_server"]},
-]
-
-DEFAULT_AVATAR_DECORATION = (
-    "https://cdn.discordapp.com/media/v1/collectibles-shop/1570925242799497256/static"
-)
-
-DEFAULT_CLAN_BADGE_URL = (
-    "https://cdn.discordapp.com/clan-badges/1542941315933667348/4d6d0a54a28859fb2b8ce09ee98b6f72.png?size=16"
-)
-
-USER_BADGES = [
-    {
-        "id": "universalist",
-        "label": "Game Variety: Universalist",
-        "icon_url": "https://raw.githubusercontent.com/mezotv/discord-badges/7175b749242ae7e593f70b3b0130b83e22a947e1/assets/game-variety/universalist.svg",
-        "fallback_icon": "🎮",
-    },
-    {
-        "id": "casual",
-        "label": "Game Time: Casual",
-        "icon_url": "https://raw.githubusercontent.com/mezotv/discord-badges/7175b749242ae7e593f70b3b0130b83e22a947e1/assets/game-time/casual.svg",
-        "fallback_icon": "⚔️",
-    },
-    {
-        "id": "breakout",
-        "label": "Streaming: Breakout",
-        "icon_url": "https://raw.githubusercontent.com/mezotv/discord-badges/7175b749242ae7e593f70b3b0130b83e22a947e1/assets/streaming/breakout.svg",
-        "fallback_icon": "🖥️",
-    },
-    {
-        "id": "orb",
-        "label": "Orbs",
-        "icon_url": "https://github.com/mezotv/discord-badges/raw/main/assets/orb.svg",
-        "fallback_icon": "🔮",
-    },
-    {
-        "id": "quest",
-        "label": "Completed a Quest",
-        "icon_url": "https://github.com/mezotv/discord-badges/raw/main/assets/quest.png",
-        "fallback_icon": "🎯",
-    },
-    {
-        "id": "hypesquad_bravery",
-        "label": "HypeSquad Bravery",
-        "icon_url": "https://github.com/mezotv/discord-badges/raw/main/assets/hype-squad-bravery.svg",
-        "fallback_icon": "💜",
-    },
-]
-
-PROFILE_CONFIG = {
-    "bio_link_text": "Check out vortexshop.onrender.com",
-    "store_url": "https://vortexshop.onrender.com",
-    "custom_banner_url": None,
-    "banner_position": "center",
-    "clan_badge_url": DEFAULT_CLAN_BADGE_URL,
-    "clan_emoji": "🍃",
-    "clan_tag": "VEM",
-    "role_badge_text": "Founder • VortexShop",
-    "role_badge_icon_url": ROLE_ICONS["founder"],
-    "owner_line": "Owner of this server-",
-    "invite_url": "https://discord.gg/3JPatMmyF",
-    "full_bio": (
-        "VortexShop Official — Roblox Crosstrading (Any Game) & Verified Middleman Hub. "
-        "Always verify MM & official server tickets before trading."
-    ),
-    "member_since_fallback": "Aug 22, 2026",
-    "mutual_servers_count": 4,
-    "vouches_count": 120,
-    "custom_trade_note": (
-        "All Roblox crosstrades across any game go through official server tickets with verified "
-        "middleman escrow. Double-check usernames and trade terms before confirming."
-    ),
-    "vouches": [
-        {
-            "name": "Aurelia",
-            "avatar_url": None,
-            "stars": 5,
-            "trade_tag": "High-Value Crosstrade",
-            "note": "Smooth trade from start to finish. Fast ticket response and zero stress.",
-        },
-        {
-            "name": "KairoTradez",
-            "avatar_url": None,
-            "stars": 5,
-            "trade_tag": "Roblox MM Escrow",
-            "note": "Verified middleman handled the exchange cleanly and kept both sides updated.",
-        },
-        {
-            "name": "MikaVortex",
-            "avatar_url": None,
-            "stars": 4,
-            "trade_tag": "Storefront & Trade",
-            "note": "Legit crosstrade and clear rules. Took a few extra minutes during peak hours, still solid.",
-        },
-        {
-            "name": "NolanRBLX",
-            "avatar_url": None,
-            "stars": 4,
-            "trade_tag": "Any-Game Swap",
-            "note": "Safe ticket process and reliable server staff. Would trade again.",
-        },
-    ],
-    "mm_rules": [
-        "Open an official ticket inside the server before starting any Roblox crosstrade.",
-        "Always confirm the Middleman's Discord ID and role inside the ticket channel.",
-        "Avoid risky direct in-game trade windows or off-server DMs from unverified accounts.",
-        "Double-check all items, quantities, and crosstrade terms before confirming.",
-    ],
-    "games": [
-        {
-            "key": "roblox-all",
-            "category": "All Games",
-            "title": "Roblox Crosstrading (Any Game)",
-            "tag": "❖",
-            "note": "We handle cross-trades across any Roblox game with verified middleman escrow & official tickets.",
-        },
-        {
-            "key": "roblox-escrow",
-            "category": "Escrow & Shop",
-            "title": "Middleman Escrow & Storefront",
-            "tag": "✦",
-            "note": "Structured ticket protection, clear trade verification & listings at vortexshop.onrender.com.",
-        },
-    ],
-}
-
-SERVER_DEFAULTS = {
-    "id": str(TARGET_GUILD_ID),
-    "name": "Vortex Exchange & MM",
-    "icon_url": None,
-    "banner_url": None,
-    "member_count": 0,
-    "online_count": 0,
-    "offline_count": 0,
-    "boost_count": 0,
-    "invite_url": "https://discord.gg/3JPatMmyF",
-}
-
-LATEST_DATA: dict = {
-    "last_synced": datetime.now(timezone.utc).strftime("%H:%M:%S UTC"),
-    "bot_status": "starting",
-    "profile": {
-        "id": str(TARGET_USER_ID),
-        "username": "mvn412.",
-        "display_name": "VortexShop",
-        "avatar_url": "https://cdn.discordapp.com/embed/avatars/0.png",
-        "banner_url": PROFILE_CONFIG["custom_banner_url"],
-        "banner_position": PROFILE_CONFIG["banner_position"],
-        "avatar_decoration_url": DEFAULT_AVATAR_DECORATION,
-        "profile_effect": {
-            "name": None,
-            "asset_url": None,
-            "source": "elwey.fr/effects",
-        },
-        "badges": USER_BADGES,
-        "status": "online",
-        "custom_status": {"emoji": None, "text": "Very nice day"},
-        "clan_badge_url": PROFILE_CONFIG["clan_badge_url"],
-        "clan_emoji": PROFILE_CONFIG["clan_emoji"],
-        "clan_tag": PROFILE_CONFIG["clan_tag"],
-        "role_badge_text": PROFILE_CONFIG["role_badge_text"],
-        "role_badge_icon_url": PROFILE_CONFIG["role_badge_icon_url"],
-        "bio_link_text": PROFILE_CONFIG["bio_link_text"],
-        "store_url": PROFILE_CONFIG["store_url"],
-        "owner_line": PROFILE_CONFIG["owner_line"],
-        "invite_url": PROFILE_CONFIG["invite_url"],
-        "full_bio": PROFILE_CONFIG["full_bio"],
-        "member_since": PROFILE_CONFIG["member_since_fallback"],
-        "mutual_servers_count": PROFILE_CONFIG["mutual_servers_count"],
-        "vouches_count": PROFILE_CONFIG["vouches_count"],
-        "custom_trade_note": PROFILE_CONFIG["custom_trade_note"],
-        "vouches": PROFILE_CONFIG["vouches"],
-        "mm_rules": PROFILE_CONFIG["mm_rules"],
-        "games": PROFILE_CONFIG["games"],
-    },
-    "server": dict(SERVER_DEFAULTS),
-    "role_catalog": ROLE_CATALOG_ITEMS,
-    "staff_members": [],
-}
-
-_ELWEY_CACHE: dict = {"fetched_at": 0.0, "entries": []}
-_USER_DETAIL_CACHE: dict[int, dict] = {}
-
-
-def _fetch_elwey_effects_sync() -> list[dict]:
-    now = datetime.now(timezone.utc).timestamp()
-    if _ELWEY_CACHE["entries"] and (now - _ELWEY_CACHE["fetched_at"]) < 900:
-        return _ELWEY_CACHE["entries"]
-
-    try:
-        req = urllib.request.Request(
-            ELWEY_EFFECTS_URL,
-            headers={"User-Agent": "Mozilla/5.0 (compatible; VortexShowcaseBot/1.0)"},
-        )
-        with urllib.request.urlopen(req, timeout=8) as resp:
-            html = resp.read().decode("utf-8", errors="ignore")
-
-        img_matches = re.findall(r'<img[^>]+src=["\']([^"\']+)["\'][^>]*>', html, flags=re.IGNORECASE)
-        entries = []
-        for raw_src in img_matches:
-            if raw_src.startswith("//"):
-                full_url = "https:" + raw_src
-            elif raw_src.startswith("/"):
-                full_url = "https://elwey.fr" + raw_src
-            elif raw_src.startswith("http"):
-                full_url = raw_src
-            else:
-                continue
-
-            slug = raw_src.split("/")[-1].split("?")[0]
-            clean_name = re.sub(r"[-_]+", " ", Path(slug).stem).strip().title()
-            if clean_name:
-                entries.append({"name": clean_name, "asset_url": full_url})
-
-        if entries:
-            _ELWEY_CACHE["fetched_at"] = now
-            _ELWEY_CACHE["entries"] = entries
-        return entries
-    except Exception:
-        return _ELWEY_CACHE["entries"]
-
-
-def build_effect_payload(user_obj, elwey_entries: list[dict]) -> dict:
-    effect_obj = getattr(user_obj, "profile_effect", None) if user_obj else None
-    effect_id = getattr(effect_obj, "id", None) if effect_obj else None
-    effect_name = getattr(effect_obj, "name", None) if effect_obj else None
-
-    matched_asset = None
-    if elwey_entries:
-        if effect_name:
-            target_key = effect_name.lower().strip()
-            for item in elwey_entries:
-                if target_key in item["name"].lower() or item["name"].lower() in target_key:
-                    matched_asset = item["asset_url"]
-                    break
-        if not matched_asset and effect_id:
-            id_str = str(effect_id)
-            for item in elwey_entries:
-                if id_str in item["asset_url"]:
-                    matched_asset = item["asset_url"]
-                    break
-
-    return {
-        "id": str(effect_id) if effect_id else None,
-        "name": effect_name,
-        "asset_url": matched_asset,
-        "source": "elwey.fr/effects",
-    }
-
-
-async def get_enriched_user(user_id: int, fallback_member: discord.Member | None = None):
-    now = datetime.now(timezone.utc).timestamp()
-    cached = _USER_DETAIL_CACHE.get(user_id)
-    if cached and (now - cached["ts"]) < 300:
-        return cached["user"]
-
-    try:
-        fetched = await bot.fetch_user(user_id)
-        _USER_DETAIL_CACHE[user_id] = {"ts": now, "user": fetched}
-        return fetched
-    except Exception:
-        return fallback_member
-
-
-def load_index_html() -> bytes:
-    try:
-        return INDEX_HTML_PATH.read_text(encoding="utf-8").encode("utf-8")
-    except Exception as exc:
-        fallback = f"<h1>VortexShop Showcase</h1><p>Could not read index.html: {exc}</p>"
-        return fallback.encode("utf-8")
-
-
+# ==============================================================================
+# STATE & PERSISTENCE
+# ==============================================================================
 intents = discord.Intents.default()
+intents.guilds = True
 intents.members = True
-intents.presences = True
 
-bot = commands.Bot(command_prefix="!", intents=intents)
+bot = discord.Client(intents=intents)
+tree = app_commands.CommandTree(bot)
 
-
-def find_member(user_id: int) -> discord.Member | None:
-    for guild in bot.guilds:
-        m = guild.get_member(user_id)
-        if m is not None:
-            return m
-    return None
+# Active tickets keyed by channel_id: dict
+active_tickets: dict[int, dict] = {}
+closed_tickets: list[dict] = []
 
 
-def resolve_role_icon(role: discord.Role) -> tuple[str | None, str]:
-    lower = role.name.lower()
-    if "founder" in lower or "owner" in lower:
-        return ROLE_ICONS["founder"], "founder"
-    if "server manager" in lower or "community manager" in lower or "manager" in lower:
-        return ROLE_ICONS["server_manager"], "server_manager"
-    if "head moderator" in lower or "head mod" in lower:
-        return ROLE_ICONS["head_moderator"], "head_moderator"
-    if "senior moderator" in lower or "senior mod" in lower or "mod" in lower:
-        return ROLE_ICONS["senior_moderator"], "senior_moderator"
-    if "support" in lower:
-        return ROLE_ICONS["support_server"], "support_server"
-    if role.icon:
-        return role.icon.url, str(role.id)
-    return None, str(role.id)
-
-
-async def collect_staff_members(guild: discord.Guild | None, elwey_entries: list[dict]) -> list[dict]:
-    if not guild:
+def load_closed_tickets() -> list[dict]:
+    if not DATA_FILE.exists():
+        return []
+    try:
+        raw = json.loads(DATA_FILE.read_text(encoding="utf-8"))
+        return raw if isinstance(raw, list) else []
+    except Exception:
         return []
 
-    tracked_set = set(STAFF_ROLE_IDS)
-    matched_pairs: list[tuple[discord.Member, list[discord.Role]]] = []
 
-    for member in guild.members:
-        matched_roles = [r for r in member.roles if r.id in tracked_set]
-        if matched_roles:
-            matched_roles.sort(key=lambda r: r.position, reverse=True)
-            matched_pairs.append((member, matched_roles))
-
-    results = []
-    for member, matched_roles in matched_pairs[:30]:
-        detailed_user = await get_enriched_user(member.id, fallback_member=member)
-        source_obj = detailed_user or member
-
-        banner_url = None
-        if getattr(source_obj, "banner", None):
-            banner_url = source_obj.banner.url
-        elif getattr(member, "banner", None):
-            banner_url = member.banner.url
-
-        deco_obj = getattr(source_obj, "avatar_decoration", None) or getattr(member, "avatar_decoration", None)
-        deco_url = deco_obj.url if deco_obj else None
-
-        effect_payload = build_effect_payload(source_obj, elwey_entries)
-
-        role_items = []
-        for r in matched_roles:
-            icon_url, role_key = resolve_role_icon(r)
-            role_items.append({
-                "id": str(r.id),
-                "role_key": role_key,
-                "name": r.name,
-                "icon_url": icon_url,
-            })
-
-        results.append({
-            "id": str(member.id),
-            "username": member.name,
-            "display_name": member.display_name,
-            "status": str(member.status) if member.status else "offline",
-            "avatar_url": member.display_avatar.url,
-            "banner_url": banner_url,
-            "avatar_decoration_url": deco_url,
-            "profile_effect": effect_payload,
-            "roles": role_items,
-        })
-
-    return results
+def save_closed_tickets() -> None:
+    DATA_FILE.write_text(json.dumps(closed_tickets[:200], indent=2), encoding="utf-8")
 
 
-async def resolve_guild_invite(guild: discord.Guild) -> str:
-    try:
-        invites = await guild.invites()
-        for inv in invites:
-            if inv.url and not inv.revoked:
-                return inv.url
-    except Exception:
-        pass
-    if guild.vanity_url:
-        return str(guild.vanity_url)
-    return PROFILE_CONFIG["invite_url"]
+def format_at_user(user: discord.abc.User | None, fallback: str = "@unknown") -> str:
+    if not user:
+        cleaned = fallback.strip()
+        return cleaned if cleaned.startswith("@") else f"@{cleaned}"
+    handle = user.name if user.discriminator in (None, "0", "") else f"{user.name}#{user.discriminator}"
+    return f"@{handle}"
 
 
-async def refresh_showcase_data(bot_status: str = "online"):
-    global LATEST_DATA
+def get_avatar_url(user: discord.abc.User | None) -> str:
+    if user and user.display_avatar:
+        return user.display_avatar.url
+    return "https://cdn.discordapp.com/embed/avatars/0.png"
 
-    elwey_entries = await asyncio.to_thread(_fetch_elwey_effects_sync)
+
+async def resolve_member_or_user(guild: discord.Guild | None, raw_input: str) -> tuple[discord.abc.User | None, str]:
+    """Resolve a user by mention (<@123>), numeric ID, or @username in the guild."""
+    text = (raw_input or "").strip()
+    if not text:
+        return None, "@unknown"
+
+    digits = "".join(ch for ch in text if ch.isdigit())
+    if guild and digits and len(digits) >= 15:
+        uid = int(digits)
+        member = guild.get_member(uid)
+        if member:
+            return member, format_at_user(member)
+        try:
+            fetched = await bot.fetch_user(uid)
+            if fetched:
+                return fetched, format_at_user(fetched)
+        except Exception:
+            pass
+
+    clean_name = text.lstrip("@").lower()
+    if guild and clean_name:
+        for m in guild.members:
+            if m.name.lower() == clean_name or (m.display_name and m.display_name.lower() == clean_name):
+                return m, format_at_user(m)
+
+    normalized = text if text.startswith("@") else f"@{text}"
+    return None, normalized
+
+
+async def post_closed_ticket_to_website(record: dict) -> dict:
+    """Send closed ticket payload (Trader 1, Trader 2, Claimed by @user) to the website."""
+    delivery = {"attempted": False, "ok": False, "status": None, "error": None}
+    if not WEBSITE_TICKET_WEBHOOK_URL:
+        delivery["error"] = "WEBSITE_TICKET_WEBHOOK_URL not set"
+        return delivery
+
+    delivery["attempted"] = True
+    headers = {"Content-Type": "application/json"}
+    if WEBSITE_WEBHOOK_SECRET:
+        headers["X-Webhook-Secret"] = WEBSITE_WEBHOOK_SECRET
 
     try:
-        user = await bot.fetch_user(TARGET_USER_ID)
+        timeout = aiohttp.ClientTimeout(total=10)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(WEBSITE_TICKET_WEBHOOK_URL, json=record, headers=headers) as resp:
+                delivery["status"] = resp.status
+                delivery["ok"] = 200 <= resp.status < 300
+                if not delivery["ok"]:
+                    delivery["error"] = await resp.text()
     except Exception as exc:
-        print(f"Error fetching user {TARGET_USER_ID}: {exc}", flush=True)
-        user = None
+        delivery["error"] = str(exc)
 
-    member = find_member(TARGET_USER_ID)
-    status = str(member.status) if member else "online"
-    custom_status = {"emoji": None, "text": "Very nice day"}
+    return delivery
 
-    if member:
-        for act in member.activities:
-            if isinstance(act, discord.CustomActivity):
-                custom_status = {
-                    "emoji": str(act.emoji) if act.emoji else None,
-                    "text": act.name or "Very nice day",
-                }
-                break
 
-    live_deco = getattr(user, "avatar_decoration", None) if user else None
-    deco_url = live_deco.url if live_deco else DEFAULT_AVATAR_DECORATION
+def build_closed_embed(record: dict) -> discord.Embed:
+    t1 = record["trader_1"]
+    t2 = record["trader_2"]
+    embed = discord.Embed(
+        title=f"Ticket Closed • {record['ticket_id']}",
+        color=discord.Color.gold(),
+        timestamp=datetime.fromisoformat(record["closed_at"]),
+    )
+    embed.add_field(
+        name="Trader 1 (Giving)",
+        value=f"**Name:** {t1['name']} ({t1['mention']})\n**Items:** {t1['giving_items']}",
+        inline=True,
+    )
+    embed.add_field(
+        name="Trader 2 (Giving)",
+        value=f"**Name:** {t2['name']} ({t2['mention']})\n**Items:** {t2['giving_items']}",
+        inline=True,
+    )
+    embed.add_field(
+        name="Claimed By",
+        value=f"**{record['claimed_by']}** (`{record.get('claimed_by_id', 'N/A')}`)",
+        inline=False,
+    )
+    if record.get("game") or record.get("notes"):
+        embed.add_field(
+            name="Trade Details",
+            value=f"**Game:** {record.get('game', 'Any')}\n**Notes:** {record.get('notes') or 'None'}",
+            inline=False,
+        )
+    if t1.get("avatar_url"):
+        embed.set_thumbnail(url=t1["avatar_url"])
+    if t2.get("avatar_url"):
+        embed.set_image(url=t2["avatar_url"])
+    return embed
 
-    profile_effect_payload = build_effect_payload(user, elwey_entries)
 
-    primary_guild = getattr(user, "primary_guild", None) if user else None
-    clan_tag = getattr(primary_guild, "tag", None) if primary_guild else PROFILE_CONFIG["clan_tag"]
+async def finalize_close_ticket(
+    interaction: discord.Interaction,
+    override_trader1: str | None = None,
+    override_trader2: str | None = None,
+    override_claimer: str | None = None,
+    override_notes: str | None = None,
+) -> None:
+    channel = interaction.channel
+    if not isinstance(channel, discord.TextChannel):
+        await interaction.response.send_message("Run this inside a ticket text channel.", ephemeral=True)
+        return
 
-    mutual_count = sum(1 for g in bot.guilds if g.get_member(TARGET_USER_ID) is not None)
+    await interaction.response.defer(ephemeral=True)
+    ticket = active_tickets.get(channel.id, {})
+    guild = interaction.guild
 
-    banner_url = PROFILE_CONFIG["custom_banner_url"] or (
-        user.banner.url if (user and user.banner) else None
+    raw_t1 = override_trader1 or ticket.get("trader_1_raw") or interaction.user.name
+    raw_t2 = override_trader2 or ticket.get("trader_2_raw") or "Trader 2"
+    raw_claimer = override_claimer or ticket.get("claimed_by_raw") or format_at_user(interaction.user)
+
+    u1, m1 = await resolve_member_or_user(guild, raw_t1)
+    u2, m2 = await resolve_member_or_user(guild, raw_t2)
+    u_claim, m_claim = await resolve_member_or_user(guild, raw_claimer)
+
+    record = {
+        "ticket_id": ticket.get("ticket_id", f"VX-{channel.id % 10000:04d}"),
+        "channel_id": channel.id,
+        "channel_name": channel.name,
+        "status": "CLOSED",
+        "game": ticket.get("game", "Roblox Crosstrade"),
+        "trader_1": {
+            "name": u1.display_name if u1 else m1.lstrip("@"),
+            "mention": m1,
+            "user_id": str(u1.id) if u1 else None,
+            "avatar_url": get_avatar_url(u1),
+            "giving_items": ticket.get("trader_1_items", "Confirmed in ticket"),
+        },
+        "trader_2": {
+            "name": u2.display_name if u2 else m2.lstrip("@"),
+            "mention": m2,
+            "user_id": str(u2.id) if u2 else None,
+            "avatar_url": get_avatar_url(u2),
+            "giving_items": ticket.get("trader_2_items", "Confirmed in ticket"),
+        },
+        "claimed_by": m_claim,
+        "claimed_by_name": u_claim.display_name if u_claim else m_claim.lstrip("@"),
+        "claimed_by_id": str(u_claim.id) if u_claim else str(interaction.user.id),
+        "claimed_by_avatar_url": get_avatar_url(u_claim or interaction.user),
+        "notes": override_notes if override_notes is not None else ticket.get("notes", ""),
+        "closed_by": format_at_user(interaction.user),
+        "closed_at": datetime.now(timezone.utc).isoformat(),
+    }
+
+    delivery = await post_closed_ticket_to_website(record)
+    record["website_delivery"] = delivery
+
+    closed_tickets.insert(0, record)
+    save_closed_tickets()
+    active_tickets.pop(channel.id, None)
+
+    if TRANSCRIPT_CHANNEL_ID and guild:
+        log_ch = guild.get_channel(TRANSCRIPT_CHANNEL_ID)
+        if isinstance(log_ch, discord.TextChannel):
+            await log_ch.send(embed=build_closed_embed(record))
+
+    status_msg = (
+        f"Closed **{record['ticket_id']}** and sent to website (HTTP {delivery['status']})."
+        if delivery["ok"]
+        else f"Closed **{record['ticket_id']}** and saved locally ({delivery['error'] or 'ready for sync'})."
+    )
+    await interaction.followup.send(f"{status_msg} Deleting channel in 3 seconds...", ephemeral=True)
+    await asyncio.sleep(3)
+    try:
+        await channel.delete(reason=f"Closed by {interaction.user}")
+    except discord.Forbidden:
+        pass
+
+
+# ==============================================================================
+# DISCORD UI COMPONENTS (MODAL, OPEN PANEL, TICKET CONTROLS)
+# ==============================================================================
+class OpenTradeTicketModal(ui.Modal, title="Open Vortex Trade / MM Ticket"):
+    trader_1 = ui.TextInput(
+        label="Trader 1 (@user or ID)",
+        placeholder="e.g. @trader_one or 123456789012345678",
+        required=True,
+        max_length=100,
+    )
+    trader_1_items = ui.TextInput(
+        label="Trader 1 Giving",
+        placeholder="e.g. Harvester + Icepiercer (MM2)",
+        required=True,
+        max_length=200,
+    )
+    trader_2 = ui.TextInput(
+        label="Trader 2 (@user or ID)",
+        placeholder="e.g. @trader_two or 987654321098765432",
+        required=True,
+        max_length=100,
+    )
+    trader_2_items = ui.TextInput(
+        label="Trader 2 Giving",
+        placeholder="e.g. Raccoon + Dragonfly (Grow a Garden 2)",
+        required=True,
+        max_length=200,
+    )
+    notes = ui.TextInput(
+        label="Game & Notes",
+        placeholder="e.g. MM2 -> GaG 2 | Verified MM requested",
+        required=False,
+        max_length=250,
     )
 
-    profile_payload = {
-        "id": str(user.id) if user else str(TARGET_USER_ID),
-        "username": user.name if user else "mvn412.",
-        "display_name": (user.global_name or user.name) if user else "VortexShop",
-        "avatar_url": user.display_avatar.url if user else "https://cdn.discordapp.com/embed/avatars/0.png",
-        "banner_url": banner_url,
-        "banner_position": PROFILE_CONFIG["banner_position"],
-        "avatar_decoration_url": deco_url,
-        "profile_effect": profile_effect_payload,
-        "badges": USER_BADGES,
-        "status": status,
-        "custom_status": custom_status,
-        "clan_badge_url": PROFILE_CONFIG["clan_badge_url"],
-        "clan_emoji": PROFILE_CONFIG["clan_emoji"],
-        "clan_tag": clan_tag,
-        "role_badge_text": PROFILE_CONFIG["role_badge_text"],
-        "role_badge_icon_url": PROFILE_CONFIG["role_badge_icon_url"],
-        "bio_link_text": PROFILE_CONFIG["bio_link_text"],
-        "store_url": PROFILE_CONFIG["store_url"],
-        "owner_line": PROFILE_CONFIG["owner_line"],
-        "invite_url": PROFILE_CONFIG["invite_url"],
-        "full_bio": PROFILE_CONFIG["full_bio"],
-        "member_since": (
-            user.created_at.strftime("%b %d, %Y")
-            if (user and user.created_at)
-            else PROFILE_CONFIG["member_since_fallback"]
-        ),
-        "mutual_servers_count": mutual_count if mutual_count > 0 else PROFILE_CONFIG["mutual_servers_count"],
-        "vouches_count": PROFILE_CONFIG["vouches_count"],
-        "custom_trade_note": PROFILE_CONFIG["custom_trade_note"],
-        "vouches": PROFILE_CONFIG["vouches"],
-        "mm_rules": PROFILE_CONFIG["mm_rules"],
-        "games": PROFILE_CONFIG["games"],
-    }
+    async def on_submit(self, interaction: discord.Interaction) -> None:
+        guild = interaction.guild
+        if not guild:
+            await interaction.response.send_message("Tickets can only be opened inside a server.", ephemeral=True)
+            return
 
-    guild = bot.get_guild(TARGET_GUILD_ID)
-    if guild is None:
-        try:
-            guild = await bot.fetch_guild(TARGET_GUILD_ID, with_counts=True)
-        except Exception:
-            guild = None
+        await interaction.response.defer(ephemeral=True)
+        u1, m1 = await resolve_member_or_user(guild, self.trader_1.value)
+        u2, m2 = await resolve_member_or_user(guild, self.trader_2.value)
 
-    if guild:
-        total_members = guild.member_count or len(guild.members)
-        online_members = sum(
-            1 for m in guild.members if m.status != discord.Status.offline
-        )
-        offline_members = max(0, total_members - online_members)
-        invite_url = await resolve_guild_invite(guild)
-        guild_banner_url = guild.banner.url if getattr(guild, "banner", None) else SERVER_DEFAULTS["banner_url"]
-
-        server_payload = {
-            "id": str(guild.id),
-            "name": guild.name,
-            "icon_url": guild.icon.url if guild.icon else None,
-            "banner_url": guild_banner_url,
-            "member_count": total_members,
-            "online_count": online_members,
-            "offline_count": offline_members,
-            "boost_count": guild.premium_subscription_count or 0,
-            "invite_url": invite_url,
+        overwrites = {
+            guild.default_role: discord.PermissionOverwrite(view_channel=False),
+            interaction.user: discord.PermissionOverwrite(view_channel=True, send_messages=True, read_message_history=True),
+            guild.me: discord.PermissionOverwrite(view_channel=True, send_messages=True, manage_channels=True),
         }
-        staff_list = await collect_staff_members(guild, elwey_entries)
-    else:
-        server_payload = dict(SERVER_DEFAULTS)
-        staff_list = []
+        for target_u in (u1, u2):
+            if isinstance(target_u, discord.Member):
+                overwrites[target_u] = discord.PermissionOverwrite(
+                    view_channel=True, send_messages=True, read_message_history=True
+                )
+        if MM_ROLE_ID:
+            mm_role = guild.get_role(MM_ROLE_ID)
+            if mm_role:
+                overwrites[mm_role] = discord.PermissionOverwrite(
+                    view_channel=True, send_messages=True, read_message_history=True
+                )
 
-    LATEST_DATA = {
-        "last_synced": datetime.now(timezone.utc).strftime("%H:%M:%S UTC"),
-        "bot_status": bot_status,
-        "profile": profile_payload,
-        "server": server_payload,
-        "role_catalog": ROLE_CATALOG_ITEMS,
-        "staff_members": staff_list,
+        category = guild.get_channel(TICKET_CATEGORY_ID) if TICKET_CATEGORY_ID else None
+        safe_slug = "".join(ch for ch in interaction.user.name.lower() if ch.isalnum())[:12] or "trade"
+        ticket_channel = await guild.create_text_channel(
+            name=f"ticket-{safe_slug}-{interaction.id % 10000:04d}",
+            category=category if isinstance(category, discord.CategoryChannel) else None,
+            overwrites=overwrites,
+            reason=f"Ticket opened by {interaction.user}",
+        )
+
+        ticket_id = f"VX-{ticket_channel.id % 10000:04d}"
+        active_tickets[ticket_channel.id] = {
+            "ticket_id": ticket_id,
+            "opened_by": format_at_user(interaction.user),
+            "trader_1_raw": self.trader_1.value.strip(),
+            "trader_1_items": self.trader_1_items.value.strip(),
+            "trader_2_raw": self.trader_2.value.strip(),
+            "trader_2_items": self.trader_2_items.value.strip(),
+            "claimed_by_raw": None,
+            "notes": self.notes.value.strip(),
+        }
+
+        embed = discord.Embed(
+            title=f"Trade Ticket Opened • {ticket_id}",
+            description="Claim this ticket to lock in the handler, then close to send Trader 1, Trader 2 & claim info to the website.",
+            color=discord.Color.purple(),
+        )
+        embed.add_field(name="Trader 1 Giving", value=f"{m1}\n`{self.trader_1_items.value.strip()}`", inline=True)
+        embed.add_field(name="Trader 2 Giving", value=f"{m2}\n`{self.trader_2_items.value.strip()}`", inline=True)
+        embed.add_field(name="Claimed By", value="*Unclaimed*", inline=False)
+        if self.notes.value.strip():
+            embed.add_field(name="Notes", value=self.notes.value.strip(), inline=False)
+        embed.set_thumbnail(url=get_avatar_url(u1))
+
+        await ticket_channel.send(
+            content=f"{interaction.user.mention} {u1.mention if isinstance(u1, discord.Member) else ''} {u2.mention if isinstance(u2, discord.Member) else ''}".strip(),
+            embed=embed,
+            view=TicketActionView(),
+        )
+        await interaction.followup.send(f"Ticket created: {ticket_channel.mention}", ephemeral=True)
+
+
+class TicketPanelView(ui.View):
+    def __init__(self) -> None:
+        super().__init__(timeout=None)
+
+    @ui.button(
+        label="Open Trade / MM Ticket",
+        style=discord.ButtonStyle.primary,
+        custom_id="vortex_open_ticket_btn",
+        emoji="🎫",
+    )
+    async def open_ticket_btn(self, interaction: discord.Interaction, button: ui.Button) -> None:
+        await interaction.response.send_modal(OpenTradeTicketModal())
+
+
+class TicketActionView(ui.View):
+    def __init__(self) -> None:
+        super().__init__(timeout=None)
+
+    @ui.button(
+        label="Claim Ticket",
+        style=discord.ButtonStyle.success,
+        custom_id="vortex_claim_ticket_btn",
+        emoji="🛡️",
+    )
+    async def claim_btn(self, interaction: discord.Interaction, button: ui.Button) -> None:
+        channel = interaction.channel
+        if not isinstance(channel, discord.TextChannel):
+            return
+        claimed_handle = format_at_user(interaction.user)
+        ticket = active_tickets.setdefault(channel.id, {"ticket_id": f"VX-{channel.id % 10000:04d}"})
+        ticket["claimed_by_raw"] = claimed_handle
+        ticket["claimed_by_id"] = str(interaction.user.id)
+        ticket["claimed_by_avatar_url"] = get_avatar_url(interaction.user)
+
+        if interaction.message and interaction.message.embeds:
+            emb = interaction.message.embeds[0]
+            for i, f in enumerate(emb.fields):
+                if f.name == "Claimed By":
+                    emb.set_field_at(i, name="Claimed By", value=f"**{claimed_handle}** ({interaction.user.mention})", inline=False)
+                    break
+            await interaction.message.edit(embed=emb, view=self)
+
+        await interaction.response.send_message(f"Ticket claimed by **{claimed_handle}**.")
+
+    @ui.button(
+        label="Close & Send to Website",
+        style=discord.ButtonStyle.danger,
+        custom_id="vortex_close_ticket_btn",
+        emoji="🔒",
+    )
+    async def close_btn(self, interaction: discord.Interaction, button: ui.Button) -> None:
+        await finalize_close_ticket(interaction)
+
+
+# ==============================================================================
+# SLASH COMMANDS
+# ==============================================================================
+@tree.command(name="ticket-panel", description="Post the Vortex Exchange & MM ticket panel")
+@app_commands.default_permissions(manage_channels=True)
+async def ticket_panel_cmd(interaction: discord.Interaction) -> None:
+    embed = discord.Embed(
+        title="Vortex Exchange & MM — Ticket System",
+        description=(
+            "Click **Open Trade / MM Ticket** below to enter **Trader 1**, **Trader 2**, and each side's items.\n"
+            "Once claimed and finished, closing the ticket automatically sends Trader 1 & Trader 2 profiles/names and the **Claimed by @user** record to the website."
+        ),
+        color=discord.Color.from_rgb(168, 85, 247),
+    )
+    await interaction.response.send_message(embed=embed, view=TicketPanelView())
+
+
+@tree.command(name="close-ticket", description="Close ticket and send Trader 1, Trader 2 & claim info to website")
+@app_commands.describe(
+    trader_1="Trader 1 @username or ID (optional if already set)",
+    trader_2="Trader 2 @username or ID (optional if already set)",
+    claimed_by="Claimed by @username or ID (defaults to ticket claimer or you)",
+    notes="Optional closing notes",
+)
+async def close_ticket_cmd(
+    interaction: discord.Interaction,
+    trader_1: str | None = None,
+    trader_2: str | None = None,
+    claimed_by: str | None = None,
+    notes: str | None = None,
+) -> None:
+    await finalize_close_ticket(
+        interaction,
+        override_trader1=trader_1,
+        override_trader2=trader_2,
+        override_claimer=claimed_by,
+        override_notes=notes,
+    )
+
+
+# ==============================================================================
+# BUILT-IN HTTP SERVER (RECEIVES / SERVES CLOSED TICKETS)
+# ==============================================================================
+async def handle_health(request: web.Request) -> web.Response:
+    return web.json_response({"ok": True, "closed_tickets_count": len(closed_tickets)})
+
+
+async def handle_get_closed_tickets(request: web.Request) -> web.Response:
+    return web.json_response({"tickets": closed_tickets})
+
+
+async def handle_post_closed_ticket(request: web.Request) -> web.Response:
+    """Allows your website or external call to post a closed ticket directly."""
+    try:
+        payload = await request.json()
+    except Exception:
+        return web.json_response({"ok": False, "error": "Invalid JSON"}, status=400)
+
+    if not isinstance(payload, dict):
+        return web.json_response({"ok": False, "error": "Expected JSON object"}, status=400)
+
+    t1 = payload.get("trader_1") or {}
+    t2 = payload.get("trader_2") or {}
+    claimed = str(payload.get("claimed_by") or "@unassigned").strip()
+    if not claimed.startswith("@"):
+        claimed = f"@{claimed}"
+
+    normalized = {
+        "ticket_id": payload.get("ticket_id") or f"VX-{len(closed_tickets) + 1001}",
+        "status": "CLOSED",
+        "game": payload.get("game") or "Roblox Crosstrade",
+        "trader_1": {
+            "name": t1.get("name") or "Trader 1",
+            "mention": t1.get("mention") or f"@{t1.get('name', 'trader1')}",
+            "avatar_url": t1.get("avatar_url") or "https://cdn.discordapp.com/embed/avatars/0.png",
+            "giving_items": t1.get("giving_items") or "",
+        },
+        "trader_2": {
+            "name": t2.get("name") or "Trader 2",
+            "mention": t2.get("mention") or f"@{t2.get('name', 'trader2')}",
+            "avatar_url": t2.get("avatar_url") or "https://cdn.discordapp.com/embed/avatars/1.png",
+            "giving_items": t2.get("giving_items") or "",
+        },
+        "claimed_by": claimed,
+        "notes": payload.get("notes") or "",
+        "closed_at": payload.get("closed_at") or datetime.now(timezone.utc).isoformat(),
     }
 
-
-class ShowcaseHTTPHandler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        if self.path.startswith("/api/showcase") or self.path.startswith("/api/profile"):
-            body = json.dumps(LATEST_DATA).encode("utf-8")
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json; charset=utf-8")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Cache-Control", "no-store")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-        else:
-            body = load_index_html()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Access-Control-Allow-Origin", "*")
-            self.send_header("Content-Length", str(len(body)))
-            self.end_headers()
-            self.wfile.write(body)
-
-    def log_message(self, format, *args):
-        return
+    closed_tickets.insert(0, normalized)
+    save_closed_tickets()
+    return web.json_response({"ok": True, "ticket": normalized}, status=201)
 
 
-def start_http_server():
-    server = HTTPServer(("0.0.0.0", PORT), ShowcaseHTTPHandler)
-    print(f"Showcase running at http://0.0.0.0:{PORT}/ | JSON at /api/showcase", flush=True)
-    server.serve_forever()
+async def start_web_server() -> web.AppRunner:
+    app = web.Application()
+    app.router.add_get("/", handle_health)
+    app.router.add_get("/api/closed-tickets", handle_get_closed_tickets)
+    app.router.add_post("/api/tickets/closed", handle_post_closed_ticket)
 
-
-@tasks.loop(seconds=25)
-async def sync_loop():
-    await refresh_showcase_data(bot_status="online")
+    runner = web.AppRunner(app)
+    await runner.setup()
+    site = web.TCPSite(runner, WEB_HOST, WEB_PORT)
+    await site.start()
+    return runner
 
 
 @bot.event
-async def on_ready():
-    print(f"Bot online as {bot.user} | User: {TARGET_USER_ID} | Server: {TARGET_GUILD_ID}", flush=True)
-    await refresh_showcase_data(bot_status="online")
-    if not sync_loop.is_running():
-        sync_loop.start()
+async def setup_hook() -> None:
+    global closed_tickets
+    closed_tickets = load_closed_tickets()
+    bot.add_view(TicketPanelView())
+    bot.add_view(TicketActionView())
+    if GUILD_ID:
+        guild_obj = discord.Object(id=GUILD_ID)
+        tree.copy_global_to(guild=guild_obj)
+        await tree.sync(guild=guild_obj)
+    else:
+        await tree.sync()
+    await start_web_server()
 
 
 @bot.event
-async def on_presence_update(before: discord.Member, after: discord.Member):
-    if after.id == TARGET_USER_ID or (after.guild and after.guild.id == TARGET_GUILD_ID):
-        await refresh_showcase_data(bot_status="online")
-
-
-@bot.event
-async def on_member_update(before: discord.Member, after: discord.Member):
-    if after.guild and after.guild.id == TARGET_GUILD_ID:
-        _USER_DETAIL_CACHE.pop(after.id, None)
-        await refresh_showcase_data(bot_status="online")
-
-
-@bot.command(name="badgesync")
-async def sync_command(ctx: commands.Context):
-    if ctx.author.id != TARGET_USER_ID:
-        return
-    _USER_DETAIL_CACHE.clear()
-    await refresh_showcase_data(bot_status="online")
-    await ctx.send("Synced showcase, role members, profile media, banners, decorations, and effects.")
-
-
-async def idle_forever():
-    while True:
-        await asyncio.sleep(3600)
-
-
-async def run_bot_loop():
-    if not BOT_TOKEN or BOT_TOKEN == "YOUR_BOT_TOKEN":
-        print("ERROR: DISCORD_BOT_TOKEN is missing or placeholder. Keeping web server alive.", flush=True)
-        LATEST_DATA["bot_status"] = "missing_token"
-        await idle_forever()
-        return
-
-    retry_delay = 90
-    while True:
-        try:
-            LATEST_DATA["bot_status"] = "logging_in"
-            await bot.start(BOT_TOKEN, reconnect=True)
-            break
-        except discord.HTTPException as exc:
-            if exc.status == 429:
-                LATEST_DATA["bot_status"] = "rate_limited_429"
-                print(
-                    f"Discord HTTP 429 rate limit hit. Retrying login in {retry_delay}s...",
-                    flush=True,
-                )
-                await asyncio.sleep(retry_delay)
-                retry_delay = min(retry_delay * 2, 600)
-            else:
-                LATEST_DATA["bot_status"] = "http_error"
-                print(f"Discord HTTPException: {exc}. Retrying in 60s...", flush=True)
-                await asyncio.sleep(60)
-        except Exception as exc:
-            LATEST_DATA["bot_status"] = "error"
-            print(f"Bot loop error: {exc}", flush=True)
-            traceback.print_exc()
-            await asyncio.sleep(60)
-
-
-def main():
-    try:
-        threading.Thread(target=start_http_server, daemon=True).start()
-        asyncio.run(run_bot_loop())
-    except Exception as exc:
-        print(f"Fatal startup error: {exc}", flush=True)
-        traceback.print_exc()
-        threading.Event().wait()
+async def on_ready() -> None:
+    print(f"Logged in as {bot.user} (ID: {bot.user.id}) | HTTP on {WEB_HOST}:{WEB_PORT}")
 
 
 if __name__ == "__main__":
-    main()
+    if DISCORD_TOKEN == "YOUR_DISCORD_BOT_TOKEN":
+        raise RuntimeError("Set DISCORD_TOKEN environment variable before running main.py.")
+    bot.run(DISCORD_TOKEN)
