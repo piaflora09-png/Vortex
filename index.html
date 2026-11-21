@@ -2300,7 +2300,45 @@
       }
     }
   
-    /* Shop & Admin Item Features */
+    /* Shop & Admin Item Features (Glassmorphism + Dark Mode + Gold/Violet Accents) */
+    .shop-header-banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, rgba(168, 85, 247, 0.16), rgba(245, 158, 11, 0.12));
+      border: 1px solid rgba(232, 121, 249, 0.3);
+      box-shadow: var(--glass-edge);
+    }
+    .shop-stats-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .shop-stat-tile {
+      padding: 8px 10px;
+      border-radius: 11px;
+      background: rgba(12, 7, 22, 0.78);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      text-align: center;
+    }
+    .shop-stat-val {
+      font-size: 0.98rem;
+      font-weight: 900;
+      color: #fbbf24;
+      font-variant-numeric: tabular-nums;
+    }
+    .shop-stat-lbl {
+      font-size: 0.68rem;
+      color: #cbd5e1;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
     .shop-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -2311,32 +2349,44 @@
     }
     .shop-items-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+      gap: 13px;
       margin-bottom: 16px;
     }
     .shop-item-card {
-      background: rgba(15, 7, 28, 0.88);
-      border: 1px solid rgba(232, 121, 249, 0.28);
-      border-radius: 14px;
+      position: relative;
+      background: linear-gradient(175deg, rgba(31, 13, 56, 0.94), rgba(14, 7, 26, 0.98));
+      border: 1px solid rgba(232, 121, 249, 0.32);
+      border-radius: 16px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      box-shadow: var(--glass-edge), 0 10px 24px rgba(0, 0, 0, 0.52);
+      box-shadow: var(--glass-edge), 0 12px 28px rgba(0, 0, 0, 0.58);
+      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+    }
+    .shop-item-card:hover {
+      transform: translateY(-3px);
+      border-color: rgba(245, 158, 11, 0.65);
+      box-shadow: var(--glass-edge), 0 16px 34px rgba(0, 0, 0, 0.72), 0 0 20px rgba(168, 85, 247, 0.25);
     }
     .shop-item-img-box {
       position: relative;
-      height: 128px;
-      background: #0d051a;
+      height: 136px;
+      background: radial-gradient(circle at 50% 40%, rgba(168, 85, 247, 0.22), #0b0416 75%);
       display: grid;
       place-items: center;
       overflow: hidden;
+      cursor: zoom-in;
     }
     .shop-item-img-box img {
       width: 100%;
       height: 100%;
       object-fit: cover;
+      transition: transform 0.25s ease;
+    }
+    .shop-item-card:hover .shop-item-img-box img {
+      transform: scale(1.05);
     }
     .shop-stock-badge {
       position: absolute;
@@ -2344,48 +2394,63 @@
       right: 8px;
       font-size: 0.68rem;
       font-weight: 800;
-      padding: 2px 8px;
+      padding: 3px 9px;
       border-radius: 999px;
-      background: rgba(17, 12, 29, 0.9);
-      border: 1px solid rgba(74, 222, 128, 0.5);
+      background: rgba(14, 10, 24, 0.92);
+      border: 1px solid rgba(74, 222, 128, 0.55);
       color: #86efac;
+      backdrop-filter: blur(4px);
     }
     .shop-stock-badge.sold-out {
-      border-color: rgba(248, 113, 113, 0.55);
+      border-color: rgba(248, 113, 113, 0.65);
       color: #fca5a5;
     }
     .shop-item-body {
-      padding: 11px 12px 12px;
+      padding: 12px 13px;
     }
     .shop-item-cat {
-      font-size: 0.68rem;
+      display: inline-block;
+      font-size: 0.67rem;
       font-weight: 800;
-      color: #c084fc;
+      color: #f5d0fe;
+      background: rgba(168, 85, 247, 0.2);
+      border: 1px solid rgba(232, 121, 249, 0.35);
+      padding: 2px 8px;
+      border-radius: 999px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
     }
     .shop-item-name {
-      margin: 2px 0 4px;
-      font-size: 0.95rem;
+      margin: 6px 0 4px;
+      font-size: 0.98rem;
       font-weight: 800;
       color: #ffffff;
     }
     .shop-item-price {
-      font-size: 0.96rem;
+      font-size: 1rem;
       font-weight: 900;
       color: #fbbf24;
-      margin-bottom: 5px;
+      margin-bottom: 6px;
+      font-variant-numeric: tabular-nums;
     }
     .shop-item-desc {
-      margin: 0 0 6px;
+      margin: 0 0 7px;
       font-size: 0.78rem;
       color: #cbd5e1;
-      line-height: 1.38;
+      line-height: 1.4;
     }
     .shop-item-poster {
-      font-size: 0.72rem;
+      font-size: 0.73rem;
       color: #e9d5ff;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
+    }
+    .shop-empty-state {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 24px 16px;
+      border-radius: 16px;
+      background: rgba(14, 8, 26, 0.85);
+      border: 1px dashed rgba(245, 158, 11, 0.35);
     }
     .shop-upload-box {
       display: flex;
@@ -2393,29 +2458,142 @@
       align-items: center;
       justify-content: center;
       gap: 4px;
-      padding: 14px 12px;
+      padding: 15px 12px;
       border-radius: 12px;
-      border: 1.5px dashed rgba(245, 158, 11, 0.45);
-      background: rgba(11, 7, 20, 0.78);
+      border: 1.5px dashed rgba(245, 158, 11, 0.5);
+      background: rgba(11, 7, 20, 0.85);
       cursor: pointer;
       text-align: center;
       margin-bottom: 10px;
+      transition: border-color 0.16s ease, background 0.16s ease;
     }
     .shop-upload-box:hover {
       border-color: #fbbf24;
-      background: rgba(36, 13, 68, 0.65);
+      background: rgba(36, 13, 68, 0.75);
     }
     .shop-upload-preview {
-      max-height: 92px;
+      max-height: 98px;
       border-radius: 8px;
       display: none;
       margin-top: 6px;
       object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
     .admin-divider-box {
       margin-top: 14px;
-      padding-top: 14px;
-      border-top: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 16px;
+      border-radius: 16px;
+      background: linear-gradient(165deg, rgba(35, 14, 62, 0.92), rgba(14, 8, 25, 0.96));
+      border: 1px solid rgba(245, 158, 11, 0.42);
+      box-shadow: var(--glass-edge), 0 14px 30px rgba(0, 0, 0, 0.65);
+    }
+    .admin-status-pill {
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 3px 9px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.18);
+      border: 1px solid rgba(74, 222, 128, 0.5);
+      color: #86efac;
+    }
+    @media (max-width: 560px) {
+      .shop-stats-strip { grid-template-columns: 1fr; }
+    }
+  
+    .secret-admin-dot {
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: rgba(15, 10, 26, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #94a3b8;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .secret-admin-dot:hover {
+      color: #fde68a;
+      border-color: rgba(245, 158, 11, 0.45);
+      background: rgba(36, 13, 68, 0.85);
+    }
+    .shop-card-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .admin-item-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px dashed rgba(255, 255, 255, 0.12);
+    }
+    .btn-minus-one {
+      background: rgba(245, 158, 11, 0.16);
+      border: 1px solid rgba(251, 191, 36, 0.45);
+      color: #fde68a;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .btn-minus-one:hover:not(:disabled) {
+      background: rgba(245, 158, 11, 0.3);
+      transform: translateY(-1px);
+    }
+    .btn-sold-one {
+      background: rgba(34, 197, 94, 0.16);
+      border: 1px solid rgba(74, 222, 128, 0.45);
+      color: #86efac;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: transform 0.12s ease, background 0.12s ease;
+    }
+    .btn-sold-one:hover:not(:disabled) {
+      background: rgba(34, 197, 94, 0.28);
+      transform: translateY(-1px);
+    }
+    .btn-edit-item {
+      background: rgba(139, 92, 246, 0.2);
+      border: 1px solid rgba(192, 132, 252, 0.45);
+      color: #f3e8ff;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-edit-item:hover {
+      background: rgba(139, 92, 246, 0.34);
+    }
+    .btn-delete-item {
+      background: rgba(225, 29, 72, 0.18);
+      border: 1px solid rgba(251, 113, 133, 0.48);
+      color: #fecdd3;
+      border-radius: 8px;
+      padding: 4px 8px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-delete-item:hover {
+      background: rgba(225, 29, 72, 0.32);
+    }
+    .admin-webhook-note {
+      font-size: 0.73rem;
+      color: #86efac;
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.28);
+      border-radius: 10px;
+      padding: 8px 10px;
+      margin-bottom: 10px;
     }
 
   </style>
@@ -2931,9 +3109,27 @@
       </div>
       <!-- Panel 6: VortexShop Storefront (Hidden Admin Post Box) -->
       <div id="panel-shop" class="sub-panel">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-          <h3 style="margin:0;">VortexShop Listings</h3>
-          <button type="button" class="mini-action-btn" id="btn-admin-unlock" onclick="openAdminGateModal()">Admin</button>
+        <div class="shop-header-banner">
+          <div>
+            <h3 style="margin:0;">VortexShop Storefront</h3>
+            <div style="font-size:0.76rem;color:#cbd5e1;">Verified items, instant ticket checkout, and live stock sync.</div>
+          </div>
+          <button type="button" class="secret-admin-dot" id="btn-admin-unlock" onclick="openAdminGateModal()" title="Secret Admin Access (Ctrl+Shift+A)">&#9672; Vault</button>
+        </div>
+
+        <div class="shop-stats-strip">
+          <div class="shop-stat-tile">
+            <div class="shop-stat-val" id="shop-stat-total">0</div>
+            <div class="shop-stat-lbl">Total Listings</div>
+          </div>
+          <div class="shop-stat-tile">
+            <div class="shop-stat-val" id="shop-stat-avail">0</div>
+            <div class="shop-stat-lbl">Available Stock</div>
+          </div>
+          <div class="shop-stat-tile">
+            <div class="shop-stat-val" id="shop-stat-sold">0</div>
+            <div class="shop-stat-lbl">Sold Out</div>
+          </div>
         </div>
         <div class="safety-callout">
           <strong>No Pre-Payment on Website:</strong> Items listed in the Shop do not charge upfront on the site. Click <strong>Make Ticket to Buy</strong> to auto-fill a ticket with the item details and pay the seller who posted it directly inside your ticket.
@@ -2957,9 +3153,23 @@
         <div class="shop-items-grid" id="shop-items-grid"></div>
 
         <div class="admin-divider-box" id="shop-admin-section" style="display:none;">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;">
-            <h4 style="margin:0;">Admin Post Item (Unlocked)</h4>
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <h4 style="margin:0;">Admin Post Item</h4>
+              <span class="admin-status-pill">UNLOCKED</span>
+            </div>
             <button type="button" class="mini-action-btn" onclick="lockAdminPanel()">Lock Admin</button>
+          </div>
+          <div class="filter-chips-row" style="margin-bottom:10px;">
+            <span class="spotlight-label">QUICK CATEGORY:</span>
+            <button type="button" class="filter-chip" onclick="applyQuickCategory('MM2')">MM2</button>
+            <button type="button" class="filter-chip" onclick="applyQuickCategory('Grow a Garden 2')">Grow a Garden 2</button>
+            <button type="button" class="filter-chip" onclick="applyQuickCategory('Adopt Me!')">Adopt Me!</button>
+            <button type="button" class="filter-chip" onclick="applyQuickCategory('PS99')">PS99</button>
+            <button type="button" class="filter-chip" onclick="applyQuickCategory('Blade Ball')">Blade Ball</button>
+          </div>
+          <div class="admin-webhook-note">
+            <strong>Webhook &amp; Channel Auto-Sync Active:</strong> Adding items, <strong>-1</strong> stock minus, <strong>Sold 1</strong>, edits, and deletes sync to backend &amp; webhook automatically.
           </div>
           <form id="shop-admin-item-form" onsubmit="handleShopAddItem(event)">
             <div class="ticket-field">
@@ -3116,6 +3326,60 @@
         </div>
         <div class="ticket-actions-bar">
           <button type="submit" class="btn-ticket-close">Unlock Post Form</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <div id="edit-shop-item-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-shop-item-title">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="edit-shop-item-title">Adjust Shop Item</h3>
+        <button type="button" class="modal-close" onclick="closeEditItemModal()">&#10005;</button>
+      </div>
+      <form id="edit-shop-item-form" onsubmit="saveEditedShopItem(event)">
+        <input type="hidden" id="edit-item-id" />
+        <div class="ticket-field">
+          <label for="edit-item-name">Item Name *</label>
+          <input type="text" id="edit-item-name" class="ticket-input" required />
+        </div>
+        <div class="ticket-grid-2">
+          <div class="ticket-field">
+            <label for="edit-item-price">Price *</label>
+            <input type="number" id="edit-item-price" class="ticket-input" step="0.01" min="0" required />
+          </div>
+          <div class="ticket-field">
+            <label for="edit-item-currency">Currency</label>
+            <select id="edit-item-currency" class="ticket-select">
+              <option value="USD">USD</option>
+              <option value="PHP">PHP</option>
+              <option value="EUR">EUR</option>
+              <option value="ROB">ROB</option>
+            </select>
+          </div>
+        </div>
+        <div class="ticket-grid-2">
+          <div class="ticket-field">
+            <label for="edit-item-stock">Stock *</label>
+            <input type="number" id="edit-item-stock" class="ticket-input" min="0" required />
+          </div>
+          <div class="ticket-field">
+            <label for="edit-item-category">Category</label>
+            <input type="text" id="edit-item-category" class="ticket-input" />
+          </div>
+        </div>
+        <div class="ticket-field">
+          <label for="edit-item-image-url">Image URL</label>
+          <input type="url" id="edit-item-image-url" class="ticket-input" placeholder="https://..." />
+        </div>
+        <div class="ticket-field">
+          <label for="edit-item-image-file">Or Upload New Image</label>
+          <input type="file" id="edit-item-image-file" class="ticket-input" accept="image/png,image/jpeg,image/webp" onchange="handleEditItemImageFile(event)" />
+        </div>
+        <div class="ticket-actions-bar">
+          <button type="submit" class="btn-ticket-close">Save &amp; Sync</button>
+          <button type="button" class="mini-action-btn" onclick="closeEditItemModal()">Cancel</button>
         </div>
       </form>
     </div>
@@ -4527,22 +4791,248 @@
       document.getElementById("admin-gate-modal").classList.remove("open");
     }
 
-    function lockAdminPanel() {
-      verifiedAdminPassword = "";
-      const sec = document.getElementById("shop-admin-section");
-      if (sec) sec.style.display = "none";
-      showToast("Admin panel locked.");
-    }
+
+
+    let editItemUploadedDataUrl = "";
+    let isAdminUnlocked = false;
+
+    document.addEventListener("keydown", (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "a") {
+        e.preventDefault();
+        openAdminGateModal();
+      }
+    });
 
     async function verifyAdminPassword(e) {
       e.preventDefault();
       const pwd = document.getElementById("admin-gate-password").value;
       if (!pwd) return;
+
+      try {
+        const res = await fetch("/api/admin/verify", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_password: pwd }),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.ok === false) {
+            showToast(data.error || "Invalid admin password.");
+            return;
+          }
+        }
+      } catch {}
+
       verifiedAdminPassword = pwd;
+      isAdminUnlocked = true;
       closeAdminGateModal();
       const sec = document.getElementById("shop-admin-section");
       if (sec) sec.style.display = "block";
-      showToast("Admin post form unlocked.");
+      renderShopItemsList();
+      showToast("Secret admin panel unlocked.");
+    }
+
+    function lockAdminPanel() {
+      verifiedAdminPassword = "";
+      isAdminUnlocked = false;
+      const sec = document.getElementById("shop-admin-section");
+      if (sec) sec.style.display = "none";
+      renderShopItemsList();
+      showToast("Admin panel locked.");
+    }
+
+    async function dispatchShopWebhook(eventType, itemObj, extra = {}) {
+      try {
+        await fetch("/api/shop/webhook", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            event: eventType,
+            admin_password: verifiedAdminPassword,
+            item: itemObj,
+            ...extra,
+            timestamp: new Date().toISOString(),
+          }),
+        });
+      } catch {}
+    }
+
+    async function adjustItemMinusOne(itemId) {
+      if (!isAdminUnlocked) {
+        openAdminGateModal();
+        return;
+      }
+      const target = shopCatalogItems.find((i) => i.id === itemId);
+      if (!target) return;
+
+      try {
+        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}/minus`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_password: verifiedAdminPassword, delta: -1 }),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok && data.item) {
+          shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? data.item : it));
+          renderShopItemsList();
+          showToast(`Stock -1 on "${data.item.name}" (Stock: ${data.item.stock}) & sent via webhook.`);
+          return;
+        }
+      } catch {}
+
+      const nextStock = Math.max(0, Number(target.stock || 0) - 1);
+      const updated = { ...target, stock: nextStock, status: nextStock <= 0 ? "SOLD" : "AVAILABLE" };
+      shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? updated : it));
+      renderShopItemsList();
+      await dispatchShopWebhook("stock_minus", updated, { delta: -1 });
+      showToast(`Stock -1 on "${updated.name}" (Stock: ${updated.stock}) & webhook triggered.`);
+    }
+
+    async function soldOneShopItem(itemId) {
+      if (!isAdminUnlocked) {
+        openAdminGateModal();
+        return;
+      }
+      const target = shopCatalogItems.find((i) => i.id === itemId);
+      if (!target) return;
+
+      try {
+        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}/sold`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_password: verifiedAdminPassword, sold_qty: 1, auto_send_channel: true }),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok && data.item) {
+          shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? data.item : it));
+          renderShopItemsList();
+          showToast(`Sold 1 "${data.item.name}" & sent to channel via webhook.`);
+          return;
+        }
+      } catch {}
+
+      const nextStock = Math.max(0, Number(target.stock || 1) - 1);
+      const updated = { ...target, stock: nextStock, status: nextStock <= 0 ? "SOLD" : "AVAILABLE" };
+      shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? updated : it));
+      renderShopItemsList();
+      await dispatchShopWebhook("sold_1", updated, { sold_qty: 1, auto_send_channel: true });
+      showToast(`Sold 1 "${updated.name}" & sent from channel via webhook.`);
+    }
+
+    async function deleteShopItem(itemId) {
+      if (!isAdminUnlocked) {
+        openAdminGateModal();
+        return;
+      }
+      const target = shopCatalogItems.find((i) => i.id === itemId);
+      if (!target) return;
+
+      try {
+        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ admin_password: verifiedAdminPassword }),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok !== false) {
+          shopCatalogItems = shopCatalogItems.filter((it) => it.id !== itemId);
+          renderShopItemsList();
+          showToast(`Deleted "${target.name}" & synced via webhook.`);
+          return;
+        }
+      } catch {}
+
+      shopCatalogItems = shopCatalogItems.filter((it) => it.id !== itemId);
+      renderShopItemsList();
+      await dispatchShopWebhook("item_deleted", target);
+      showToast(`Deleted "${target.name}" & webhook triggered.`);
+    }
+
+    function openEditItemModal(itemId) {
+      if (!isAdminUnlocked) {
+        openAdminGateModal();
+        return;
+      }
+      const item = shopCatalogItems.find((i) => i.id === itemId);
+      if (!item) return;
+      editItemUploadedDataUrl = "";
+      document.getElementById("edit-item-id").value = item.id;
+      document.getElementById("edit-item-name").value = item.name || "";
+      document.getElementById("edit-item-price").value = item.price ?? 0;
+      document.getElementById("edit-item-currency").value = item.currency || "USD";
+      document.getElementById("edit-item-stock").value = item.stock ?? 0;
+      document.getElementById("edit-item-category").value = item.category || "";
+      document.getElementById("edit-item-image-url").value = (item.image_url || "").startsWith("data:") ? "" : (item.image_url || "");
+      const fileInp = document.getElementById("edit-item-image-file");
+      if (fileInp) fileInp.value = "";
+      document.getElementById("edit-shop-item-modal").classList.add("open");
+    }
+
+    function closeEditItemModal() {
+      document.getElementById("edit-shop-item-modal").classList.remove("open");
+    }
+
+    function handleEditItemImageFile(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      if (file.size > 3 * 1024 * 1024) {
+        showToast("Image must be 3 MB or smaller.");
+        e.target.value = "";
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = () => {
+        editItemUploadedDataUrl = String(reader.result || "");
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveEditedShopItem(e) {
+      e.preventDefault();
+      const itemId = document.getElementById("edit-item-id").value;
+      const existing = shopCatalogItems.find((i) => i.id === itemId);
+      if (!existing) return;
+
+      const nextImage =
+        editItemUploadedDataUrl ||
+        document.getElementById("edit-item-image-url").value.trim() ||
+        existing.image_url ||
+        "";
+      const nextStock = Math.max(0, Number(document.getElementById("edit-item-stock").value || 0));
+
+      const updatedPayload = {
+        admin_password: verifiedAdminPassword,
+        name: document.getElementById("edit-item-name").value.trim(),
+        price: Number(document.getElementById("edit-item-price").value || 0).toFixed(2),
+        currency: document.getElementById("edit-item-currency").value,
+        stock: nextStock,
+        category: document.getElementById("edit-item-category").value.trim() || existing.category || "Item",
+        image_url: nextImage,
+        status: nextStock <= 0 ? "SOLD" : "AVAILABLE",
+      };
+
+      try {
+        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(updatedPayload),
+        });
+        const data = await res.json();
+        if (res.ok && data.ok && data.item) {
+          shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? data.item : it));
+          renderShopItemsList();
+          closeEditItemModal();
+          showToast(`Updated "${data.item.name}" & synced via webhook.`);
+          return;
+        }
+      } catch {}
+
+      const merged = { ...existing, ...updatedPayload };
+      shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? merged : it));
+      renderShopItemsList();
+      closeEditItemModal();
+      await dispatchShopWebhook("item_updated", merged);
+      showToast(`Updated "${merged.name}" & webhook triggered.`);
     }
 
     function handleShopImageFile(e) {
@@ -4648,33 +5138,34 @@
       showToast(`Ticket ready for "${item.name}". Pay ${item.posted_by} inside your ticket.`);
     }
 
-    async function markShopItemSold(itemId) {
-      const buyerTag = prompt("Enter buyer @username or ticket note for Sold Webhook:", "@buyer") || "@buyer";
-      try {
-        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}/sold`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ buyer: buyerTag }),
-        });
-        const data = await res.json();
-        if (res.ok && data.ok) {
-          shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? data.item : it));
-          renderShopItemsList();
-          showToast(`Marked "${data.item.name}" as SOLD & sent sold webhook.`);
-          return;
-        }
-      } catch {}
 
-      shopCatalogItems = shopCatalogItems.map((it) => {
-        if (it.id !== itemId) return it;
-        const nextStock = Math.max(0, Number(it.stock || 1) - 1);
-        return { ...it, stock: nextStock, status: nextStock <= 0 ? "SOLD" : "AVAILABLE" };
-      });
-      renderShopItemsList();
-      showToast("Marked item as SOLD.");
+
+
+    function updateShopStats() {
+      const totalEl = document.getElementById("shop-stat-total");
+      const availEl = document.getElementById("shop-stat-avail");
+      const soldEl = document.getElementById("shop-stat-sold");
+      if (!totalEl || !availEl || !soldEl) return;
+
+      const total = shopCatalogItems.length;
+      const soldCount = shopCatalogItems.filter((it) => Number(it.stock || 0) <= 0 || it.status === "SOLD").length;
+      const totalStock = shopCatalogItems.reduce((sum, it) => sum + Math.max(0, Number(it.stock || 0)), 0);
+
+      totalEl.textContent = String(total);
+      availEl.textContent = String(totalStock);
+      soldEl.textContent = String(soldCount);
+    }
+
+    function applyQuickCategory(catName) {
+      const catInput = document.getElementById("shop-item-category");
+      if (catInput) {
+        catInput.value = catName;
+        catInput.focus();
+      }
     }
 
     function renderShopItemsList() {
+      updateShopStats();
       const grid = document.getElementById("shop-items-grid");
       if (!grid) return;
       const q = (document.getElementById("shop-search-input")?.value || "").trim().toLowerCase();
@@ -4690,7 +5181,7 @@
       });
 
       if (!items.length) {
-        grid.innerHTML = `<div class="vouch-card"><p class="vouch-note">No items posted in Shop yet.</p></div>`;
+        grid.innerHTML = `<div class="shop-empty-state"><div style="font-size:1.3rem;margin-bottom:6px;">🛍️</div><p class="vouch-note" style="margin:0;">No items posted in Shop yet.</p></div>`;
         return;
       }
 
@@ -4700,7 +5191,7 @@
         return `
           <div class="shop-item-card">
             <div>
-              <div class="shop-item-img-box">
+              <div class="shop-item-img-box" onclick="openLightbox('${escapeHtml(it.name)}', '${escapeHtml(imgSrc)}')">
                 <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(it.name)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" />
                 <span class="shop-stock-badge ${soldOut ? "sold-out" : ""}">${soldOut ? "SOLD OUT" : `Stock: ${it.stock}`}</span>
               </div>
@@ -4717,10 +5208,15 @@
                 <button type="button" class="btn-ticket-primary" style="padding:7px 10px;font-size:0.74rem;" ${soldOut ? "disabled" : ""} onclick="makeTicketToBuy('${escapeHtml(it.id)}')">
                   Make Ticket to Buy
                 </button>
-                <button type="button" class="m-copy-btn" ${soldOut ? "disabled" : ""} onclick="markShopItemSold('${escapeHtml(it.id)}')">
-                  Mark Sold
-                </button>
               </div>
+              ${isAdminUnlocked ? `
+                <div class="admin-item-controls">
+                  <button type="button" class="btn-minus-one" ${soldOut ? "disabled" : ""} onclick="adjustItemMinusOne('${escapeHtml(it.id)}')">-1 Stock</button>
+                  <button type="button" class="btn-sold-one" ${soldOut ? "disabled" : ""} onclick="soldOneShopItem('${escapeHtml(it.id)}')">Sold 1</button>
+                  <button type="button" class="btn-edit-item" onclick="openEditItemModal('${escapeHtml(it.id)}')">Edit</button>
+                  <button type="button" class="btn-delete-item" onclick="deleteShopItem('${escapeHtml(it.id)}')">Delete</button>
+                </div>
+              ` : ""}
             </div>
           </div>
         `;
