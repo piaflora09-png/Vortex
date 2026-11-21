@@ -89,11 +89,18 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
+    @keyframes effectShimmer {
+      0% { transform: translateX(-100%) rotate(12deg); opacity: 0; }
+      35% { opacity: 0.75; }
+      70% { opacity: 0.45; }
+      100% { transform: translateX(220%) rotate(12deg); opacity: 0; }
+    }
+
     .top-nav {
       position: relative;
       z-index: 5;
       width: 100%;
-      max-width: 980px;
+      max-width: 1020px;
       display: flex;
       flex-wrap: wrap;
       align-items: center;
@@ -184,7 +191,7 @@
       align-items: flex-start;
       justify-content: center;
       gap: 34px;
-      max-width: 980px;
+      max-width: 1020px;
       width: 100%;
       animation: settleIn 0.45s ease;
     }
@@ -198,7 +205,7 @@
 
     .outer-stage {
       position: relative;
-      width: 388px;
+      width: 396px;
       max-width: 100%;
       padding-top: 26px;
       flex-shrink: 0;
@@ -246,26 +253,6 @@
         0 28px 70px rgba(0, 0, 0, 0.9);
     }
 
-    .frame-shell::before,
-    .frame-shell::after {
-      content: "";
-      position: absolute;
-      top: 32px;
-      bottom: 24px;
-      width: 10px;
-      border-radius: 999px;
-      pointer-events: none;
-      opacity: 0.85;
-    }
-    .frame-shell::before {
-      left: -4px;
-      background: linear-gradient(180deg, #f472b6, #a855f7 55%, #6366f1);
-    }
-    .frame-shell::after {
-      right: -4px;
-      background: linear-gradient(180deg, #e879f9, #7c3aed 60%, #4c1d95);
-    }
-
     .card {
       position: relative;
       background: linear-gradient(180deg, #240d44 0%, #1c0936 55%, #150629 100%);
@@ -274,29 +261,43 @@
       z-index: 2;
     }
 
-    .card::after {
-      content: "";
+    .profile-effect-layer {
       position: absolute;
-      top: 0;
-      left: -130%;
-      width: 65%;
+      inset: 0;
+      pointer-events: none;
+      z-index: 5;
+      overflow: hidden;
+      display: none;
+    }
+    .profile-effect-layer.active {
+      display: block;
+    }
+    .profile-effect-layer img.effect-asset {
+      width: 100%;
       height: 100%;
+      object-fit: cover;
+      opacity: 0.72;
+      mix-blend-mode: screen;
+    }
+    .profile-effect-sweep {
+      position: absolute;
+      top: -40%;
+      left: -40%;
+      width: 55%;
+      height: 180%;
       background: linear-gradient(
         90deg,
         transparent,
-        rgba(255, 255, 255, 0.06),
+        rgba(232, 121, 249, 0.22),
+        rgba(245, 158, 11, 0.18),
         transparent
       );
-      transform: skewX(-20deg);
-      transition: left 0.65s ease;
-      pointer-events: none;
-      z-index: 5;
+      animation: effectShimmer 4.5s ease-in-out infinite;
     }
-    .card:hover::after { left: 160%; }
 
     .banner {
       position: relative;
-      height: 148px;
+      height: 152px;
       background-color: #1c0b36;
       background-image:
         linear-gradient(135deg, rgba(168, 85, 247, 0.42), rgba(236, 72, 153, 0.32)),
@@ -318,9 +319,9 @@
       inset: 0;
       background: linear-gradient(
         180deg,
-        rgba(7, 5, 12, 0.42) 0%,
+        rgba(7, 5, 12, 0.35) 0%,
         rgba(7, 5, 12, 0.05) 55%,
-        rgba(21, 6, 41, 0.45) 100%
+        rgba(21, 6, 41, 0.52) 100%
       );
       pointer-events: none;
     }
@@ -488,6 +489,20 @@
       cursor: pointer;
     }
     .copy-handle-inline:hover { color: #fff; background: rgba(168, 85, 247, 0.25); }
+
+    .effect-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 8px;
+      background: rgba(168, 85, 247, 0.16);
+      border: 1px solid rgba(232, 121, 249, 0.35);
+      color: #f5d0fe;
+      font-size: 0.76rem;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
 
     .bio-link {
       font-size: 0.92rem;
@@ -716,7 +731,7 @@
     }
 
     .server-column {
-      width: 475px;
+      width: 510px;
       max-width: 100%;
       padding-top: 26px;
       flex-shrink: 0;
@@ -744,25 +759,6 @@
         0 0 36px rgba(245, 158, 11, 0.22),
         0 28px 70px rgba(0, 0, 0, 0.9);
     }
-
-    .server-card::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: -130%;
-      width: 65%;
-      height: 100%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(255, 255, 255, 0.05),
-        transparent
-      );
-      transform: skewX(-20deg);
-      transition: left 0.65s ease;
-      pointer-events: none;
-    }
-    .server-card:hover::after { left: 160%; }
 
     .server-banner-strip {
       display: none;
@@ -1038,6 +1034,112 @@
     .game-card-item strong { color: #fbbf24; display: block; margin-bottom: 4px; font-size: 0.95rem; }
     .game-card-item span { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
 
+    .role-legend-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+
+    .role-legend-card {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+    }
+
+    .role-icon-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      object-fit: cover;
+      background: rgba(15, 8, 28, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      flex-shrink: 0;
+    }
+
+    .role-legend-title {
+      font-size: 0.83rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .role-legend-id {
+      font-size: 0.7rem;
+      color: #94a3b8;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .staff-member-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      margin-bottom: 8px;
+    }
+
+    .staff-member-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .staff-member-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1.5px solid rgba(245, 158, 11, 0.45);
+      background: #240d44;
+      flex-shrink: 0;
+    }
+
+    .staff-member-name {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .staff-member-handle {
+      font-size: 0.75rem;
+      color: #cbd5e1;
+    }
+
+    .staff-roles-badges {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .staff-role-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(139, 92, 246, 0.16);
+      border: 1px solid rgba(192, 132, 252, 0.35);
+      font-size: 0.73rem;
+      font-weight: 700;
+      color: #f3e8ff;
+    }
+
+    .staff-role-pill img {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      border-radius: 3px;
+    }
+
     .vouch-card {
       padding: 11px 13px;
       border-radius: 12px;
@@ -1183,6 +1285,7 @@
   <header class="top-nav" aria-label="Navigation and Sync Controls">
     <div class="nav-tabs" role="tablist">
       <button type="button" class="nav-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
+      <button type="button" class="nav-tab" data-tab="staff" onclick="switchTab('staff')">Staff &amp; Roles</button>
       <button type="button" class="nav-tab" data-tab="games" onclick="switchTab('games')">Roblox Crosstrading</button>
       <button type="button" class="nav-tab" data-tab="rules" onclick="switchTab('rules')">MM &amp; Rules</button>
     </div>
@@ -1224,6 +1327,11 @@
 
       <div class="frame-shell">
         <div class="card">
+          <div id="profile-effect-layer" class="profile-effect-layer">
+            <img id="profile-effect-img" class="effect-asset" src="" alt="" style="display:none;" />
+            <div class="profile-effect-sweep"></div>
+          </div>
+
           <div id="banner" class="banner">
             <div class="banner-top-actions">
               <button type="button" class="circle-btn" title="Copy User ID" aria-label="Copy User ID" onclick="copyUserId()">ID</button>
@@ -1255,6 +1363,11 @@
               <button type="button" class="copy-handle-inline" id="btn-copy-handle" onclick="copyHandle()">Copy</button>
             </div>
 
+            <div class="effect-tag-pill" id="profile-effect-pill">
+              <span>✨</span>
+              <span id="profile-effect-label">Effect: Default Shimmer (elwey.fr/effects)</span>
+            </div>
+
             <div class="bio-link">
               <a id="bio-link" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
                 Check out vortexshop.onrender.com
@@ -1281,7 +1394,8 @@
             </div>
 
             <div id="role-pill" class="role-pill">
-              <span>👑</span>
+              <img id="role-pill-icon" src="" alt="" style="width:16px;height:16px;object-fit:contain;border-radius:3px;display:none;" />
+              <span id="role-pill-emoji">👑</span>
               <span id="role-pill-text">VortexShop</span>
             </div>
 
@@ -1301,10 +1415,10 @@
             <div class="member-label">Member Since</div>
             <div id="member-since" class="member-date">Aug 22, 2026</div>
 
-            <div class="game-collection-bar" onclick="switchTab('games')" title="View Roblox Crosstrading & Vouches">
-              <span class="gc-title">Roblox Crosstrading</span>
+            <div class="game-collection-bar" onclick="switchTab('staff')" title="View Staff & Role Members">
+              <span class="gc-title">Staff &amp; Role Directory</span>
               <div class="gc-icons">
-                <div class="gc-tile gc-roblox" title="Roblox Any Game">❖</div>
+                <div class="gc-tile gc-roblox" title="Staff Roles">❖</div>
                 <div class="gc-tile gc-mm" title="Verified Escrow & Vouches">✦</div>
               </div>
             </div>
@@ -1374,6 +1488,19 @@
         <div class="toast-msg" id="toast-msg"></div>
       </div>
 
+      <div id="panel-staff" class="sub-panel">
+        <h3>Tracked Staff Roles &amp; Members</h3>
+        <div class="custom-note-box">
+          Members holding any of the tracked staff role IDs (<code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, <code>1568387457752371270</code>) are synced automatically from the Discord server.
+        </div>
+
+        <h4>Role Icons Reference</h4>
+        <div class="role-legend-grid" id="role-legend-container"></div>
+
+        <h4>Members with Staff Roles (<span id="staff-count-label">0</span>)</h4>
+        <div id="staff-members-container"></div>
+      </div>
+
       <div id="panel-games" class="sub-panel">
         <h3>Roblox Crosstrading (Any Game) &amp; Shop</h3>
         <div class="custom-note-box" id="custom-trade-note-box"></div>
@@ -1417,6 +1544,8 @@
     let currentHandle = "mvn412.";
     let allGames = [];
     let allVouches = [];
+    let roleCatalog = [];
+    let staffMembers = [];
 
     function escapeHtml(str) {
       return String(str ?? "")
@@ -1511,8 +1640,93 @@
       document.querySelectorAll(".nav-tab").forEach((btn) => {
         btn.classList.toggle("active", btn.getAttribute("data-tab") === tabName);
       });
+      document.getElementById("panel-staff").classList.toggle("active", tabName === "staff");
       document.getElementById("panel-games").classList.toggle("active", tabName === "games");
       document.getElementById("panel-rules").classList.toggle("active", tabName === "rules");
+    }
+
+    function getInitials(name) {
+      return (name || "VX")
+        .split(/\s+/)
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((w) => w[0].toUpperCase())
+        .join("") || "VX";
+    }
+
+    function renderStaffSection() {
+      const legendEl = document.getElementById("role-legend-container");
+      legendEl.innerHTML = "";
+
+      roleCatalog.forEach((r) => {
+        const card = document.createElement("div");
+        card.className = "role-legend-card";
+
+        const img = document.createElement("img");
+        img.className = "role-icon-badge";
+        img.src = r.icon_url;
+        img.alt = r.label;
+        img.onerror = () => { img.style.display = "none"; };
+
+        const info = document.createElement("div");
+        info.innerHTML = `<div class="role-legend-title">${escapeHtml(r.label)}</div><div class="role-legend-id">${escapeHtml(r.id || "Icon Role")}</div>`;
+
+        card.appendChild(img);
+        card.appendChild(info);
+        legendEl.appendChild(card);
+      });
+
+      const membersEl = document.getElementById("staff-members-container");
+      const countEl = document.getElementById("staff-count-label");
+      membersEl.innerHTML = "";
+      countEl.textContent = String(staffMembers.length);
+
+      if (!staffMembers.length) {
+        membersEl.innerHTML = `<div class="vouch-card"><p class="vouch-note">No members currently detected with the tracked staff role IDs yet (bot may still be syncing or members do not have those role IDs).</p></div>`;
+        return;
+      }
+
+      staffMembers.forEach((m) => {
+        const row = document.createElement("div");
+        row.className = "staff-member-card";
+
+        const left = document.createElement("div");
+        left.className = "staff-member-left";
+
+        const av = document.createElement("img");
+        av.className = "staff-member-avatar";
+        av.src = m.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
+        av.alt = m.display_name || m.username || "Staff";
+
+        const textCol = document.createElement("div");
+        textCol.innerHTML = `<div class="staff-member-name">${escapeHtml(m.display_name || m.username)}</div><div class="staff-member-handle">@${escapeHtml(m.username)} • ID: ${escapeHtml(m.id)}</div>`;
+
+        left.appendChild(av);
+        left.appendChild(textCol);
+
+        const rolesWrap = document.createElement("div");
+        rolesWrap.className = "staff-roles-badges";
+
+        (m.roles || []).forEach((roleItem) => {
+          const pill = document.createElement("span");
+          pill.className = "staff-role-pill";
+          if (roleItem.icon_url) {
+            const rImg = document.createElement("img");
+            rImg.src = roleItem.icon_url;
+            rImg.alt = roleItem.name;
+            rImg.onerror = () => { rImg.remove(); };
+            pill.appendChild(rImg);
+          }
+          const labelSpan = document.createElement("span");
+          labelSpan.textContent = roleItem.name;
+          pill.appendChild(labelSpan);
+          rolesWrap.appendChild(pill);
+        });
+
+        row.appendChild(left);
+        row.appendChild(rolesWrap);
+        membersEl.appendChild(row);
+      });
     }
 
     function renderGames() {
@@ -1524,15 +1738,6 @@
         box.innerHTML = `<strong>${escapeHtml(g.tag || "•")} ${escapeHtml(g.title)}</strong><span>${escapeHtml(g.note)}</span>`;
         container.appendChild(box);
       });
-    }
-
-    function getInitials(name) {
-      return (name || "MM")
-        .split(/\\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((w) => w[0].toUpperCase())
-        .join("") || "MM";
     }
 
     function renderVouches() {
@@ -1663,6 +1868,24 @@
           decoEl.style.display = "none";
         }
 
+        const effectLayer = document.getElementById("profile-effect-layer");
+        const effectImg = document.getElementById("profile-effect-img");
+        const effectLabel = document.getElementById("profile-effect-label");
+        const eff = d.profile_effect || {};
+
+        effectLayer.classList.add("active");
+        effectLabel.textContent = eff.name
+          ? `Effect: ${eff.name} (${eff.source || "elwey.fr/effects"})`
+          : "Effect: Shimmer (elwey.fr/effects)";
+
+        if (eff.asset_url) {
+          effectImg.src = eff.asset_url;
+          effectImg.style.display = "block";
+          effectImg.onerror = () => { effectImg.style.display = "none"; };
+        } else {
+          effectImg.style.display = "none";
+        }
+
         const st = d.status || "online";
         document.getElementById("status-dot").className = `status-dot ${st}`;
         applyStatusGlow(st);
@@ -1691,6 +1914,20 @@
         clanEmoji.textContent = d.clan_emoji || "🍃";
         document.getElementById("clan-tag").textContent = d.clan_tag || "VEM";
 
+        const roleIconEl = document.getElementById("role-pill-icon");
+        const roleEmojiEl = document.getElementById("role-pill-emoji");
+        if (d.role_badge_icon_url) {
+          roleIconEl.src = d.role_badge_icon_url;
+          roleIconEl.style.display = "inline-block";
+          roleEmojiEl.style.display = "none";
+          roleIconEl.onerror = () => {
+            roleIconEl.style.display = "none";
+            roleEmojiEl.style.display = "inline";
+          };
+        } else {
+          roleIconEl.style.display = "none";
+          roleEmojiEl.style.display = "inline";
+        }
         document.getElementById("role-pill-text").textContent = d.role_badge_text || "VortexShop";
         document.getElementById("owner-line").textContent = d.owner_line || "Owner of this server-";
 
@@ -1727,6 +1964,10 @@
           }
           badgeBar.appendChild(item);
         });
+
+        roleCatalog = payload.role_catalog || [];
+        staffMembers = payload.staff_members || [];
+        renderStaffSection();
 
         allGames = d.games || [];
         renderGames();
