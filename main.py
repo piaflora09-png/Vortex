@@ -6,7 +6,6 @@ import sqlite3
 import datetime
 import threading
 import urllib.request
-import urllib.error
 from flask import Flask, request, jsonify, send_from_directory
 import discord
 from discord.ext import commands
@@ -20,7 +19,6 @@ OWNER_USER_ID = int(os.getenv("OWNER_USER_ID", "1540575139538796634"))
 ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "vortexadmin2026")
 PORT = int(os.getenv("PORT", "10000"))
 
-# Webhooks for Shop & Ticket Logs (Optional - set in env vars)
 WEBHOOK_ITEM_ADDED = os.getenv("WEBHOOK_ITEM_ADDED", "").strip()
 WEBHOOK_ITEM_SOLD = os.getenv("WEBHOOK_ITEM_SOLD", "").strip()
 WEBHOOK_TICKET_CLOSED = os.getenv("WEBHOOK_TICKET_CLOSED", "").strip()
@@ -29,9 +27,6 @@ DB_PATH = os.getenv("DB_PATH", "vortexshop.db").strip()
 LEGACY_JSON_FILE = "vortex_state.json"
 HTML_FILE = "index-v2.html"
 
-# =========================================================
-# SQLITE DATABASE LAYER (Shop Items, Closed Tickets & Logs)
-# =========================================================
 DEFAULT_SEED_ITEMS = [
     {
         "id": "vx-seed-1",
@@ -165,10 +160,20 @@ def init_database():
             )
         """)
 
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS app_meta (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            )
+        """)
+
         cur.execute("SELECT COUNT(*) AS cnt FROM shop_items")
         item_count = cur.fetchone()["cnt"]
         cur.execute("SELECT COUNT(*) AS cnt FROM closed_tickets")
         ticket_count = cur.fetchone()["cnt"]
+        cur.execute("SELECT value FROM app_meta WHERE key = 'seeded_once'")
+        seeded_row = cur.fetchone()
+        already_seeded = bool(seeded_row and seeded_row["value"] == "1")
 
         if item_count == 0 and ticket_count == 0 and os.path.exists(LEGACY_JSON_FILE):
             try:
@@ -224,11 +229,12 @@ def init_database():
                             str(tk.get("closed_at") or now_iso),
                         ),
                     )
+                already_seeded = True
             except Exception as exc:
                 print(f"[DB Legacy Import Warning] {exc}")
 
         cur.execute("SELECT COUNT(*) AS cnt FROM shop_items")
-        if cur.fetchone()["cnt"] == 0:
+        if cur.fetchone()["cnt"] == 0 and not already_seeded:
             for seed in DEFAULT_SEED_ITEMS:
                 cur.execute(
                     """
@@ -253,6 +259,9 @@ def init_database():
                     ),
                 )
 
+        cur.execute(
+            "INSERT OR REPLACE INTO app_meta (key, value) VALUES ('seeded_once', '1')"
+        )
         conn.commit()
         conn.close()
 
@@ -309,6 +318,43 @@ def db_add_item(item: dict):
         conn.commit()
         conn.close()
     record_activity("ITEM_ADDED", item["id"], f"Added {item['name']} (stock={item['stock']}, {item['price']} {item['currency']})")
+
+
+def db_update_item(item_id: str, fields: dict):
+    now_iso = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    with db_lock:
+        conn = get_db_connection()
+        row = conn.execute("SELECT * FROM shop_items WHERE id = ?", (item_id,)).fetchone()
+        if not row:
+            conn.close()
+            return None
+        next_stock = max(0, int(fields.get("stock", row["stock"])))
+        next_status = "SOLD" if next_stock <= 0 else str(fields.get("status") or "AVAILABLE")
+        conn.execute(
+            """
+            UPDATE shop_items
+            SET name = ?, category = ?, stock = ?, price = ?, currency = ?,
+                image_url = ?, status = ?, updated_at = ?
+            WHERE id = ?
+            """,
+            (
+                str(fields.get("name", row["name"])),
+                str(fields.get("category", row["category"])),
+                next_stock,
+                str(fields.get("price", row["price"])),
+                str(fields.get("currency", row["currency"])).upper(),
+                str(fields.get("image_url", row["image_url"] or "")),
+                next_status,
+                now_iso,
+                item_id,
+            ),
+        )
+        updated_row = conn.execute("SELECT * FROM shop_items WHERE id = ?", (item_id,)).fetchone()
+        conn.commit()
+        conn.close()
+    updated = _row_to_item(updated_row)
+    record_activity("ITEM_UPDATED", item_id, f"Updated {updated['name']} (stock={next_stock})")
+    return updated
 
 
 def db_adjust_stock(item_id: str, delta: int):
@@ -519,6 +565,39 @@ def api_state():
     return jsonify(get_store_state())
 
 
+@app.route("/api/admin/verify", methods=["POST"])
+def api_admin_verify():
+    data = request.get_json(silent=True) or {}
+    if data.get("admin_password") != ADMIN_PASSWORD:
+        return jsonify({"ok": False, "error": "Invalid admin password."}), 403
+    return jsonify({"ok": True})
+
+
+@app.route("/api/shop/webhook", methods=["POST"])
+def api_shop_webhook():
+    data = request.get_json(silent=True) or {}
+    if data.get("admin_password") != ADMIN_PASSWORD:
+        return jsonify({"ok": False, "error": "Invalid admin password."}), 403
+    event_name = str(data.get("event") or "shop_event")
+    item = data.get("item") if isinstance(data.get("item"), dict) else {}
+    threading.Thread(
+        target=post_discord_webhook,
+        args=(
+            WEBHOOK_ITEM_SOLD or WEBHOOK_ITEM_ADDED,
+            f"🔔 VortexShop Event ({event_name}): {item.get('name', 'Item')}",
+            [
+                {"name": "Price", "value": f"{item.get('price', '0.00')} {item.get('currency', 'USD')}", "inline": True},
+                {"name": "Stock", "value": str(item.get("stock", 0)), "inline": True},
+                {"name": "Seller", "value": str(item.get("posted_by", "@mvn412.")), "inline": True},
+            ],
+            0xA855F7,
+            str(item.get("image_url", "")),
+        ),
+        daemon=True,
+    ).start()
+    return jsonify({"ok": True})
+
+
 @app.route("/api/shop/items", methods=["POST"])
 def api_add_shop_item():
     data = request.get_json(silent=True) or {}
@@ -577,6 +656,19 @@ def api_add_shop_item():
     return jsonify({"ok": True, "item": item})
 
 
+@app.route("/api/shop/items/<item_id>", methods=["PATCH"])
+def api_patch_shop_item(item_id):
+    data = request.get_json(silent=True) or {}
+    if data.get("admin_password") != ADMIN_PASSWORD:
+        return jsonify({"ok": False, "error": "Invalid admin password."}), 403
+
+    updated = db_update_item(item_id, data)
+    if not updated:
+        return jsonify({"ok": False, "error": "Item not found."}), 404
+
+    return jsonify({"ok": True, "item": updated})
+
+
 @app.route("/api/shop/items/<item_id>/minus", methods=["POST"])
 def api_minus_shop_item(item_id):
     data = request.get_json(silent=True) or {}
@@ -633,6 +725,21 @@ def api_delete_shop_item(item_id):
     deleted = db_delete_item(item_id)
     if not deleted:
         return jsonify({"ok": False, "error": "Item not found."}), 404
+
+    threading.Thread(
+        target=post_discord_webhook,
+        args=(
+            WEBHOOK_ITEM_SOLD or WEBHOOK_ITEM_ADDED,
+            f"🗑️ VortexShop Item Deleted: {deleted['name']}",
+            [
+                {"name": "Item ID", "value": deleted["id"], "inline": True},
+                {"name": "Seller", "value": deleted["posted_by"], "inline": True},
+            ],
+            0xE11D48,
+            deleted.get("image_url", ""),
+        ),
+        daemon=True,
+    ).start()
 
     return jsonify({"ok": True, "deleted": deleted})
 
