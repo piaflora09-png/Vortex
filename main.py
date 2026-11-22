@@ -1,5 +1,6 @@
 import asyncio
 import base64
+from io import BytesIO
 import json
 import os
 import re
@@ -212,7 +213,9 @@ def _resolve_buyer_member(
 
     lowered = raw.lstrip("@").lower()
     for m in guild.members:
-        if m.name.lower() == lowered or (m.global_name and m.global_name.lower() == lowered):
+        if m.name.lower() == lowered or (
+            m.global_name and m.global_name.lower() == lowered
+        ):
             return m
     return None
 
@@ -230,8 +233,6 @@ def _build_image_file(image_url: str) -> discord.File | None:
         elif "gif" in header:
             ext = "gif"
         raw_bytes = base64.b64decode(b64_data)
-        from io import BytesIO
-
         return discord.File(BytesIO(raw_bytes), filename=f"item_preview.{ext}")
     except Exception as exc:
         print(f"[Ticket] Failed decoding image data URL: {exc}")
@@ -335,9 +336,11 @@ async def create_order_ticket_channel(order: dict) -> tuple[str, str]:
     embed.set_footer(text="VortexShop Live Ticket System")
 
     file_obj = _build_image_file(order.get("image_url", ""))
+    mention_text = (
+        buyer_member.mention if buyer_member else f"**{order['buyer_discord']}**"
+    )
     if file_obj is not None:
         embed.set_image(url=f"attachment://{file_obj.filename}")
-        mention_text = buyer_member.mention if buyer_member else f"**{order['buyer_discord']}**"
         await channel.send(
             content=f"{mention_text} — Ticket opened for your order.",
             embed=embed,
@@ -345,9 +348,10 @@ async def create_order_ticket_channel(order: dict) -> tuple[str, str]:
             view=CloseTicketView(),
         )
     else:
-        if order.get("image_url") and order["image_url"].startswith(("http://", "https://")):
+        if order.get("image_url") and order["image_url"].startswith(
+            ("http://", "https://")
+        ):
             embed.set_image(url=order["image_url"])
-        mention_text = buyer_member.mention if buyer_member else f"**{order['buyer_discord']}**"
         await channel.send(
             content=f"{mention_text} — Ticket opened for your order.",
             embed=embed,
@@ -494,7 +498,9 @@ def build_showcase_payload() -> dict:
         "vouches_count": 120,
         "badges": [
             {"id": "verified", "label": "Verified Hub", "fallback_icon": "✦"},
-            {"id": "mm", "label": "Middleman", "fallback_icon": "🛡️"},
+            {"id": "mm", "label": "Verified Middleman", "fallback_icon": "🛡️"},
+            {"id": "fast", "label": "Fast Ticket Support", "fallback_icon": "⚡"},
+            {"id": "vouched", "label": "Trusted Vouches", "fallback_icon": "★"},
         ],
         "mm_rules": [
             "Open an official ticket inside Vortex Exchange & MM before any trade.",
