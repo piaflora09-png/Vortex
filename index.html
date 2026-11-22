@@ -688,17 +688,6 @@
     }
     .sub-panel.active { display: block; animation: settleIn 0.24s ease; }
 
-    .custom-note-box {
-      padding: 11px 13px;
-      border-radius: 12px;
-      background: rgba(139, 92, 246, 0.12);
-      border: 1px solid rgba(192, 132, 252, 0.32);
-      color: #f3e8ff;
-      font-size: 0.84rem;
-      line-height: 1.45;
-      margin-bottom: 12px;
-    }
-
     .controls-toolbar {
       display: flex;
       flex-wrap: wrap;
@@ -1188,7 +1177,7 @@
               <div class="owner-text">
                 <span id="owner-line">Owner of this server-</span><br />
                 <a id="invite-link" class="invite-link" href="https://discord.gg/3JPatMmyF" target="_blank" rel="noopener">
-                  https://discord.gg/3JPatMmyF...
+                  https://discord.gg/3JPatMmyF
                 </a>
               </div>
 
@@ -2047,6 +2036,22 @@
           (d.custom_status && (d.custom_status.emoji || d.custom_status.text))
             ? `${d.custom_status.emoji ? d.custom_status.emoji + " " : ""}${d.custom_status.text || ""}`.trim()
             : "Very nice day";
+
+        const bioLinkEl = document.getElementById("bio-link");
+        if (d.store_url) bioLinkEl.href = d.store_url;
+        if (d.bio_link_text) bioLinkEl.textContent = d.bio_link_text;
+
+        if (d.clan_emoji) document.getElementById("clan-emoji").textContent = d.clan_emoji;
+        if (d.clan_tag) document.getElementById("clan-tag").textContent = d.clan_tag;
+        if (d.role_badge_text) document.getElementById("role-pill-text").textContent = d.role_badge_text;
+        if (d.owner_line) document.getElementById("owner-line").textContent = d.owner_line;
+
+        const invLinkEl = document.getElementById("invite-link");
+        if (d.invite_url) {
+          invLinkEl.href = d.invite_url;
+          invLinkEl.textContent = d.invite_url;
+        }
+
         document.getElementById("full-bio-panel").textContent = d.full_bio || "";
         document.getElementById("member-since").textContent = d.member_since || "Aug 22, 2026";
         document.getElementById("mutual-text").textContent = `${d.mutual_servers_count ?? 4} Mutual Servers`;
