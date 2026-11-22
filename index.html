@@ -3,13 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VortexShop — 3D Roblox Crosstrading, Ticket System &amp; Server Showcase</title>
-  <link
-    id="dynamic-favicon"
-    rel="icon"
-    type="image/svg+xml"
-    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='%23a855f7'/%3E%3Cstop offset='55%25' stop-color='%23ec4899'/%3E%3Cstop offset='100%25' stop-color='%23f59e0b'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%23120824'/%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Cpath d='M16 18L32 48L48 18' fill='none' stroke='url(%23g)' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='22' r='4' fill='%23fde68a'/%3E%3C/svg%3E"
-  />
+  <title>VortexShop — 3D Roblox Crosstrading, Role Members &amp; Server Showcase</title>
   <style>
     :root {
       --bg-dark: #07050c;
@@ -20,15 +14,8 @@
       --accent-gold: #f59e0b;
       --accent-pink: #e879f9;
       --status-ring: #23a55a;
-      --bg-grid-stroke: rgba(192, 132, 252, 0.06);
-      --bg-ring-stroke: rgba(245, 158, 11, 0.12);
-      --vortex-core-a: #a855f7;
-      --vortex-core-b: #f59e0b;
-      --glass-edge: inset 0 1px 0 rgba(255, 255, 255, 0.14);
-      --card-shadow-x: 0px;
-      --card-shadow-y: 26px;
-      --card-shadow-blur: 70px;
-      --surface-dark: rgba(20, 12, 34, 0.94);
+      --server-border: rgba(245, 158, 11, 0.62);
+      --sparkle-color: rgba(216, 180, 254, 0.55);
     }
 
     body.theme-crimson {
@@ -37,36 +24,8 @@
       --rose-glow: rgba(251, 113, 133, 0.18);
       --accent-primary: #e11d48;
       --accent-pink: #fb7185;
-      --bg-grid-stroke: rgba(251, 113, 133, 0.065);
-      --bg-ring-stroke: rgba(251, 113, 133, 0.16);
-      --vortex-core-a: #e11d48;
-      --vortex-core-b: #f59e0b;
-    }
-
-    body.theme-gold {
-      --purple-glow: rgba(245, 158, 11, 0.26);
-      --gold-glow: rgba(251, 191, 36, 0.22);
-      --rose-glow: rgba(217, 119, 6, 0.16);
-      --accent-primary: #d97706;
-      --accent-pink: #fbbf24;
-      --bg-grid-stroke: rgba(251, 191, 36, 0.065);
-      --bg-ring-stroke: rgba(251, 191, 36, 0.17);
-      --vortex-core-a: #f59e0b;
-      --vortex-core-b: #fde68a;
-    }
-
-    body.deep-vortex {
-      --bg-dark: #030206;
-      --surface-dark: rgba(10, 6, 18, 0.98);
-      --purple-glow: rgba(139, 92, 246, 0.22);
-      --gold-glow: rgba(245, 158, 11, 0.14);
-      --rose-glow: rgba(236, 72, 153, 0.1);
-    }
-
-    @property --rim-angle {
-      syntax: "<angle>";
-      initial-value: 0deg;
-      inherits: false;
+      --server-border: rgba(251, 113, 133, 0.65);
+      --sparkle-color: rgba(253, 164, 175, 0.58);
     }
 
     * { box-sizing: border-box; }
@@ -89,7 +48,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 18px 80px;
+      padding: 24px 18px 56px;
       background:
         radial-gradient(circle at 14% 16%, var(--purple-glow), transparent 46%),
         radial-gradient(circle at 86% 78%, var(--gold-glow), transparent 48%),
@@ -99,52 +58,6 @@
       font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       overflow-x: hidden;
       transition: background 0.3s ease;
-    }
-
-    .site-bg-art {
-      position: fixed;
-      inset: -12%;
-      width: 124%;
-      height: 124%;
-      pointer-events: none;
-      z-index: 0;
-      opacity: 0.9;
-    }
-
-    .vortex-ring-outer {
-      transform-origin: 720px 450px;
-      animation: vortexSpinSlow 95s linear infinite;
-    }
-
-    .vortex-ring-inner {
-      transform-origin: 720px 450px;
-      animation: vortexSpinReverse 68s linear infinite;
-    }
-
-    .vortex-core-pulse {
-      transform-origin: 720px 450px;
-      animation: vortexPulse 8s ease-in-out infinite alternate;
-    }
-
-    @keyframes vortexSpinSlow {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
-
-    @keyframes vortexSpinReverse {
-      from { transform: rotate(360deg); }
-      to { transform: rotate(0deg); }
-    }
-
-    @keyframes vortexPulse {
-      0% { opacity: 0.85; transform: scale(0.98); }
-      100% { opacity: 1; transform: scale(1.03); }
-    }
-
-    @keyframes onlineHaloPulse {
-      0% { box-shadow: 0 0 0 0 rgba(35, 165, 90, 0.65); }
-      70% { box-shadow: 0 0 0 8px rgba(35, 165, 90, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(35, 165, 90, 0); }
     }
 
     #sparkle-canvas {
@@ -198,28 +111,6 @@
       100% { transform: translateX(240%) rotate(14deg); opacity: 0; }
     }
 
-    @keyframes spinRim {
-      to { --rim-angle: 360deg; }
-    }
-
-    @keyframes copyBounce {
-      0% { transform: scale(1); }
-      45% { transform: scale(1.07); }
-      100% { transform: scale(1); }
-    }
-
-    @keyframes holoSweep {
-      0% { background-position: -150% 0; }
-      100% { background-position: 250% 0; }
-    }
-
-    .copied-pulse {
-      animation: copyBounce 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-      background: rgba(34, 197, 94, 0.24) !important;
-      border-color: rgba(74, 222, 128, 0.75) !important;
-      color: #bbf7d0 !important;
-    }
-
     .tilt-3d {
       position: relative;
       transform-style: preserve-3d;
@@ -227,13 +118,6 @@
       --spot-x: 50%;
       --spot-y: 35%;
       --spot-opacity: 0;
-      --par-bg-x: 0px;
-      --par-bg-y: 0px;
-      --par-fg-x: 0px;
-      --par-fg-y: 0px;
-      --card-shadow-x: 0px;
-      --card-shadow-y: 18px;
-      --card-shadow-blur: 40px;
       transition: transform 0.14s ease-out, box-shadow 0.22s ease, border-color 0.2s ease;
     }
     .tilt-3d.resetting {
@@ -250,20 +134,10 @@
       transition: opacity 0.22s ease;
       background: radial-gradient(
         340px circle at var(--spot-x) var(--spot-y),
-        rgba(232, 121, 249, 0.22),
-        rgba(245, 158, 11, 0.13) 42%,
+        rgba(232, 121, 249, 0.2),
+        rgba(245, 158, 11, 0.12) 42%,
         transparent 72%
       );
-    }
-
-    .parallax-bg {
-      transform: translate3d(var(--par-bg-x), var(--par-bg-y), 0) scale(1.04);
-      transition: transform 0.16s ease-out;
-    }
-
-    .parallax-fg {
-      transform: translate3d(var(--par-fg-x), var(--par-fg-y), 18px);
-      transition: transform 0.16s ease-out;
     }
 
     .depth-lift { transform: translateZ(18px); }
@@ -279,86 +153,46 @@
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 20px;
-      padding: 11px 16px 15px;
+      padding: 11px 16px;
       border-radius: 18px;
-      background: var(--surface-dark);
+      background: rgba(20, 12, 34, 0.88);
       border: 1px solid rgba(255, 255, 255, 0.11);
-      box-shadow: var(--glass-edge), 0 14px 36px rgba(0, 0, 0, 0.55);
+      box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(14px);
-      overflow: hidden;
       animation: settleIn 0.35s ease;
-    }
-
-    .brand-mark {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding-right: 6px;
-      font-weight: 900;
-      font-size: 0.92rem;
-      letter-spacing: 0.02em;
-      color: #ffffff;
-    }
-
-    .brand-icon-svg {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      flex-shrink: 0;
-      box-shadow: 0 0 14px rgba(168, 85, 247, 0.42);
-    }
-
-    .sync-countdown-strip {
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 3px;
-      background: rgba(255, 255, 255, 0.06);
-    }
-
-    .sync-countdown-fill {
-      height: 100%;
-      width: 100%;
-      background: linear-gradient(90deg, var(--accent-primary), var(--accent-pink), var(--accent-gold));
-      transition: width 0.25s linear;
     }
 
     .nav-tabs {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
-      gap: 7px;
+      gap: 8px;
     }
 
     .nav-tab {
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.1);
       color: #e9d5ff;
-      padding: 7px 12px;
+      padding: 8px 14px;
       border-radius: 11px;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.16s ease;
     }
     .nav-tab:hover { background: rgba(168, 85, 247, 0.2); color: #ffffff; transform: translateY(-1px); }
     .nav-tab.active {
-      background:
-        linear-gradient(135deg, var(--accent-primary), #d97706) padding-box,
-        conic-gradient(from var(--rim-angle), #f59e0b, #e879f9, #8b5cf6, #f59e0b) border-box;
-      border: 1.5px solid transparent;
+      background: linear-gradient(135deg, var(--accent-primary), #d97706);
       color: #ffffff;
-      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.42);
-      animation: spinRim 6s linear infinite;
+      border-color: transparent;
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
     }
 
     .sync-status-group {
       display: flex;
       flex-wrap: wrap;
       align-items: center;
-      gap: 7px;
-      font-size: 0.76rem;
+      gap: 8px;
+      font-size: 0.78rem;
       color: #cbd5e1;
       font-variant-numeric: tabular-nums;
     }
@@ -374,16 +208,6 @@
       color: #86efac;
       font-weight: 700;
     }
-    .live-pill.stale {
-      background: rgba(245, 158, 11, 0.14);
-      border-color: rgba(245, 158, 11, 0.45);
-      color: #fde68a;
-    }
-    .live-pill.paused {
-      background: rgba(148, 163, 184, 0.14);
-      border-color: rgba(148, 163, 184, 0.4);
-      color: #e2e8f0;
-    }
 
     .live-pulse {
       width: 7px;
@@ -392,22 +216,14 @@
       background: var(--status-ring);
       box-shadow: 0 0 8px var(--status-ring);
     }
-    .live-pill.stale .live-pulse {
-      background: #f59e0b;
-      box-shadow: 0 0 8px #f59e0b;
-    }
-    .live-pill.paused .live-pulse {
-      background: #94a3b8;
-      box-shadow: none;
-    }
 
     .mini-action-btn {
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.14);
       color: #f5f3ff;
-      padding: 5px 10px;
+      padding: 5px 11px;
       border-radius: 9px;
-      font-size: 0.75rem;
+      font-size: 0.77rem;
       font-weight: 700;
       cursor: pointer;
       transition: background 0.15s ease, transform 0.12s ease;
@@ -476,22 +292,16 @@
       position: relative;
       border-radius: 26px;
       padding: 8px;
-      background:
-        linear-gradient(180deg, #b057f5 0%, var(--accent-primary) 52%, #4c1d95 100%) padding-box,
-        conic-gradient(from var(--rim-angle), rgba(245, 158, 11, 0.75), rgba(232, 121, 249, 0.8), rgba(139, 92, 246, 0.75), rgba(245, 158, 11, 0.75)) border-box;
-      border: 2px solid transparent;
+      background: linear-gradient(180deg, #b057f5 0%, var(--accent-primary) 52%, #4c1d95 100%);
       box-shadow:
-        var(--glass-edge),
-        0 0 0 1px rgba(216, 180, 254, 0.22),
-        var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.88);
-      animation: spinRim 9s linear infinite;
+        0 0 0 2px rgba(216, 180, 254, 0.28),
+        0 26px 70px rgba(0, 0, 0, 0.88);
     }
 
     .frame-shell:hover {
       box-shadow:
-        var(--glass-edge),
-        0 0 32px rgba(168, 85, 247, 0.45),
-        var(--card-shadow-x) calc(var(--card-shadow-y) + 4px) calc(var(--card-shadow-blur) + 8px) rgba(0, 0, 0, 0.92);
+        0 0 30px rgba(168, 85, 247, 0.42),
+        0 32px 76px rgba(0, 0, 0, 0.92);
     }
 
     .card {
@@ -501,7 +311,6 @@
       overflow: hidden;
       z-index: 2;
       transform-style: preserve-3d;
-      box-shadow: var(--glass-edge);
     }
 
     .profile-effect-layer {
@@ -554,7 +363,6 @@
       background-size: cover;
       background-position: center;
       z-index: 1;
-      overflow: hidden;
     }
 
     .banner::after {
@@ -654,7 +462,6 @@
       box-shadow: 0 0 10px var(--status-ring);
       z-index: 4;
     }
-    .status-dot.online { animation: onlineHaloPulse 2.4s infinite; }
     .status-dot.idle { background: #f0b232; }
     .status-dot.dnd { background: #f23f43; }
     .status-dot.offline { background: #747f8d; }
@@ -690,7 +497,7 @@
       padding: 9px 14px;
       font-size: 0.92rem;
       font-weight: 500;
-      box-shadow: var(--glass-edge), 0 8px 20px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
     }
 
     .display-name-line {
@@ -757,7 +564,6 @@
       gap: 8px;
       flex-wrap: wrap;
       margin-bottom: 12px;
-      transform-style: preserve-3d;
     }
 
     .clan-chip {
@@ -772,14 +578,6 @@
       font-weight: 700;
       color: #f5f3ff;
       min-height: 28px;
-      box-shadow: var(--glass-edge);
-      transform: translateZ(14px);
-      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
-    }
-    .clan-chip:hover {
-      transform: translateZ(22px) translateY(-2px);
-      border-color: rgba(245, 158, 11, 0.55);
-      box-shadow: var(--glass-edge), 0 8px 18px rgba(0, 0, 0, 0.5), 0 0 12px rgba(245, 158, 11, 0.25);
     }
 
     .clan-chip img {
@@ -798,9 +596,6 @@
       border-radius: 8px;
       padding: 4px 9px;
       min-height: 28px;
-      box-shadow: var(--glass-edge);
-      transform: translateZ(18px);
-      transform-style: preserve-3d;
     }
 
     .badge-icon-item {
@@ -810,31 +605,11 @@
       justify-content: center;
       width: 20px;
       height: 20px;
-      border-radius: 5px;
       font-size: 0.92rem;
       cursor: pointer;
-      overflow: hidden;
-      transition: transform 0.16s ease, filter 0.16s ease, box-shadow 0.16s ease;
+      transition: transform 0.14s ease;
     }
-    .badge-icon-item::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(125deg, transparent 25%, rgba(255, 255, 255, 0.42) 48%, rgba(245, 158, 11, 0.35) 56%, transparent 78%);
-      background-size: 220% 100%;
-      background-position: -150% 0;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .badge-icon-item:hover {
-      transform: translateZ(24px) translateY(-3px) scale(1.16);
-      filter: drop-shadow(0 6px 12px rgba(232, 121, 249, 0.55));
-      box-shadow: 0 0 10px rgba(245, 158, 11, 0.35);
-    }
-    .badge-icon-item:hover::after {
-      opacity: 1;
-      animation: holoSweep 1.25s ease forwards;
-    }
+    .badge-icon-item:hover { transform: translateY(-2px) scale(1.1); }
 
     .badge-icon-item img {
       width: 18px;
@@ -842,10 +617,12 @@
       object-fit: contain;
     }
 
-    .badge-icon-item[data-tooltip]:hover::before {
+    .badge-icon-item:hover::after {
       content: attr(data-tooltip);
-      position: fixed;
-      transform: translate(-50%, -130%);
+      position: absolute;
+      bottom: 135%;
+      left: 50%;
+      transform: translateX(-50%);
       background: #090512;
       color: #fff;
       font-size: 0.7rem;
@@ -854,8 +631,7 @@
       border-radius: 6px;
       white-space: nowrap;
       border: 1px solid rgba(255, 255, 255, 0.16);
-      z-index: 40;
-      pointer-events: none;
+      z-index: 30;
     }
 
     .mutual-row {
@@ -890,7 +666,6 @@
     .mini-stack span:nth-child(3) { background: #4c1d95; color: #f5d0fe; }
 
     .role-pill {
-      position: relative;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -902,28 +677,6 @@
       padding: 4px 10px;
       border-radius: 8px;
       margin-bottom: 10px;
-      box-shadow: var(--glass-edge);
-      overflow: hidden;
-      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
-    }
-    .role-pill::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, 0.25) 50%, transparent 80%);
-      background-size: 220% 100%;
-      background-position: -150% 0;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .role-pill:hover {
-      transform: translateZ(16px) translateY(-2px);
-      border-color: rgba(245, 158, 11, 0.65);
-      box-shadow: var(--glass-edge), 0 8px 18px rgba(0, 0, 0, 0.5), 0 0 14px rgba(96, 165, 250, 0.35);
-    }
-    .role-pill:hover::after {
-      opacity: 1;
-      animation: holoSweep 1.1s ease forwards;
     }
 
     .owner-text {
@@ -943,7 +696,6 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      flex-wrap: wrap;
       margin-bottom: 12px;
       font-size: 0.84rem;
     }
@@ -967,7 +719,6 @@
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.05);
       border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: var(--glass-edge);
       font-size: 0.82rem;
       color: #e2e8f0;
       line-height: 1.45;
@@ -994,7 +745,6 @@
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: 12px;
       padding: 9px 12px;
-      box-shadow: var(--glass-edge);
       cursor: pointer;
       transition: border-color 0.15s ease, transform 0.15s ease;
     }
@@ -1038,26 +788,21 @@
 
     .server-card {
       position: relative;
-      background:
-        linear-gradient(165deg, rgba(36, 16, 62, 0.97), rgba(16, 10, 27, 0.99)) padding-box,
-        conic-gradient(from var(--rim-angle), rgba(245, 158, 11, 0.72), rgba(232, 121, 249, 0.65), rgba(139, 92, 246, 0.65), rgba(245, 158, 11, 0.72)) border-box;
+      background: linear-gradient(165deg, rgba(36, 16, 62, 0.97), rgba(16, 10, 27, 0.99));
       border-radius: 22px;
       padding: 0 26px 22px;
-      border: 1.5px solid transparent;
+      border: 1.5px solid var(--server-border);
       box-shadow:
-        var(--glass-edge),
         0 0 34px rgba(245, 158, 11, 0.16),
-        var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.88);
+        0 26px 70px rgba(0, 0, 0, 0.88);
       overflow: hidden;
       transform-style: preserve-3d;
-      animation: spinRim 11s linear infinite;
     }
 
     .server-card:hover {
       box-shadow:
-        var(--glass-edge),
         0 0 42px rgba(245, 158, 11, 0.26),
-        var(--card-shadow-x) calc(var(--card-shadow-y) + 4px) calc(var(--card-shadow-blur) + 8px) rgba(0, 0, 0, 0.92);
+        0 32px 76px rgba(0, 0, 0, 0.92);
     }
 
     .server-banner-strip {
@@ -1102,7 +847,7 @@
       justify-content: center;
       gap: 4px;
       padding: 6px;
-      box-shadow: var(--glass-edge), 0 8px 18px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
       transform: translateZ(14px);
       transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
     }
@@ -1110,7 +855,7 @@
     .server-banner-strip:hover .banner-3d-slot {
       transform: translateZ(26px) translateY(-2px);
       border-color: rgba(245, 158, 11, 0.45);
-      box-shadow: var(--glass-edge), 0 14px 26px rgba(0, 0, 0, 0.65), 0 0 14px rgba(168, 85, 247, 0.25);
+      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.65), 0 0 14px rgba(168, 85, 247, 0.25);
     }
 
     .banner-3d-tag {
@@ -1249,7 +994,6 @@
       border-radius: 10px;
       background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(255, 255, 255, 0.08);
-      box-shadow: var(--glass-edge);
     }
 
     .stat-inline strong {
@@ -1320,7 +1064,7 @@
       align-items: center;
       justify-content: center;
       gap: 9px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35), 0 10px 26px rgba(245, 158, 11, 0.3);
+      box-shadow: 0 10px 26px rgba(245, 158, 11, 0.3);
       transition: transform 0.12s ease, filter 0.12s ease;
     }
     .btn-copy-invite:hover { filter: brightness(1.07); transform: translateY(-1px); }
@@ -1338,7 +1082,7 @@
       align-items: center;
       justify-content: center;
       gap: 8px;
-      box-shadow: var(--glass-edge), 0 8px 20px rgba(0, 0, 0, 0.45);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
       transition: background 0.12s ease, transform 0.12s ease;
     }
     .btn-copy-id:hover { background: rgba(42, 31, 62, 0.95); transform: translateY(-1px); }
@@ -1354,11 +1098,11 @@
 
     .sub-panel {
       display: none;
-      background: var(--surface-dark);
+      background: rgba(20, 12, 34, 0.95);
       border: 1px solid rgba(168, 85, 247, 0.34);
       border-radius: 20px;
       padding: 20px;
-      box-shadow: var(--glass-edge), 0 20px 46px rgba(0, 0, 0, 0.72);
+      box-shadow: 0 20px 46px rgba(0, 0, 0, 0.72);
     }
     .sub-panel.active { display: block; animation: settleIn 0.26s ease; }
 
@@ -1379,7 +1123,6 @@
       border-radius: 12px;
       background: rgba(139, 92, 246, 0.12);
       border: 1px solid rgba(192, 132, 252, 0.32);
-      box-shadow: var(--glass-edge);
       color: #f3e8ff;
       font-size: 0.84rem;
       line-height: 1.45;
@@ -1395,20 +1138,18 @@
       margin-bottom: 12px;
     }
 
-    .search-input, .select-input {
+    .search-input {
+      flex: 1;
+      min-width: 190px;
       background: rgba(11, 7, 20, 0.9);
       border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 10px;
-      padding: 8px 11px;
+      padding: 8px 12px;
       color: #ffffff;
-      font-size: 0.82rem;
+      font-size: 0.84rem;
       outline: none;
     }
-    .search-input {
-      flex: 1;
-      min-width: 170px;
-    }
-    .search-input:focus, .select-input:focus {
+    .search-input:focus {
       border-color: var(--accent-gold);
     }
 
@@ -1416,27 +1157,7 @@
       display: flex;
       flex-wrap: wrap;
       gap: 6px;
-      margin-bottom: 12px;
-    }
-
-    .spotlight-strip {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      padding: 9px 11px;
-      border-radius: 12px;
-      background: rgba(245, 158, 11, 0.08);
-      border: 1px solid rgba(245, 158, 11, 0.26);
-      box-shadow: var(--glass-edge);
-      margin-bottom: 12px;
-      align-items: center;
-    }
-
-    .spotlight-label {
-      font-size: 0.73rem;
-      font-weight: 800;
-      color: #fbbf24;
-      margin-right: 4px;
+      margin-bottom: 14px;
     }
 
     .filter-chip {
@@ -1447,9 +1168,8 @@
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.04);
       border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: var(--glass-edge);
       color: #e2e8f0;
-      font-size: 0.74rem;
+      font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
       transition: all 0.14s ease;
@@ -1459,12 +1179,9 @@
       color: #ffffff;
     }
     .filter-chip.active {
-      background:
-        linear-gradient(135deg, var(--accent-primary), #d97706) padding-box,
-        conic-gradient(from var(--rim-angle), #f59e0b, #e879f9, #8b5cf6, #f59e0b) border-box;
-      border: 1.5px solid transparent;
+      background: linear-gradient(135deg, var(--accent-primary), #d97706);
+      border-color: transparent;
       color: #ffffff;
-      animation: spinRim 6s linear infinite;
     }
     .filter-chip img {
       width: 14px;
@@ -1485,16 +1202,16 @@
       border-radius: 18px;
       overflow: hidden;
       background: linear-gradient(180deg, rgba(35, 14, 62, 0.96), rgba(16, 8, 29, 0.98));
-      border: 1px solid var(--member-role-color, rgba(232, 121, 249, 0.34));
-      box-shadow: var(--glass-edge), var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.72), 0 0 18px color-mix(in srgb, var(--member-role-color, #e879f9) 22%, transparent);
+      border: 1px solid rgba(232, 121, 249, 0.28);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.7);
       cursor: pointer;
       transform-style: preserve-3d;
       animation: settleIn 0.24s ease;
     }
 
     .member-showcase-card:hover {
-      border-color: rgba(245, 158, 11, 0.65);
-      box-shadow: var(--glass-edge), var(--card-shadow-x) calc(var(--card-shadow-y) + 4px) calc(var(--card-shadow-blur) + 8px) rgba(0, 0, 0, 0.84), 0 0 24px color-mix(in srgb, var(--member-role-color, #a855f7) 36%, transparent);
+      border-color: rgba(245, 158, 11, 0.58);
+      box-shadow: 0 22px 44px rgba(0, 0, 0, 0.82), 0 0 24px rgba(168, 85, 247, 0.24);
     }
 
     .member-card-effect {
@@ -1538,7 +1255,6 @@
       background-size: cover;
       background-position: center;
       z-index: 1;
-      overflow: hidden;
     }
 
     .member-banner-box::after {
@@ -1585,7 +1301,7 @@
       height: 64px;
       border-radius: 50%;
       object-fit: cover;
-      border: 3px solid var(--member-role-color, rgba(245, 158, 11, 0.52));
+      border: 3px solid rgba(245, 158, 11, 0.42);
       outline: 2.5px solid #210c3e;
       background: #120624;
       box-shadow: 0 8px 18px rgba(0, 0, 0, 0.72), 0 0 14px rgba(168, 85, 247, 0.25);
@@ -1612,7 +1328,6 @@
       background: #23a55a;
       z-index: 4;
     }
-    .m-status-badge.online { animation: onlineHaloPulse 2.4s infinite; }
     .m-status-badge.idle { background: #f0b232; }
     .m-status-badge.dnd { background: #f23f43; }
     .m-status-badge.offline { background: #747f8d; }
@@ -1620,13 +1335,6 @@
     .m-name-block {
       padding-top: 28px;
       min-width: 0;
-    }
-
-    .m-display-row {
-      display: flex;
-      align-items: center;
-      gap: 7px;
-      flex-wrap: wrap;
     }
 
     .m-display-name {
@@ -1637,29 +1345,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .mm-avail-pill {
-      font-size: 0.67rem;
-      font-weight: 800;
-      padding: 2px 7px;
-      border-radius: 999px;
-      border: 1px solid transparent;
-    }
-    .mm-avail-pill.available {
-      background: rgba(34, 197, 94, 0.16);
-      border-color: rgba(74, 222, 128, 0.45);
-      color: #86efac;
-    }
-    .mm-avail-pill.in-ticket {
-      background: rgba(245, 158, 11, 0.18);
-      border-color: rgba(251, 191, 36, 0.45);
-      color: #fde68a;
-    }
-    .mm-avail-pill.away {
-      background: rgba(148, 163, 184, 0.16);
-      border-color: rgba(148, 163, 184, 0.35);
-      color: #cbd5e1;
     }
 
     .m-username-line {
@@ -1701,39 +1386,16 @@
     }
 
     .staff-role-pill {
-      position: relative;
       display: inline-flex;
       align-items: center;
       gap: 5px;
       padding: 4px 9px;
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.06);
-      border: 1px solid var(--pill-role-color, rgba(245, 158, 11, 0.38));
-      box-shadow: var(--glass-edge);
+      border: 1px solid rgba(245, 158, 11, 0.34);
       font-size: 0.74rem;
       font-weight: 700;
       color: #fef3c7;
-      overflow: hidden;
-      transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
-    }
-    .staff-role-pill::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(120deg, transparent 20%, rgba(255, 255, 255, 0.28) 50%, transparent 80%);
-      background-size: 220% 100%;
-      background-position: -150% 0;
-      opacity: 0;
-      pointer-events: none;
-    }
-    .staff-role-pill:hover {
-      transform: translateZ(18px) translateY(-2px);
-      border-color: rgba(232, 121, 249, 0.65);
-      box-shadow: var(--glass-edge), 0 8px 16px rgba(0, 0, 0, 0.55), 0 0 12px rgba(245, 158, 11, 0.3);
-    }
-    .staff-role-pill:hover::after {
-      opacity: 1;
-      animation: holoSweep 1.15s ease forwards;
     }
 
     .staff-role-pill img {
@@ -1748,70 +1410,15 @@
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(255, 255, 255, 0.09);
-      box-shadow: var(--glass-edge), var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.45);
       margin-bottom: 10px;
     }
-    .game-card-item:hover {
-      border-color: rgba(245, 158, 11, 0.42);
-      box-shadow: var(--glass-edge), var(--card-shadow-x) calc(var(--card-shadow-y) + 3px) calc(var(--card-shadow-blur) + 6px) rgba(0, 0, 0, 0.65), 0 0 16px rgba(168, 85, 247, 0.18);
-    }
-    .game-card-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 4px;
-    }
-    .game-card-item strong { color: #fbbf24; font-size: 0.95rem; }
-    .game-tier-badge {
-      font-size: 0.68rem;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(168, 85, 247, 0.18);
-      border: 1px solid rgba(232, 121, 249, 0.36);
-      color: #f5d0fe;
-    }
-    .game-card-item span.game-desc { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
-
-    .storefront-launch-card {
-      margin-top: 14px;
-      padding: 13px 15px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.16), rgba(245, 158, 11, 0.12));
-      border: 1px solid rgba(245, 158, 11, 0.38);
-      box-shadow: var(--glass-edge);
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-    }
-
-    .vouch-summary-bar {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      padding: 9px 12px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: var(--glass-edge);
-      margin-bottom: 10px;
-      font-size: 0.8rem;
-      color: #e2e8f0;
-      font-variant-numeric: tabular-nums;
-    }
+    .game-card-item strong { color: #fbbf24; display: block; margin-bottom: 4px; font-size: 0.95rem; }
+    .game-card-item span { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
 
     .vouch-filter-row {
       display: flex;
+      gap: 6px;
       flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
       margin-bottom: 10px;
     }
 
@@ -1820,13 +1427,8 @@
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.03);
       border: 1px solid rgba(255, 255, 255, 0.09);
-      box-shadow: var(--glass-edge), var(--card-shadow-x) var(--card-shadow-y) var(--card-shadow-blur) rgba(0, 0, 0, 0.42);
       margin-bottom: 10px;
       animation: settleIn 0.22s ease;
-    }
-    .vouch-card:hover {
-      border-color: rgba(245, 158, 11, 0.42);
-      box-shadow: var(--glass-edge), var(--card-shadow-x) calc(var(--card-shadow-y) + 3px) calc(var(--card-shadow-blur) + 6px) rgba(0, 0, 0, 0.62), 0 0 16px rgba(245, 158, 11, 0.16);
     }
 
     .vouch-top {
@@ -1835,7 +1437,6 @@
       justify-content: space-between;
       gap: 10px;
       margin-bottom: 6px;
-      flex-wrap: wrap;
     }
 
     .vouch-member {
@@ -1863,22 +1464,6 @@
       font-size: 0.88rem;
       font-weight: 700;
       color: #ffffff;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .vouch-stamp {
-      font-size: 0.65rem;
-      font-weight: 800;
-      padding: 1px 7px;
-      border-radius: 999px;
-      background: rgba(245, 158, 11, 0.16);
-      border: 1px solid rgba(251, 191, 36, 0.45);
-      color: #fde68a;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
     }
 
     .vouch-tag {
@@ -1901,69 +1486,15 @@
       line-height: 1.42;
     }
 
-    .scam-alert-banner {
-      padding: 10px 13px;
-      border-radius: 12px;
-      background: rgba(225, 29, 72, 0.14);
-      border: 1px solid rgba(251, 113, 133, 0.45);
-      box-shadow: var(--glass-edge);
-      color: #fecdd3;
-      font-size: 0.82rem;
-      line-height: 1.45;
-      margin-bottom: 12px;
-    }
-
     .safety-callout {
       padding: 10px 12px;
       border-radius: 10px;
       background: rgba(245, 158, 11, 0.1);
       border: 1px solid rgba(245, 158, 11, 0.35);
-      box-shadow: var(--glass-edge);
       color: #fde68a;
       font-size: 0.82rem;
       line-height: 1.45;
       margin-bottom: 12px;
-    }
-
-    .steps-strip {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-
-    .step-tile {
-      padding: 9px 10px;
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      box-shadow: var(--glass-edge);
-      font-size: 0.77rem;
-      line-height: 1.38;
-      color: #e2e8f0;
-    }
-
-    .step-num {
-      display: inline-block;
-      font-size: 0.68rem;
-      font-weight: 900;
-      color: #fbbf24;
-      margin-bottom: 3px;
-    }
-
-    .mm-quick-ref {
-      padding: 11px 13px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.04);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      box-shadow: var(--glass-edge);
-      margin-bottom: 12px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      font-size: 0.8rem;
     }
 
     .checklist-box {
@@ -1971,39 +1502,14 @@
       border-radius: 12px;
       background: rgba(255, 255, 255, 0.035);
       border: 1px solid rgba(168, 85, 247, 0.28);
-      box-shadow: var(--glass-edge);
       margin-top: 12px;
-    }
-
-    .checklist-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      margin-bottom: 8px;
     }
 
     .checklist-title {
       font-size: 0.85rem;
       font-weight: 800;
       color: #fbbf24;
-    }
-
-    .checklist-progress-pill {
-      font-size: 0.73rem;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      color: #e2e8f0;
-      font-variant-numeric: tabular-nums;
-      transition: all 0.2s ease;
-    }
-    .checklist-progress-pill.complete {
-      background: rgba(34, 197, 94, 0.2);
-      border-color: rgba(74, 222, 128, 0.55);
-      color: #86efac;
+      margin-bottom: 8px;
     }
 
     .checklist-item {
@@ -2029,173 +1535,14 @@
 
     .store-cta-btn {
       display: inline-block;
-      padding: 8px 13px;
+      margin-top: 4px;
+      padding: 9px 14px;
       border-radius: 10px;
       background: linear-gradient(135deg, var(--accent-primary), #ec4899);
       color: #ffffff;
-      font-size: 0.82rem;
+      font-size: 0.85rem;
       font-weight: 700;
       text-decoration: none;
-      box-shadow: var(--glass-edge);
-    }
-
-    .ticket-grid-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
-
-    .ticket-field {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      margin-bottom: 10px;
-    }
-
-    .ticket-field label {
-      font-size: 0.74rem;
-      font-weight: 700;
-      color: #e9d5ff;
-    }
-
-    .ticket-input, .ticket-select, .ticket-textarea {
-      width: 100%;
-      background: rgba(11, 7, 20, 0.92);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 10px;
-      padding: 8px 11px;
-      color: #ffffff;
-      font-size: 0.82rem;
-      outline: none;
-      font-family: inherit;
-    }
-    .ticket-input:focus, .ticket-select:focus, .ticket-textarea:focus {
-      border-color: var(--accent-gold);
-    }
-    .ticket-textarea {
-      min-height: 64px;
-      resize: vertical;
-    }
-
-    .ticket-actions-bar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .btn-ticket-primary {
-      background: linear-gradient(135deg, var(--accent-primary), #ec4899);
-      color: #ffffff;
-      border: none;
-      border-radius: 10px;
-      padding: 9px 14px;
-      font-size: 0.82rem;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: var(--glass-edge);
-    }
-    .btn-ticket-primary:hover { filter: brightness(1.08); }
-
-    .btn-ticket-close {
-      background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
-      color: #120d1d;
-      border: none;
-      border-radius: 10px;
-      padding: 9px 14px;
-      font-size: 0.82rem;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: var(--glass-edge);
-    }
-    .btn-ticket-close:hover { filter: brightness(1.07); }
-
-    .closed-ticket-card {
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: rgba(255, 255, 255, 0.035);
-      border: 1px solid rgba(245, 158, 11, 0.32);
-      box-shadow: var(--glass-edge);
-      margin-bottom: 10px;
-      animation: settleIn 0.24s ease;
-    }
-
-    .closed-ticket-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 8px;
-    }
-
-    .ticket-id-pill {
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-size: 0.73rem;
-      font-weight: 800;
-      padding: 2px 8px;
-      border-radius: 999px;
-      background: rgba(34, 197, 94, 0.16);
-      border: 1px solid rgba(74, 222, 128, 0.45);
-      color: #86efac;
-    }
-
-    .traders-pair-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-
-    .trader-box {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 10px;
-      border-radius: 10px;
-      background: rgba(11, 7, 20, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-    }
-
-    .trader-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid rgba(245, 158, 11, 0.55);
-      background: #240d44;
-      display: grid;
-      place-items: center;
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: #fbbf24;
-      flex-shrink: 0;
-    }
-
-    .jump-top-btn {
-      position: fixed;
-      right: 20px;
-      bottom: 20px;
-      z-index: 35;
-      background: linear-gradient(135deg, var(--accent-primary), #d97706);
-      color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.22);
-      border-radius: 999px;
-      padding: 9px 14px;
-      font-size: 0.78rem;
-      font-weight: 800;
-      cursor: pointer;
-      box-shadow: var(--glass-edge), 0 12px 28px rgba(0, 0, 0, 0.7);
-      opacity: 0;
-      pointer-events: none;
-      transform: translateY(10px);
-      transition: opacity 0.2s ease, transform 0.2s ease;
-    }
-    .jump-top-btn.visible {
-      opacity: 1;
-      pointer-events: auto;
-      transform: translateY(0);
     }
 
     .modal-backdrop {
@@ -2208,7 +1555,7 @@
       place-items: center;
       padding: 16px;
     }
-    .modal-backdrop.open { display: grid; animation: settleIn 0.18s ease; }
+    .modal-backdrop.open { display: grid; }
     #lightbox-modal { z-index: 65; }
 
     .modal-box {
@@ -2218,7 +1565,7 @@
       border: 1px solid rgba(245, 158, 11, 0.45);
       border-radius: 18px;
       padding: 20px 22px;
-      box-shadow: var(--glass-edge), 0 24px 60px rgba(0, 0, 0, 0.85);
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
       animation: settleIn 0.2s ease;
     }
     .modal-header {
@@ -2284,389 +1631,37 @@
       box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
     }
 
-    @media (max-width: 560px) {
-      .server-actions, .ticket-grid-2, .traders-pair-grid, .steps-strip { grid-template-columns: 1fr; }
+    @media (max-width: 520px) {
+      .server-actions { grid-template-columns: 1fr; }
       .banner-3d-items { grid-template-columns: repeat(2, 1fr); }
       .server-banner-strip { height: auto; min-height: 112px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .ambient-orb, .profile-effect-sweep, #sparkle-canvas, .frame-shell, .server-card, .nav-tab.active, .filter-chip.active, .vortex-ring-outer, .vortex-ring-inner, .vortex-core-pulse, .status-dot.online, .m-status-badge.online {
-        animation: none !important;
-      }
-      .tilt-3d, .parallax-bg, .parallax-fg {
-        transform: none !important;
-        transition: none !important;
-      }
-    }
-
-    /* Shop & Admin Item Features (Glassmorphism + Dark Mode + Gold/Violet Accents) */
-    .shop-header-banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-      padding: 12px 14px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(168, 85, 247, 0.16), rgba(245, 158, 11, 0.12));
-      border: 1px solid rgba(232, 121, 249, 0.3);
-      box-shadow: var(--glass-edge);
-    }
-    .shop-stats-strip {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .shop-stat-tile {
-      padding: 8px 10px;
-      border-radius: 11px;
-      background: rgba(12, 7, 22, 0.78);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      text-align: center;
-    }
-    .shop-stat-val {
-      font-size: 0.98rem;
-      font-weight: 900;
-      color: #fbbf24;
-      font-variant-numeric: tabular-nums;
-    }
-    .shop-stat-lbl {
-      font-size: 0.68rem;
-      color: #cbd5e1;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .shop-toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .shop-items-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
-      gap: 13px;
-      margin-bottom: 16px;
-    }
-    .shop-item-card {
-      position: relative;
-      background: linear-gradient(175deg, rgba(31, 13, 56, 0.94), rgba(14, 7, 26, 0.98));
-      border: 1px solid rgba(232, 121, 249, 0.32);
-      border-radius: 16px;
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      box-shadow: var(--glass-edge), 0 12px 28px rgba(0, 0, 0, 0.58);
-      transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
-    }
-    .shop-item-card:hover {
-      transform: translateY(-3px);
-      border-color: rgba(245, 158, 11, 0.65);
-      box-shadow: var(--glass-edge), 0 16px 34px rgba(0, 0, 0, 0.72), 0 0 20px rgba(168, 85, 247, 0.25);
-    }
-    .shop-item-img-box {
-      position: relative;
-      height: 136px;
-      background: radial-gradient(circle at 50% 40%, rgba(168, 85, 247, 0.22), #0b0416 75%);
-      display: grid;
-      place-items: center;
-      overflow: hidden;
-      cursor: zoom-in;
-    }
-    .shop-item-img-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      transition: transform 0.25s ease;
-    }
-    .shop-item-card:hover .shop-item-img-box img {
-      transform: scale(1.05);
-    }
-    .shop-stock-badge {
-      position: absolute;
-      top: 8px;
-      right: 8px;
-      font-size: 0.68rem;
-      font-weight: 800;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: rgba(14, 10, 24, 0.92);
-      border: 1px solid rgba(74, 222, 128, 0.55);
-      color: #86efac;
-      backdrop-filter: blur(4px);
-    }
-    .shop-stock-badge.sold-out {
-      border-color: rgba(248, 113, 113, 0.65);
-      color: #fca5a5;
-    }
-    .shop-item-body {
-      padding: 12px 13px;
-    }
-    .shop-item-cat {
-      display: inline-block;
-      font-size: 0.67rem;
-      font-weight: 800;
-      color: #f5d0fe;
-      background: rgba(168, 85, 247, 0.2);
-      border: 1px solid rgba(232, 121, 249, 0.35);
-      padding: 2px 8px;
-      border-radius: 999px;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-    }
-    .shop-item-name {
-      margin: 6px 0 4px;
-      font-size: 0.98rem;
-      font-weight: 800;
-      color: #ffffff;
-    }
-    .shop-item-price {
-      font-size: 1rem;
-      font-weight: 900;
-      color: #fbbf24;
-      margin-bottom: 6px;
-      font-variant-numeric: tabular-nums;
-    }
-    .shop-item-desc {
-      margin: 0 0 7px;
-      font-size: 0.78rem;
-      color: #cbd5e1;
-      line-height: 1.4;
-    }
-    .shop-item-poster {
-      font-size: 0.73rem;
-      color: #e9d5ff;
-      margin-bottom: 6px;
-    }
-    .shop-empty-state {
-      grid-column: 1 / -1;
-      text-align: center;
-      padding: 24px 16px;
-      border-radius: 16px;
-      background: rgba(14, 8, 26, 0.85);
-      border: 1px dashed rgba(245, 158, 11, 0.35);
-    }
-    .shop-upload-box {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 15px 12px;
-      border-radius: 12px;
-      border: 1.5px dashed rgba(245, 158, 11, 0.5);
-      background: rgba(11, 7, 20, 0.85);
-      cursor: pointer;
-      text-align: center;
-      margin-bottom: 10px;
-      transition: border-color 0.16s ease, background 0.16s ease;
-    }
-    .shop-upload-box:hover {
-      border-color: #fbbf24;
-      background: rgba(36, 13, 68, 0.75);
-    }
-    .shop-upload-preview {
-      max-height: 98px;
-      border-radius: 8px;
-      display: none;
-      margin-top: 6px;
-      object-fit: cover;
-      border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-    .admin-divider-box {
-      margin-top: 14px;
-      padding: 16px;
-      border-radius: 16px;
-      background: linear-gradient(165deg, rgba(35, 14, 62, 0.92), rgba(14, 8, 25, 0.96));
-      border: 1px solid rgba(245, 158, 11, 0.42);
-      box-shadow: var(--glass-edge), 0 14px 30px rgba(0, 0, 0, 0.65);
-    }
-    .admin-status-pill {
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 3px 9px;
-      border-radius: 999px;
-      background: rgba(34, 197, 94, 0.18);
-      border: 1px solid rgba(74, 222, 128, 0.5);
-      color: #86efac;
-    }
-    @media (max-width: 560px) {
-      .shop-stats-strip { grid-template-columns: 1fr; }
-    }
-
-    .secret-admin-dot {
-      font-size: 0.72rem;
-      font-weight: 700;
-      padding: 5px 10px;
-      border-radius: 999px;
-      background: rgba(15, 10, 26, 0.75);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: #94a3b8;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    .secret-admin-dot:hover {
-      color: #fde68a;
-      border-color: rgba(245, 158, 11, 0.45);
-      background: rgba(36, 13, 68, 0.85);
-    }
-    .shop-card-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
-    }
-    .admin-item-controls {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-      margin-top: 8px;
-      padding-top: 8px;
-      border-top: 1px dashed rgba(255, 255, 255, 0.12);
-    }
-    .btn-minus-one {
-      background: rgba(245, 158, 11, 0.16);
-      border: 1px solid rgba(251, 191, 36, 0.45);
-      color: #fde68a;
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.12s ease, background 0.12s ease;
-    }
-    .btn-minus-one:hover:not(:disabled) {
-      background: rgba(245, 158, 11, 0.3);
-      transform: translateY(-1px);
-    }
-    .btn-sold-one {
-      background: rgba(34, 197, 94, 0.16);
-      border: 1px solid rgba(74, 222, 128, 0.45);
-      color: #86efac;
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      cursor: pointer;
-      transition: transform 0.12s ease, background 0.12s ease;
-    }
-    .btn-sold-one:hover:not(:disabled) {
-      background: rgba(34, 197, 94, 0.28);
-      transform: translateY(-1px);
-    }
-    .btn-edit-item {
-      background: rgba(139, 92, 246, 0.2);
-      border: 1px solid rgba(192, 132, 252, 0.45);
-      color: #f3e8ff;
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .btn-edit-item:hover {
-      background: rgba(139, 92, 246, 0.34);
-    }
-    .btn-delete-item {
-      background: rgba(225, 29, 72, 0.18);
-      border: 1px solid rgba(251, 113, 133, 0.48);
-      color: #fecdd3;
-      border-radius: 8px;
-      padding: 4px 8px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      cursor: pointer;
-    }
-    .btn-delete-item:hover {
-      background: rgba(225, 29, 72, 0.32);
-    }
-    .admin-webhook-note {
-      font-size: 0.73rem;
-      color: #86efac;
-      background: rgba(34, 197, 94, 0.1);
-      border: 1px solid rgba(74, 222, 128, 0.28);
-      border-radius: 10px;
-      padding: 8px 10px;
-      margin-bottom: 10px;
+      .ambient-orb, .profile-effect-sweep, #sparkle-canvas { animation: none !important; }
+      .tilt-3d { transform: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
-  <svg class="site-bg-art" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
-    <defs>
-      <pattern id="vortex-grid" width="72" height="72" patternUnits="userSpaceOnUse">
-        <path d="M 72 0 L 0 0 0 72" fill="none" stroke="var(--bg-grid-stroke)" stroke-width="1" />
-      </pattern>
-      <radialGradient id="vortex-core" cx="50%" cy="45%" r="55%">
-        <stop offset="0%" stop-color="var(--vortex-core-a)" stop-opacity="0.18" />
-        <stop offset="60%" stop-color="var(--vortex-core-b)" stop-opacity="0.07" />
-        <stop offset="100%" stop-color="#07050c" stop-opacity="0" />
-      </radialGradient>
-    </defs>
-    <rect width="1440" height="900" fill="url(#vortex-grid)" />
-    <g class="vortex-core-pulse">
-      <rect width="1440" height="900" fill="url(#vortex-core)" />
-    </g>
-    <g class="vortex-ring-outer">
-      <circle cx="720" cy="450" r="340" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" stroke-dasharray="10 12" />
-      <path d="M 0 170 Q 420 250 860 150 T 1440 190" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" />
-    </g>
-    <g class="vortex-ring-inner">
-      <circle cx="720" cy="450" r="210" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.2" stroke-dasharray="6 8" />
-      <path d="M 0 740 Q 360 660 720 740 T 1440 720" fill="none" stroke="var(--bg-ring-stroke)" stroke-width="1.5" />
-    </g>
-  </svg>
-
   <canvas id="sparkle-canvas" aria-hidden="true"></canvas>
   <div class="ambient-orb orb-left"></div>
   <div class="ambient-orb orb-right"></div>
 
   <header class="top-nav" aria-label="Navigation and Sync Controls">
     <div class="nav-tabs" role="tablist">
-      <span class="brand-mark">
-        <svg id="site-brand-icon" class="brand-icon-svg" viewBox="0 0 64 64" aria-hidden="true">
-          <defs>
-            <linearGradient id="vxBrandGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#a855f7" />
-              <stop offset="55%" stop-color="#ec4899" />
-              <stop offset="100%" stop-color="#f59e0b" />
-            </linearGradient>
-          </defs>
-          <rect width="64" height="64" rx="16" fill="#120824" />
-          <rect x="2" y="2" width="60" height="60" rx="14" fill="none" stroke="url(#vxBrandGrad)" stroke-width="3" />
-          <path d="M16 18L32 48L48 18" fill="none" stroke="url(#vxBrandGrad)" stroke-width="6.5" stroke-linecap="round" stroke-linejoin="round" />
-          <circle cx="32" cy="22" r="4" fill="#fde68a" />
-        </svg>
-        <span>VortexShop</span>
-      </span>
       <button type="button" class="nav-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
       <button type="button" class="nav-tab" data-tab="staff" onclick="switchTab('staff')">Role Members</button>
       <button type="button" class="nav-tab" data-tab="games" onclick="switchTab('games')">Roblox Crosstrading</button>
       <button type="button" class="nav-tab" data-tab="rules" onclick="switchTab('rules')">MM &amp; Rules</button>
-      <button type="button" class="nav-tab" data-tab="tickets" onclick="switchTab('tickets')">Ticket System</button>
-      <button type="button" class="nav-tab" data-tab="shop" onclick="switchTab('shop')">Shop</button>
     </div>
 
     <div class="sync-status-group">
-      <span class="live-pill" id="sync-state-pill"><span class="live-pulse"></span> <span id="sync-state-label">Live Sync</span></span>
+      <span class="live-pill"><span class="live-pulse"></span> Live Sync</span>
       <span id="last-synced-text">Synced just now</span>
-      <span id="sync-countdown-label">Next sync in 12s</span>
-      <button type="button" class="mini-action-btn" id="btn-pause-sync" onclick="toggleAutoSync()">Pause Sync</button>
       <button type="button" class="mini-action-btn" id="btn-refresh-now" onclick="refreshShowcase(true)">Refresh Now</button>
-      <button type="button" class="mini-action-btn" id="btn-theme-toggle" onclick="cycleTheme()">Aura: Violet</button>
-      <button type="button" class="mini-action-btn" id="btn-deep-vortex" onclick="toggleDeepVortex()">Deep Contrast</button>
-      <button type="button" class="mini-action-btn" id="btn-shortcuts" onclick="openShortcutsModal()" title="Keyboard Shortcuts (?)">?</button>
-      <button type="button" class="mini-action-btn" id="btn-share-page" onclick="sharePageLink()">Share</button>
-    </div>
-
-    <div class="sync-countdown-strip" aria-hidden="true">
-      <div class="sync-countdown-fill" id="sync-countdown-fill"></div>
+      <button type="button" class="mini-action-btn" id="btn-theme-toggle" onclick="toggleTheme()">Theme: Violet</button>
+      <button type="button" class="mini-action-btn" id="btn-share-page" onclick="sharePageLink()">Share Page</button>
     </div>
   </header>
 
@@ -2703,19 +1698,19 @@
             <div class="profile-effect-sweep"></div>
           </div>
 
-          <div id="banner" class="banner parallax-bg">
+          <div id="banner" class="banner">
             <div class="banner-top-actions">
-              <button type="button" class="circle-btn" title="Copy User ID" aria-label="Copy User ID" onclick="copyUserId(this)">ID</button>
+              <button type="button" class="circle-btn" title="Copy User ID" aria-label="Copy User ID" onclick="copyUserId()">ID</button>
               <button type="button" class="circle-btn" title="MM Safety Guide" aria-label="MM Safety Guide" onclick="openModal()">!</button>
             </div>
           </div>
 
           <div class="card-body">
             <div class="avatar-thought-row">
-              <div class="avatar-box parallax-fg">
+              <div class="avatar-box">
                 <img id="avatar" class="avatar-img" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" />
                 <img id="avatar-deco" class="avatar-deco" src="" alt="" style="display:none;" />
-                <span id="status-dot" class="status-dot online"></span>
+                <span id="status-dot" class="status-dot"></span>
               </div>
 
               <div class="status-bubble-wrap">
@@ -2731,7 +1726,7 @@
 
             <div class="username-sub">
               <span id="username">mvn412. •</span>
-              <button type="button" class="copy-handle-inline" id="btn-copy-handle" onclick="copyHandle(this)">Copy</button>
+              <button type="button" class="copy-handle-inline" id="btn-copy-handle" onclick="copyHandle()">Copy</button>
             </div>
 
             <div class="bio-link">
@@ -2775,8 +1770,6 @@
             <div class="bio-actions-row">
               <button type="button" class="link-btn" onclick="toggleFullBio()">View Full Bio</button>
               <button type="button" class="link-btn" onclick="openModal()">How MM Works</button>
-              <button type="button" class="link-btn" onclick="switchTab('shop')">Browse Shop</button>
-              <button type="button" class="link-btn" onclick="switchTab('tickets')">Open Ticket</button>
             </div>
             <div id="full-bio-panel" class="full-bio-panel"></div>
 
@@ -2795,9 +1788,9 @@
       </div>
     </section>
 
-    <section class="server-column" id="server-column" aria-label="Target Discord Server">
+    <section class="server-column" aria-label="Target Discord Server">
       <div class="server-card tilt-3d" id="server-card" data-tilt-max="6">
-        <div class="server-banner-strip parallax-bg" id="server-banner-strip">
+        <div class="server-banner-strip" id="server-banner-strip">
           <div class="banner-3d-items" aria-hidden="true">
             <div class="banner-3d-slot">
               <span class="banner-3d-tag">EXCLUSIVE</span>
@@ -2818,7 +1811,7 @@
           </div>
         </div>
 
-        <div class="server-header parallax-fg">
+        <div class="server-header">
           <div class="server-icon-box" id="server-icon-box">
             <span class="server-icon-fallback" id="server-icon-initials">VX</span>
           </div>
@@ -2861,12 +1854,12 @@
           </div>
         </div>
 
-        <div class="server-actions parallax-fg">
-          <button type="button" class="btn-copy-invite" id="btn-copy-invite" onclick="copyInviteLink(this)">
+        <div class="server-actions">
+          <button type="button" class="btn-copy-invite" id="btn-copy-invite" onclick="copyInviteLink()">
             <span>🔗</span>
             <span id="btn-copy-invite-text">Copy Invite</span>
           </button>
-          <button type="button" class="btn-copy-id" id="btn-copy-id" onclick="copyServerId(this)">
+          <button type="button" class="btn-copy-id" id="btn-copy-id" onclick="copyServerId()">
             <span>#</span>
             <span id="btn-copy-id-text">Copy ID</span>
           </button>
@@ -2875,11 +1868,10 @@
         <div class="toast-msg" id="toast-msg"></div>
       </div>
 
-      <!-- Panel 2: Role Members -->
       <div id="panel-staff" class="sub-panel">
         <h3>Members with Tracked Roles (<span id="staff-count-label">0</span>)</h3>
         <div class="custom-note-box">
-          Showing members holding tracked roles with profile image, banner image, avatar decoration, effect overlay, and role-color rim. Hover cards for 3D spotlight, parallax &amp; tilt or click to inspect.
+          Showing members holding role IDs <code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, or <code>1568387457752371270</code> with profile image, banner image, avatar decoration, and effect overlay. Hover cards for 3D spotlight &amp; tilt or click to inspect.
         </div>
 
         <div class="controls-toolbar">
@@ -2887,14 +1879,9 @@
             type="search"
             id="staff-search-input"
             class="search-input"
-            placeholder="Search by name, @username, or ID... (press /)"
+            placeholder="Search by name, @username, or ID..."
             oninput="renderStaffSection()"
           />
-          <select id="staff-sort-select" class="select-input" onchange="renderStaffSection()" aria-label="Sort role members">
-            <option value="online">Sort: Online First</option>
-            <option value="name">Sort: Name (A–Z)</option>
-            <option value="roles">Sort: Most Roles</option>
-          </select>
           <button
             type="button"
             id="btn-online-only"
@@ -2910,343 +1897,49 @@
         <div class="member-showcase-grid" id="staff-members-container"></div>
       </div>
 
-      <!-- Panel 3: Roblox Crosstrading -->
       <div id="panel-games" class="sub-panel">
         <h3>Roblox Crosstrading (Any Game) &amp; Shop</h3>
         <div class="custom-note-box" id="custom-trade-note-box"></div>
-
-        <div class="spotlight-strip">
-          <span class="spotlight-label">TRENDING:</span>
-          <button type="button" class="filter-chip" onclick="setGameFilter('MM2')">🔪 MM2 Sets</button>
-          <button type="button" class="filter-chip" onclick="setGameFilter('Grow a Garden 2')">🌱 GaG 2 Pets &amp; Seeds</button>
-          <button type="button" class="filter-chip" onclick="setGameFilter('Adopt Me!')">🐾 Adopt Me!</button>
-          <button type="button" class="filter-chip" onclick="setGameFilter('PS99')">💎 PS99</button>
-          <button type="button" class="filter-chip" onclick="setGameFilter('Blade Ball')">⚔️ Blade Ball</button>
-        </div>
-
-        <div class="filter-chips-row" id="game-filter-chips">
-          <button type="button" class="filter-chip active" data-game="ALL" onclick="setGameFilter('ALL')">All Games</button>
-          <button type="button" class="filter-chip" data-game="MM2" onclick="setGameFilter('MM2')">MM2</button>
-          <button type="button" class="filter-chip" data-game="Grow a Garden 2" onclick="setGameFilter('Grow a Garden 2')">Grow a Garden 2</button>
-          <button type="button" class="filter-chip" data-game="Adopt Me!" onclick="setGameFilter('Adopt Me!')">Adopt Me!</button>
-          <button type="button" class="filter-chip" data-game="PS99" onclick="setGameFilter('PS99')">PS99</button>
-          <button type="button" class="filter-chip" data-game="Any Game" onclick="setGameFilter('Any Game')">Any Game</button>
-        </div>
-
         <div id="games-list-container"></div>
 
         <h4>Member Vouches</h4>
-        <div class="vouch-summary-bar" id="vouch-summary-bar">
-          <span id="vouch-summary-stats">0 vouches • ★ 5.0 avg</span>
-          <span id="vouch-summary-breakdown">5★: 0 • 4★: 0</span>
-        </div>
         <div class="vouch-filter-row" id="vouch-filter-row">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button type="button" class="filter-chip active" data-stars="ALL" onclick="setVouchFilter('ALL')">All Vouches</button>
-            <button type="button" class="filter-chip" data-stars="5" onclick="setVouchFilter('5')">5★ Only</button>
-            <button type="button" class="filter-chip" data-stars="4" onclick="setVouchFilter('4')">4★ Only</button>
-          </div>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <select id="vouch-sort-select" class="select-input" onchange="renderVouches()" aria-label="Sort vouches">
-              <option value="recent">Sort: Most Recent</option>
-              <option value="stars">Sort: Highest Rated</option>
-            </select>
-            <button type="button" class="mini-action-btn" id="btn-copy-vouch-fmt" onclick="copyVouchTemplate(this)">Copy Vouch Format</button>
-          </div>
+          <button type="button" class="filter-chip active" data-stars="ALL" onclick="setVouchFilter('ALL')">All Vouches</button>
+          <button type="button" class="filter-chip" data-stars="5" onclick="setVouchFilter('5')">5★ Only</button>
+          <button type="button" class="filter-chip" data-stars="4" onclick="setVouchFilter('4')">4★ Only</button>
         </div>
         <div id="vouches-list-container"></div>
 
-        <div class="storefront-launch-card">
-          <div>
-            <div style="font-size:0.9rem;font-weight:800;color:#fbbf24;">VortexShop Web Storefront</div>
-            <div style="font-size:0.78rem;color:#e2e8f0;">Browse instant listings, VIP &amp; SVP role perks, and verified trade hubs.</div>
-          </div>
-          <a id="store-cta-link" class="store-cta-btn" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
-            Visit vortexshop.onrender.com →
-          </a>
-        </div>
+        <a id="store-cta-link" class="store-cta-btn" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
+          Visit vortexshop.onrender.com →
+        </a>
       </div>
 
-      <!-- Panel 4: MM & Rules -->
       <div id="panel-rules" class="sub-panel">
         <h3>Middleman &amp; Safety Rules</h3>
-        <div class="scam-alert-banner">
-          Scam Alert: Never trade directly in-game with unverified users or trust lookalike profiles claiming to be staff. Always verify the Middleman's Discord ID inside an official server ticket.
-        </div>
-        <div class="steps-strip">
-          <div class="step-tile">
-            <div class="step-num">STEP 1</div>
-            Open an official ticket in <strong>Vortex Exchange &amp; MM</strong>.
-          </div>
-          <div class="step-tile">
-            <div class="step-num">STEP 2</div>
-            Verify the Middleman's ID &amp; role inside the ticket thread.
-          </div>
-          <div class="step-tile">
-            <div class="step-num">STEP 3</div>
-            Confirm items, complete escrow, and leave a vouch.
-          </div>
-        </div>
         <div class="safety-callout">
-          Escrow Fee / Tip Note: Standard middleman services and optional tips are always agreed upon openly inside the official ticket before items are handed over.
-        </div>
-        <div class="mm-quick-ref">
-          <span><strong>Server ID:</strong> <code id="rules-server-id">1542941315933667348</code></span>
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button type="button" class="mini-action-btn" id="btn-copy-mm-ids" onclick="copyAllMmIds(this)">Copy MM IDs</button>
-            <button type="button" class="mini-action-btn" onclick="copyInviteLink(this)">Copy Invite</button>
-          </div>
+          Anti-Scam Reminder: Always open an official server ticket and verify the Middleman's Discord ID before trading. Avoid unverified direct in-game trade windows or off-server impersonators.
         </div>
         <ol class="rules-list" id="rules-list-container"></ol>
 
         <div class="checklist-box">
-          <div class="checklist-header">
-            <span class="checklist-title">✓ Verify Ticket Checklist</span>
-            <span class="checklist-progress-pill" id="checklist-progress-pill">0 / 3 checks complete</span>
-          </div>
+          <div class="checklist-title">✓ Verify Ticket Checklist</div>
           <label class="checklist-item">
-            <input type="checkbox" class="mm-check-input" onchange="updateChecklistProgress()" />
+            <input type="checkbox" />
             <span>Opened an official ticket inside Vortex Exchange &amp; MM</span>
           </label>
           <label class="checklist-item">
-            <input type="checkbox" class="mm-check-input" onchange="updateChecklistProgress()" />
+            <input type="checkbox" />
             <span>Confirmed the Middleman's Discord ID &amp; role in the ticket</span>
           </label>
           <label class="checklist-item">
-            <input type="checkbox" class="mm-check-input" onchange="updateChecklistProgress()" />
+            <input type="checkbox" />
             <span>Double-checked both sides' items and trade terms</span>
           </label>
         </div>
       </div>
-
-      <!-- Panel 5: Ticket System & Closed Trade Sync -->
-      <div id="panel-tickets" class="sub-panel">
-        <h3>Ticket System &amp; Closed Trade Sync</h3>
-        <div class="custom-note-box">
-          Create or close a trade/MM ticket below. When a ticket is <strong>Closed</strong>, its structured record—including <strong>Trader 1</strong> (profile image &amp; name), <strong>Trader 2</strong> (profile image &amp; name), and <strong>Claimed by @user</strong>—is sent to your website (<code>/api/tickets/closed</code>) and displayed in the closed logs feed.
-        </div>
-
-        <form id="ticket-system-form" onsubmit="handleTicketSubmit(event)">
-          <div class="ticket-grid-2">
-            <div class="ticket-field">
-              <label for="ticket-type">Ticket Category</label>
-              <select id="ticket-type" class="ticket-select">
-                <option value="Middleman Escrow">Middleman Escrow</option>
-                <option value="Roblox Crosstrade">Roblox Crosstrade</option>
-                <option value="VIP / Shop Support">VIP / Shop Support</option>
-              </select>
-            </div>
-            <div class="ticket-field">
-              <label for="ticket-game">Game / Item Tier</label>
-              <select id="ticket-game" class="ticket-select">
-                <option value="MM2">MM2 (Weapons &amp; Sets)</option>
-                <option value="Grow a Garden 2">Grow a Garden 2 (Pets &amp; Seeds)</option>
-                <option value="Adopt Me!">Adopt Me! (High-Tier)</option>
-                <option value="PS99">PS99</option>
-                <option value="Blade Ball">Blade Ball</option>
-                <option value="Any Game">Any Game</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="ticket-grid-2">
-            <div class="ticket-field">
-              <label for="trader1-name">Trader 1 Name (Giving)</label>
-              <input type="text" id="trader1-name" class="ticket-input" placeholder="e.g. Aurelia" required />
-            </div>
-            <div class="ticket-field">
-              <label for="trader1-avatar">Trader 1 Profile Image URL</label>
-              <input type="url" id="trader1-avatar" class="ticket-input" placeholder="https://cdn.discordapp.com/..." />
-            </div>
-          </div>
-
-          <div class="ticket-field">
-            <label for="trader1-items">Trader 1 Giving Items</label>
-            <input type="text" id="trader1-items" class="ticket-input" placeholder="e.g. Harvester + Icepiercer" required />
-          </div>
-
-          <div class="ticket-grid-2">
-            <div class="ticket-field">
-              <label for="trader2-name">Trader 2 Name (Giving)</label>
-              <input type="text" id="trader2-name" class="ticket-input" placeholder="e.g. tefo900" required />
-            </div>
-            <div class="ticket-field">
-              <label for="trader2-avatar">Trader 2 Profile Image URL</label>
-              <input type="url" id="trader2-avatar" class="ticket-input" placeholder="https://cdn.discordapp.com/..." />
-            </div>
-          </div>
-
-          <div class="ticket-field">
-            <label for="trader2-items">Trader 2 Giving Items</label>
-            <input type="text" id="trader2-items" class="ticket-input" placeholder="e.g. Dragonfly + Raccoon / $ Offer" required />
-          </div>
-
-          <div class="ticket-grid-2">
-            <div class="ticket-field">
-              <label for="claimed-by-user">Claimed By (@user)</label>
-              <input type="text" id="claimed-by-user" class="ticket-input" value="@mvn412." placeholder="@username" required />
-            </div>
-            <div class="ticket-field">
-              <label for="ticket-value">Estimated Trade Value</label>
-              <input type="text" id="ticket-value" class="ticket-input" placeholder="e.g. High-Tier / $45" />
-            </div>
-          </div>
-
-          <div class="ticket-field">
-            <label for="ticket-notes">Ticket / Escrow Notes</label>
-            <textarea id="ticket-notes" class="ticket-textarea" placeholder="Optional ticket channel ID, middleman notes, or trade confirmation details..."></textarea>
-          </div>
-
-          <div class="ticket-actions-bar">
-            <button type="submit" name="action_mode" value="open" class="btn-ticket-primary">Create Open Ticket</button>
-            <button type="button" class="btn-ticket-close" onclick="closeAndSendTicketToWebsite(this)">Close Ticket &amp; Send to Website</button>
-          </div>
-        </form>
-
-        <h4>Active &amp; Closed Tickets (<span id="closed-tickets-count">0</span>)</h4>
-        <div id="tickets-feed-container"></div>
-      </div>
-
-      <!-- Panel 6: VortexShop Storefront (Hidden Admin Post Box) -->
-      <div id="panel-shop" class="sub-panel">
-        <div class="shop-header-banner">
-          <div>
-            <h3 style="margin:0;">VortexShop Storefront</h3>
-            <div style="font-size:0.76rem;color:#cbd5e1;">Verified items, instant ticket checkout, and live stock sync.</div>
-          </div>
-          <button type="button" class="secret-admin-dot" id="btn-admin-unlock" onclick="openAdminGateModal()" title="Secret Admin Access (Ctrl+Shift+A)">&#9672; Vault</button>
-        </div>
-
-        <div class="shop-stats-strip">
-          <div class="shop-stat-tile">
-            <div class="shop-stat-val" id="shop-stat-total">0</div>
-            <div class="shop-stat-lbl">Total Listings</div>
-          </div>
-          <div class="shop-stat-tile">
-            <div class="shop-stat-val" id="shop-stat-avail">0</div>
-            <div class="shop-stat-lbl">Available Stock</div>
-          </div>
-          <div class="shop-stat-tile">
-            <div class="shop-stat-val" id="shop-stat-sold">0</div>
-            <div class="shop-stat-lbl">Sold Out</div>
-          </div>
-        </div>
-        <div class="safety-callout">
-          <strong>No Pre-Payment on Website:</strong> Items listed in the Shop do not charge upfront on the site. Click <strong>Make Ticket to Buy</strong> to auto-fill a ticket with the item details and pay the seller who posted it directly inside your ticket.
-        </div>
-
-        <div class="shop-toolbar">
-          <input
-            type="search"
-            id="shop-search-input"
-            class="search-input"
-            placeholder="Search shop items, category, or @poster..."
-            oninput="renderShopItemsList()"
-          />
-          <select id="shop-filter-select" class="select-input" onchange="renderShopItemsList()" aria-label="Filter shop items">
-            <option value="ALL">All Items</option>
-            <option value="AVAILABLE">Available Only</option>
-            <option value="SOLD">Sold Out</option>
-          </select>
-        </div>
-
-        <div class="shop-items-grid" id="shop-items-grid"></div>
-
-        <div class="admin-divider-box" id="shop-admin-section" style="display:none;">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:10px;">
-            <div style="display:flex;align-items:center;gap:8px;">
-              <h4 style="margin:0;">Admin Post Item</h4>
-              <span class="admin-status-pill">UNLOCKED</span>
-            </div>
-            <button type="button" class="mini-action-btn" onclick="lockAdminPanel()">Lock Admin</button>
-          </div>
-          <div class="filter-chips-row" style="margin-bottom:10px;">
-            <span class="spotlight-label">QUICK CATEGORY:</span>
-            <button type="button" class="filter-chip" onclick="applyQuickCategory('MM2')">MM2</button>
-            <button type="button" class="filter-chip" onclick="applyQuickCategory('Grow a Garden 2')">Grow a Garden 2</button>
-            <button type="button" class="filter-chip" onclick="applyQuickCategory('Adopt Me!')">Adopt Me!</button>
-            <button type="button" class="filter-chip" onclick="applyQuickCategory('PS99')">PS99</button>
-            <button type="button" class="filter-chip" onclick="applyQuickCategory('Blade Ball')">Blade Ball</button>
-          </div>
-          <div class="admin-webhook-note">
-            <strong>Webhook &amp; Channel Auto-Sync Active:</strong> Adding items, <strong>-1</strong> stock minus, <strong>Sold 1</strong>, edits, and deletes sync to backend &amp; webhook automatically.
-          </div>
-          <form id="shop-admin-item-form" onsubmit="handleShopAddItem(event)">
-            <div class="ticket-field">
-              <label for="shop-item-poster">Posted By (@user / Seller) *</label>
-              <input
-                type="text"
-                id="shop-item-poster"
-                class="ticket-input"
-                value="@mvn412."
-                placeholder="@seller"
-                required
-              />
-            </div>
-
-            <label class="shop-upload-box" for="shop-image-file">
-              <div style="font-size:1rem;font-weight:800;color:#fbbf24;">&#8593; Upload product image</div>
-              <div style="font-size:0.72rem;color:#cbd5e1;">PNG, JPG, or WebP &middot; up to 3 MB</div>
-              <img id="shop-image-preview" class="shop-upload-preview" alt="Item preview" />
-            </label>
-            <input
-              type="file"
-              id="shop-image-file"
-              accept="image/png,image/jpeg,image/webp"
-              style="display:none;"
-              onchange="handleShopImageFile(event)"
-            />
-
-            <div class="ticket-field">
-              <label for="shop-image-url">Or Image URL (optional)</label>
-              <input type="url" id="shop-image-url" class="ticket-input" placeholder="https://..." />
-            </div>
-
-            <div class="ticket-grid-2">
-              <div class="ticket-field">
-                <label for="shop-item-name">Item Name *</label>
-                <input type="text" id="shop-item-name" class="ticket-input" placeholder="e.g. Harvester + Icepiercer / Gift Card" required />
-              </div>
-              <div class="ticket-field">
-                <label for="shop-item-category">Category *</label>
-                <input type="text" id="shop-item-category" class="ticket-input" placeholder="e.g. MM2 / Grow a Garden 2" required />
-              </div>
-            </div>
-
-            <div class="ticket-grid-2">
-              <div class="ticket-field">
-                <label for="shop-item-stock">Available Stock *</label>
-                <input type="number" id="shop-item-stock" class="ticket-input" min="1" value="1" required />
-              </div>
-              <div class="ticket-field">
-                <label for="shop-item-price">Price &amp; Currency *</label>
-                <div style="display:flex;gap:6px;">
-                  <input type="number" id="shop-item-price" class="ticket-input" step="0.01" min="0" placeholder="0.00" required />
-                  <select id="shop-item-currency" class="ticket-select" style="max-width:110px;">
-                    <option value="USD">USD</option>
-                    <option value="PHP">PHP</option>
-                    <option value="EUR">EUR</option>
-                    <option value="ROB">ROB</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="ticket-field">
-              <label for="shop-item-desc">Description (optional)</label>
-              <textarea id="shop-item-desc" class="ticket-textarea" placeholder="Edition, region, trade notes, or delivery instructions..."></textarea>
-            </div>
-
-            <div class="ticket-actions-bar">
-              <button type="submit" class="btn-ticket-close">Post Item to Shop &#8599;</button>
-            </div>
-          </form>
-        </div>
-      </div>
     </section>
   </main>
-
-  <button type="button" class="jump-top-btn" id="jump-top-btn" onclick="scrollToTopSmooth()" title="Jump to Top">↑ Top</button>
 
   <div id="mm-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="mm-modal-title">
     <div class="modal-box">
@@ -3258,26 +1951,6 @@
         Verify tickets &amp; middleman IDs inside the server before completing any crosstrade.
       </div>
       <ol class="rules-list" id="modal-rules-list"></ol>
-    </div>
-  </div>
-
-  <div id="shortcuts-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="shortcuts-modal-title">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 id="shortcuts-modal-title">Keyboard Shortcuts</h3>
-        <button type="button" class="modal-close" onclick="closeShortcutsModal()">✕</button>
-      </div>
-      <ul class="rules-list" style="list-style:none;padding-left:0;">
-        <li><strong>1</strong> — Overview</li>
-        <li><strong>2</strong> — Role Members</li>
-        <li><strong>3</strong> — Roblox Crosstrading</li>
-        <li><strong>4</strong> — MM &amp; Rules</li>
-        <li><strong>5</strong> — Ticket System</li>
-        <li><strong>6</strong> — Shop</li>
-        <li><strong>/</strong> — Focus Member Search</li>
-        <li><strong>?</strong> — Open This Shortcut Guide</li>
-        <li><strong>Esc</strong> — Close Any Open Modal</li>
-      </ul>
     </div>
   </div>
 
@@ -3314,104 +1987,18 @@
     </div>
   </div>
 
-  <div id="admin-gate-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="admin-gate-title">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 id="admin-gate-title">Admin Login</h3>
-        <button type="button" class="modal-close" onclick="closeAdminGateModal()">&#10005;</button>
-      </div>
-      <form onsubmit="verifyAdminPassword(event)">
-        <div class="ticket-field">
-          <label for="admin-gate-password">Enter Admin Password</label>
-          <input type="password" id="admin-gate-password" class="ticket-input" placeholder="Admin password..." required />
-        </div>
-        <div class="ticket-actions-bar">
-          <button type="submit" class="btn-ticket-close">Unlock Post Form</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
-  <div id="edit-shop-item-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="edit-shop-item-title">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 id="edit-shop-item-title">Adjust Shop Item</h3>
-        <button type="button" class="modal-close" onclick="closeEditItemModal()">&#10005;</button>
-      </div>
-      <form id="edit-shop-item-form" onsubmit="saveEditedShopItem(event)">
-        <input type="hidden" id="edit-item-id" />
-        <div class="ticket-field">
-          <label for="edit-item-name">Item Name *</label>
-          <input type="text" id="edit-item-name" class="ticket-input" required />
-        </div>
-        <div class="ticket-grid-2">
-          <div class="ticket-field">
-            <label for="edit-item-price">Price *</label>
-            <input type="number" id="edit-item-price" class="ticket-input" step="0.01" min="0" required />
-          </div>
-          <div class="ticket-field">
-            <label for="edit-item-currency">Currency</label>
-            <select id="edit-item-currency" class="ticket-select">
-              <option value="USD">USD</option>
-              <option value="PHP">PHP</option>
-              <option value="EUR">EUR</option>
-              <option value="ROB">ROB</option>
-            </select>
-          </div>
-        </div>
-        <div class="ticket-grid-2">
-          <div class="ticket-field">
-            <label for="edit-item-stock">Stock *</label>
-            <input type="number" id="edit-item-stock" class="ticket-input" min="0" required />
-          </div>
-          <div class="ticket-field">
-            <label for="edit-item-category">Category</label>
-            <input type="text" id="edit-item-category" class="ticket-input" />
-          </div>
-        </div>
-        <div class="ticket-field">
-          <label for="edit-item-image-url">Image URL</label>
-          <input type="url" id="edit-item-image-url" class="ticket-input" placeholder="https://..." />
-        </div>
-        <div class="ticket-field">
-          <label for="edit-item-image-file">Or Upload New Image</label>
-          <input type="file" id="edit-item-image-file" class="ticket-input" accept="image/png,image/jpeg,image/webp" onchange="handleEditItemImageFile(event)" />
-        </div>
-        <div class="ticket-actions-bar">
-          <button type="submit" class="btn-ticket-close">Save &amp; Sync</button>
-          <button type="button" class="mini-action-btn" onclick="closeEditItemModal()">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-
   <script>
-    const SYNC_INTERVAL_MS = 12000;
-    let nextSyncAt = Date.now() + SYNC_INTERVAL_MS;
-    let autoSyncPaused = false;
-    let lastSuccessfulSyncLabel = "just now";
-
     let currentServerInvite = "https://discord.gg/3JPatMmyF";
     let currentServerId = "1542941315933667348";
     let currentUserId = "1540575139538796634";
     let currentHandle = "mvn412.";
     let allGames = [];
-    let selectedGameFilter = "ALL";
     let allVouches = [];
     let selectedVouchStars = "ALL";
     let roleCatalog = [];
     let staffMembers = [];
     let selectedRoleFilter = "ALL";
     let onlineOnlyFilter = false;
-    let themeIndex = 0;
-    let deepVortexEnabled = false;
-    let ticketRecords = [];
-
-    const THEME_MODES = [
-      { cls: "", label: "Aura: Violet", c1: "%23a855f7", c2: "%23ec4899", c3: "%23f59e0b" },
-      { cls: "theme-crimson", label: "Aura: Crimson", c1: "%23e11d48", c2: "%23fb7185", c3: "%23f59e0b" },
-      { cls: "theme-gold", label: "Aura: Amber Gold", c1: "%23f59e0b", c2: "%23fbbf24", c3: "%23fef08a" },
-    ];
 
     const displayedCounts = {
       members: 0,
@@ -3420,67 +2007,12 @@
       boosts: 0,
     };
 
-    const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-    function updateFaviconForTheme(mode) {
-      const link = document.getElementById("dynamic-favicon");
-      if (!link) return;
-      const svg = `%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' stop-color='${mode.c1}'/%3E%3Cstop offset='55%25' stop-color='${mode.c2}'/%3E%3Cstop offset='100%25' stop-color='${mode.c3}'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='16' fill='%23120824'/%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='none' stroke='url(%23g)' stroke-width='3'/%3E%3Cpath d='M16 18L32 48L48 18' fill='none' stroke='url(%23g)' stroke-width='6.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='32' cy='22' r='4' fill='%23fde68a'/%3E%3C/svg%3E`;
-      link.setAttribute("href", `data:image/svg+xml,${svg}`);
-    }
-
-    function cycleTheme() {
-      themeIndex = (themeIndex + 1) % THEME_MODES.length;
-      const mode = THEME_MODES[themeIndex];
-      document.body.classList.remove("theme-crimson", "theme-gold");
-      if (mode.cls) document.body.classList.add(mode.cls);
-      document.getElementById("btn-theme-toggle").textContent = mode.label;
-      updateFaviconForTheme(mode);
-    }
-
-    function toggleDeepVortex() {
-      deepVortexEnabled = !deepVortexEnabled;
-      document.body.classList.toggle("deep-vortex", deepVortexEnabled);
-      const btn = document.getElementById("btn-deep-vortex");
-      btn.classList.toggle("toggled", deepVortexEnabled);
-      btn.textContent = deepVortexEnabled ? "Deep Contrast: On" : "Deep Contrast";
-    }
-
-    function toggleAutoSync() {
-      autoSyncPaused = !autoSyncPaused;
-      const btn = document.getElementById("btn-pause-sync");
-      btn.textContent = autoSyncPaused ? "Resume Sync" : "Pause Sync";
-      btn.classList.toggle("toggled", autoSyncPaused);
-      if (!autoSyncPaused) {
-        nextSyncAt = Date.now() + SYNC_INTERVAL_MS;
-      }
-      updateSyncPillState();
-      tickSyncCountdown();
-    }
-
-    function updateSyncPillState(isStale = false) {
-      const pill = document.getElementById("sync-state-pill");
-      const lbl = document.getElementById("sync-state-label");
-      if (!pill || !lbl) return;
-      pill.classList.remove("stale", "paused");
-      if (autoSyncPaused) {
-        pill.classList.add("paused");
-        lbl.textContent = "Sync Paused";
-      } else if (isStale) {
-        pill.classList.add("stale");
-        lbl.textContent = `Cached (${lastSuccessfulSyncLabel})`;
-      } else {
-        lbl.textContent = "Live Sync";
-      }
-    }
-
     function animateCounter(elId, key, targetVal) {
       const el = document.getElementById(elId);
       if (!el) return;
       const target = Math.max(0, Number(targetVal || 0));
       const start = displayedCounts[key] ?? 0;
-      if (start === target || prefersReducedMotion) {
-        displayedCounts[key] = target;
+      if (start === target) {
         el.textContent = target.toLocaleString();
         return;
       }
@@ -3505,8 +2037,6 @@
     function attach3DTilt(el) {
       if (!el || el.dataset.tiltBound === "1") return;
       el.dataset.tiltBound = "1";
-      if (prefersReducedMotion) return;
-
       const maxDeg = Number(el.dataset.tiltMax || "6");
 
       el.addEventListener("pointermove", (e) => {
@@ -3519,38 +2049,16 @@
         const py = y / rect.height - 0.5;
         const rotY = (px * maxDeg * 2).toFixed(2);
         const rotX = (-py * maxDeg * 2).toFixed(2);
-        const bgX = (-px * 12).toFixed(1);
-        const bgY = (-py * 10).toFixed(1);
-        const fgX = (px * 8).toFixed(1);
-        const fgY = (py * 6).toFixed(1);
-        const shadowX = (-px * 18).toFixed(1);
-        const shadowY = (20 - py * 12).toFixed(1);
-        const shadowBlur = (56 + Math.abs(px) * 14).toFixed(0);
-
         el.classList.remove("resetting");
         el.style.setProperty("--spot-x", `${x.toFixed(1)}px`);
         el.style.setProperty("--spot-y", `${y.toFixed(1)}px`);
         el.style.setProperty("--spot-opacity", "1");
-        el.style.setProperty("--par-bg-x", `${bgX}px`);
-        el.style.setProperty("--par-bg-y", `${bgY}px`);
-        el.style.setProperty("--par-fg-x", `${fgX}px`);
-        el.style.setProperty("--par-fg-y", `${fgY}px`);
-        el.style.setProperty("--card-shadow-x", `${shadowX}px`);
-        el.style.setProperty("--card-shadow-y", `${shadowY}px`);
-        el.style.setProperty("--card-shadow-blur", `${shadowBlur}px`);
         el.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.012, 1.012, 1.012)`;
       });
 
       el.addEventListener("pointerleave", () => {
         el.classList.add("resetting");
         el.style.setProperty("--spot-opacity", "0");
-        el.style.setProperty("--par-bg-x", "0px");
-        el.style.setProperty("--par-bg-y", "0px");
-        el.style.setProperty("--par-fg-x", "0px");
-        el.style.setProperty("--par-fg-y", "0px");
-        el.style.setProperty("--card-shadow-x", "0px");
-        el.style.setProperty("--card-shadow-y", "18px");
-        el.style.setProperty("--card-shadow-blur", "40px");
         el.style.transform = "perspective(1100px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)";
       });
     }
@@ -3561,7 +2069,7 @@
 
     (function initSparkleField() {
       const canvas = document.getElementById("sparkle-canvas");
-      if (!canvas || prefersReducedMotion) return;
+      if (!canvas) return;
       const ctx = canvas.getContext("2d");
       let width = (canvas.width = window.innerWidth);
       let height = (canvas.height = window.innerHeight);
@@ -3589,7 +2097,6 @@
       function draw() {
         ctx.clearRect(0, 0, width, height);
         const isCrimson = document.body.classList.contains("theme-crimson");
-        const isGold = document.body.classList.contains("theme-gold");
         for (const s of stars) {
           s.y -= s.vy;
           if (s.y < -10) {
@@ -3600,36 +2107,15 @@
           const drawY = (s.y + pointerOffsetY * (s.r * 0.6) + height) % height;
           ctx.beginPath();
           ctx.arc(drawX, drawY, s.r, 0, Math.PI * 2);
-          ctx.fillStyle = isGold
-            ? `rgba(253, 224, 71, ${s.alpha})`
-            : isCrimson
-              ? `rgba(253, 164, 175, ${s.alpha})`
-              : `rgba(216, 180, 254, ${s.alpha})`;
+          ctx.fillStyle = isCrimson
+            ? `rgba(253, 164, 175, ${s.alpha})`
+            : `rgba(216, 180, 254, ${s.alpha})`;
           ctx.fill();
         }
         requestAnimationFrame(draw);
       }
       requestAnimationFrame(draw);
     })();
-
-    window.addEventListener("scroll", () => {
-      const btn = document.getElementById("jump-top-btn");
-      if (!btn) return;
-      btn.classList.toggle("visible", window.scrollY > 280);
-    }, { passive: true });
-
-    function scrollToTopSmooth() {
-      window.scrollTo({ top: 0, behavior: prefersReducedMotion ? "auto" : "smooth" });
-    }
-
-    function pulseCopied(btnEl) {
-      if (!btnEl) return;
-      btnEl.classList.remove("copied-pulse");
-      void btnEl.offsetWidth;
-      btnEl.classList.add("copied-pulse");
-      clearTimeout(btnEl._pulseTimer);
-      btnEl._pulseTimer = setTimeout(() => btnEl.classList.remove("copied-pulse"), 450);
-    }
 
     function escapeHtml(str) {
       return String(str ?? "")
@@ -3642,11 +2128,9 @@
 
     function showToast(msg) {
       const el = document.getElementById("toast-msg");
-      if (el) {
-        el.textContent = msg;
-        clearTimeout(window._toastTimer);
-        window._toastTimer = setTimeout(() => { el.textContent = ""; }, 2800);
-      }
+      el.textContent = msg;
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => { el.textContent = ""; }, 2500);
     }
 
     function flashLabel(elId, tempText, originalText) {
@@ -3657,7 +2141,7 @@
       el._flashTimer = setTimeout(() => { el.textContent = originalText; }, 1600);
     }
 
-    async function copyText(text, successMsg, flashFn, triggerBtn) {
+    async function copyText(text, successMsg, flashFn) {
       try {
         await navigator.clipboard.writeText(text);
       } catch {
@@ -3668,52 +2152,41 @@
         document.execCommand("copy");
         inp.remove();
       }
-      pulseCopied(triggerBtn);
       showToast(successMsg);
       if (flashFn) flashFn();
     }
 
-    function copyInviteLink(btnEl) {
+    function copyInviteLink() {
       copyText(currentServerInvite, "Server invite copied.", () => {
         flashLabel("btn-copy-invite-text", "Copied!", "Copy Invite");
-      }, btnEl);
+      });
     }
 
-    function copyServerId(btnEl) {
+    function copyServerId() {
       copyText(currentServerId, "Server ID copied.", () => {
         flashLabel("btn-copy-id-text", "Copied!", "Copy ID");
-      }, btnEl);
+      });
     }
 
-    function copyUserId(btnEl) {
-      copyText(currentUserId, "Owner User ID copied.", null, btnEl);
+    function copyUserId() {
+      copyText(currentUserId, "Owner User ID copied.");
     }
 
-    function copyHandle(btnEl) {
+    function copyHandle() {
       copyText(currentHandle, `Copied handle: ${currentHandle}`, () => {
         flashLabel("btn-copy-handle", "Copied", "Copy");
-      }, btnEl);
-    }
-
-    function copyAllMmIds(btnEl) {
-      const ids = staffMembers.map((m) => `${m.display_name || m.username} (${m.id})`).join(" | ") || currentUserId;
-      copyText(ids, "Copied tracked MM / role member IDs.", () => {
-        flashLabel("btn-copy-mm-ids", "Copied!", "Copy MM IDs");
-      }, btnEl);
-    }
-
-    function copyVouchTemplate(btnEl) {
-      const tpl = "Vouch for Vortex Exchange & MM — Traded: [Item] | MM: [@Middleman] | Rating: 5/5";
-      copyText(tpl, "Copied vouch format template.", () => {
-        flashLabel("btn-copy-vouch-fmt", "Copied!", "Copy Vouch Format");
-      }, btnEl);
+      });
     }
 
     function sharePageLink() {
-      const btnEl = document.getElementById("btn-share-page");
       copyText(window.location.href, "Page URL copied to clipboard.", () => {
-        flashLabel("btn-share-page", "Copied!", "Share");
-      }, btnEl);
+        flashLabel("btn-share-page", "Copied!", "Share Page");
+      });
+    }
+
+    function toggleTheme() {
+      const isCrimson = document.body.classList.toggle("theme-crimson");
+      document.getElementById("btn-theme-toggle").textContent = isCrimson ? "Theme: Crimson" : "Theme: Violet";
     }
 
     function toggleFullBio() {
@@ -3729,59 +2202,12 @@
       renderStaffSection();
     }
 
-    function resetAllFilters() {
-      selectedRoleFilter = "ALL";
-      onlineOnlyFilter = false;
-      const searchEl = document.getElementById("staff-search-input");
-      if (searchEl) searchEl.value = "";
-      const sortEl = document.getElementById("staff-sort-select");
-      if (sortEl) sortEl.value = "online";
-      const onlineBtn = document.getElementById("btn-online-only");
-      if (onlineBtn) {
-        onlineBtn.textContent = "Online Only: Off";
-        onlineBtn.classList.remove("toggled");
-      }
-      renderFilterChips();
-      renderStaffSection();
-    }
-
-    function resetCrosstradeFilters() {
-      selectedGameFilter = "ALL";
-      selectedVouchStars = "ALL";
-      document.querySelectorAll("#game-filter-chips .filter-chip").forEach((btn) => {
-        btn.classList.toggle("active", btn.getAttribute("data-game") === "ALL");
-      });
-      document.querySelectorAll("#vouch-filter-row .filter-chip").forEach((btn) => {
-        btn.classList.toggle("active", btn.getAttribute("data-stars") === "ALL");
-      });
-      renderGames();
-      renderVouches();
-    }
-
-    function updateChecklistProgress() {
-      const inputs = Array.from(document.querySelectorAll(".mm-check-input"));
-      const checkedCount = inputs.filter((i) => i.checked).length;
-      const total = inputs.length;
-      const pill = document.getElementById("checklist-progress-pill");
-      if (!pill) return;
-      pill.textContent = `${checkedCount} / ${total} checks complete`;
-      pill.classList.toggle("complete", total > 0 && checkedCount === total);
-    }
-
     function openModal() {
       document.getElementById("mm-modal").classList.add("open");
     }
 
     function closeModal() {
       document.getElementById("mm-modal").classList.remove("open");
-    }
-
-    function openShortcutsModal() {
-      document.getElementById("shortcuts-modal").classList.add("open");
-    }
-
-    function closeShortcutsModal() {
-      document.getElementById("shortcuts-modal").classList.remove("open");
     }
 
     function openLightbox(title, url) {
@@ -3812,7 +2238,6 @@
       const avEl = document.getElementById("inspector-avatar");
       const avSrc = member.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
       avEl.src = avSrc;
-      avEl.onerror = () => { avEl.src = "https://cdn.discordapp.com/embed/avatars/0.png"; };
       avEl.onclick = () => openLightbox(`${member.display_name || member.username} — Avatar`, avSrc);
 
       const eff = member.profile_effect || {};
@@ -3824,14 +2249,11 @@
         <strong>Decoration:</strong> ${member.avatar_decoration_url ? "Active" : "None"}
       `;
 
-      const copyIdBtn = document.getElementById("inspector-copy-id");
-      copyIdBtn.onclick = () => {
-        copyText(member.id, `Copied ID for ${member.display_name || member.username}.`, null, copyIdBtn);
+      document.getElementById("inspector-copy-id").onclick = () => {
+        copyText(member.id, `Copied ID for ${member.display_name || member.username}.`);
       };
-
-      const copyMentionBtn = document.getElementById("inspector-copy-mention");
-      copyMentionBtn.onclick = () => {
-        copyText(`<@${member.id}>`, `Copied mention <@${member.id}>.`, null, copyMentionBtn);
+      document.getElementById("inspector-copy-mention").onclick = () => {
+        copyText(`<@${member.id}>`, `Copied mention <@${member.id}>.`);
       };
 
       const rolesBox = document.getElementById("inspector-roles");
@@ -3839,7 +2261,6 @@
       (member.roles || []).forEach((roleItem) => {
         const pill = document.createElement("span");
         pill.className = "staff-role-pill";
-        if (roleItem.color) pill.style.setProperty("--pill-role-color", roleItem.color);
         if (roleItem.icon_url) {
           const rImg = document.createElement("img");
           rImg.src = roleItem.icon_url;
@@ -3865,56 +2286,16 @@
         closeLightbox();
         closeInspectorModal();
         closeModal();
-        closeShortcutsModal();
-        closeAdminGateModal();
-        closeEditItemModal();
-        return;
-      }
-      const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
-      if (activeTag === "input" || activeTag === "textarea" || activeTag === "select") return;
-
-      if (e.key === "1") switchTab("overview");
-      else if (e.key === "2") switchTab("staff");
-      else if (e.key === "3") switchTab("games");
-      else if (e.key === "4") switchTab("rules");
-      else if (e.key === "5") switchTab("tickets");
-      else if (e.key === "6") switchTab("shop");
-      else if (e.key === "?") {
-        e.preventDefault();
-        openShortcutsModal();
-      } else if (e.key === "/") {
-        e.preventDefault();
-        switchTab("staff");
-        const inp = document.getElementById("staff-search-input");
-        if (inp) inp.focus();
       }
     });
 
-    const VALID_TABS = ["overview", "staff", "games", "rules", "tickets", "shop"];
-
-    function switchTab(tabName, updateHash = true) {
-      const targetTab = VALID_TABS.includes(tabName) ? tabName : "overview";
+    function switchTab(tabName) {
       document.querySelectorAll(".nav-tab").forEach((btn) => {
-        btn.classList.toggle("active", btn.getAttribute("data-tab") === targetTab);
+        btn.classList.toggle("active", btn.getAttribute("data-tab") === tabName);
       });
-      document.getElementById("panel-staff").classList.toggle("active", targetTab === "staff");
-      document.getElementById("panel-games").classList.toggle("active", targetTab === "games");
-      document.getElementById("panel-rules").classList.toggle("active", targetTab === "rules");
-      document.getElementById("panel-tickets").classList.toggle("active", targetTab === "tickets");
-      document.getElementById("panel-shop").classList.toggle("active", targetTab === "shop");
-
-      if (updateHash && window.location.hash !== `#${targetTab}`) {
-        try {
-          history.replaceState(null, "", `#${targetTab}`);
-        } catch {
-          window.location.hash = targetTab;
-        }
-      }
-
-      if (window.innerWidth <= 900 && targetTab !== "overview") {
-        const col = document.getElementById("server-column");
-        if (col) col.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "start" });
-      }
+      document.getElementById("panel-staff").classList.toggle("active", tabName === "staff");
+      document.getElementById("panel-games").classList.toggle("active", tabName === "games");
+      document.getElementById("panel-rules").classList.toggle("active", tabName === "rules");
     }
 
     function getInitials(name) {
@@ -3924,26 +2305,6 @@
         .slice(0, 2)
         .map((w) => w[0].toUpperCase())
         .join("") || "VX";
-    }
-
-    function getAvailabilityInfo(member) {
-      if (member.availability_status) {
-        const key = String(member.availability_status).toLowerCase().replace(/\s+/g, "-");
-        return { key, label: member.availability_label || member.availability_status };
-      }
-      if ((member.status || "offline") === "online") {
-        return { key: "available", label: "Available" };
-      }
-      if ((member.status || "offline") === "dnd" || (member.status || "offline") === "idle") {
-        return { key: "in-ticket", label: "In Ticket" };
-      }
-      return { key: "away", label: "Away" };
-    }
-
-    function countMembersForRole(roleId) {
-      return staffMembers.filter((m) =>
-        (m.roles || []).some((r) => r.id === roleId || r.role_key === roleId)
-      ).length;
     }
 
     function renderFilterChips() {
@@ -3962,7 +2323,6 @@
       container.appendChild(allChip);
 
       roleCatalog.forEach((r) => {
-        const count = countMembersForRole(r.id);
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = `filter-chip ${selectedRoleFilter === r.id ? "active" : ""}`;
@@ -3974,7 +2334,7 @@
           chip.appendChild(img);
         }
         const txt = document.createElement("span");
-        txt.textContent = `${r.short_label || r.label} (${count})`;
+        txt.textContent = r.short_label || r.label;
         chip.appendChild(txt);
         chip.onclick = () => {
           selectedRoleFilter = r.id;
@@ -3987,8 +2347,6 @@
 
     function renderStaffSection() {
       const queryVal = (document.getElementById("staff-search-input")?.value || "").trim().toLowerCase();
-      const sortMode = document.getElementById("staff-sort-select")?.value || "online";
-
       const filtered = staffMembers.filter((m) => {
         if (onlineOnlyFilter && (m.status || "offline") === "offline") return false;
         if (selectedRoleFilter !== "ALL") {
@@ -4004,31 +2362,13 @@
         return true;
       });
 
-      const statusRank = { online: 0, idle: 1, dnd: 2, offline: 3 };
-      filtered.sort((a, b) => {
-        if (sortMode === "name") {
-          return String(a.display_name || a.username || "").localeCompare(String(b.display_name || b.username || ""));
-        }
-        if (sortMode === "roles") {
-          return (b.roles || []).length - (a.roles || []).length;
-        }
-        const ra = statusRank[a.status || "offline"] ?? 3;
-        const rb = statusRank[b.status || "offline"] ?? 3;
-        return ra - rb;
-      });
-
       const membersEl = document.getElementById("staff-members-container");
       const countEl = document.getElementById("staff-count-label");
       membersEl.innerHTML = "";
       countEl.textContent = String(filtered.length);
 
       if (!filtered.length) {
-        membersEl.innerHTML = `
-          <div class="vouch-card">
-            <p class="vouch-note" style="margin-bottom:8px;">No matching members found for the current filter.</p>
-            <button type="button" class="mini-action-btn" onclick="resetAllFilters()">Reset Filters</button>
-          </div>
-        `;
+        membersEl.innerHTML = `<div class="vouch-card"><p class="vouch-note">No matching members found for the current filter.</p></div>`;
         return;
       }
 
@@ -4037,12 +2377,6 @@
         card.className = "member-showcase-card tilt-3d";
         card.dataset.tiltMax = "5";
         card.onclick = () => openInspectorModal(m);
-
-        const primaryRoleColor =
-          m.role_color ||
-          (m.roles || []).find((r) => r.color)?.color ||
-          "#e879f9";
-        card.style.setProperty("--member-role-color", primaryRoleColor);
 
         const eff = m.profile_effect || {};
         const effectLayer = document.createElement("div");
@@ -4061,7 +2395,7 @@
         card.appendChild(effectLayer);
 
         const banner = document.createElement("div");
-        banner.className = "member-banner-box parallax-bg";
+        banner.className = "member-banner-box";
         if (m.banner_url) {
           banner.style.backgroundImage = `url("${m.banner_url}")`;
         }
@@ -4074,7 +2408,7 @@
         idRow.className = "member-identity-row";
 
         const avWrap = document.createElement("div");
-        avWrap.className = "member-avatar-wrap parallax-fg";
+        avWrap.className = "member-avatar-wrap";
 
         const ring = document.createElement("div");
         ring.className = "m-avatar-ring";
@@ -4083,7 +2417,6 @@
         av.className = "m-avatar-photo";
         av.src = m.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
         av.alt = m.display_name || m.username || "Member";
-        av.onerror = () => { av.src = "https://cdn.discordapp.com/embed/avatars/0.png"; };
         ring.appendChild(av);
 
         if (m.avatar_decoration_url) {
@@ -4095,21 +2428,13 @@
           ring.appendChild(deco);
         }
 
-        const st = m.status || "offline";
         const stDot = document.createElement("span");
-        stDot.className = `m-status-badge ${st}`;
+        stDot.className = `m-status-badge ${m.status || "offline"}`;
         ring.appendChild(stDot);
 
-        const avail = getAvailabilityInfo(m);
         const nameBlock = document.createElement("div");
         nameBlock.className = "m-name-block";
-        nameBlock.innerHTML = `
-          <div class="m-display-row">
-            <span class="m-display-name">${escapeHtml(m.display_name || m.username)}</span>
-            <span class="mm-avail-pill ${escapeHtml(avail.key)}">${escapeHtml(avail.label)}</span>
-          </div>
-          <div class="m-username-line">@${escapeHtml(m.username)}</div>
-        `;
+        nameBlock.innerHTML = `<div class="m-display-name">${escapeHtml(m.display_name || m.username)}</div><div class="m-username-line">@${escapeHtml(m.username)}</div>`;
 
         avWrap.appendChild(ring);
         avWrap.appendChild(nameBlock);
@@ -4123,7 +2448,7 @@
         copyIdBtn.textContent = "Copy ID";
         copyIdBtn.onclick = (ev) => {
           ev.stopPropagation();
-          copyText(m.id, `Copied ID for ${m.display_name || m.username}.`, null, copyIdBtn);
+          copyText(m.id, `Copied ID for ${m.display_name || m.username}.`);
         };
 
         const copyMentionBtn = document.createElement("button");
@@ -4132,7 +2457,7 @@
         copyMentionBtn.textContent = "@Mention";
         copyMentionBtn.onclick = (ev) => {
           ev.stopPropagation();
-          copyText(`<@${m.id}>`, `Copied mention <@${m.id}>.`, null, copyMentionBtn);
+          copyText(`<@${m.id}>`, `Copied mention <@${m.id}>.`);
         };
 
         actionsWrap.appendChild(copyIdBtn);
@@ -4148,7 +2473,6 @@
         (m.roles || []).forEach((roleItem) => {
           const pill = document.createElement("span");
           pill.className = "staff-role-pill";
-          if (roleItem.color) pill.style.setProperty("--pill-role-color", roleItem.color);
           if (roleItem.icon_url) {
             const rImg = document.createElement("img");
             rImg.src = roleItem.icon_url;
@@ -4169,83 +2493,17 @@
       });
     }
 
-    function setGameFilter(gameVal) {
-      selectedGameFilter = gameVal;
-      document.querySelectorAll("#game-filter-chips .filter-chip").forEach((btn) => {
-        btn.classList.toggle("active", btn.getAttribute("data-game") === gameVal);
-      });
-      renderGames();
-    }
-
-    function inferTierBadge(gameObj) {
-      if (gameObj.tier) return gameObj.tier;
-      const text = `${gameObj.title || ""} ${gameObj.note || ""}`.toLowerCase();
-      if (text.includes("pet") || text.includes("seed") || text.includes("garden")) return "Pets & Seeds";
-      if (text.includes("mm2") || text.includes("knife") || text.includes("gun") || text.includes("set")) return "Weapons & Sets";
-      if (text.includes("high") || text.includes("adopt") || text.includes("ps99")) return "High-Tier";
-      return "Any Game";
-    }
-
     function renderGames() {
       const container = document.getElementById("games-list-container");
       container.innerHTML = "";
-
-      const list = selectedGameFilter === "ALL"
-        ? allGames
-        : allGames.filter((g) => {
-            const hay = `${g.title || ""} ${g.note || ""} ${g.tag || ""}`.toLowerCase();
-            if (selectedGameFilter === "Any Game") {
-              return hay.includes("any") || hay.includes("all") || allGames.length > 0;
-            }
-            return hay.includes(selectedGameFilter.toLowerCase());
-          });
-
-      if (!list.length) {
-        container.innerHTML = `
-          <div class="vouch-card">
-            <p class="vouch-note" style="margin-bottom:8px;">No crosstrading notes match "${escapeHtml(selectedGameFilter)}".</p>
-            <button type="button" class="mini-action-btn" onclick="resetCrosstradeFilters()">Reset Filters</button>
-          </div>
-        `;
-        return;
-      }
-
-      list.forEach((g) => {
+      allGames.forEach((g) => {
         const box = document.createElement("div");
         box.className = "game-card-item tilt-3d";
         box.dataset.tiltMax = "4";
-        const tierLabel = inferTierBadge(g);
-        box.innerHTML = `
-          <div class="game-card-header">
-            <strong>${escapeHtml(g.tag || "•")} ${escapeHtml(g.title)}</strong>
-            <span class="game-tier-badge">${escapeHtml(tierLabel)}</span>
-          </div>
-          <span class="game-desc">${escapeHtml(g.note)}</span>
-        `;
+        box.innerHTML = `<strong>${escapeHtml(g.tag || "•")} ${escapeHtml(g.title)}</strong><span>${escapeHtml(g.note)}</span>`;
         attach3DTilt(box);
         container.appendChild(box);
       });
-    }
-
-    function updateVouchSummary() {
-      const statsEl = document.getElementById("vouch-summary-stats");
-      const breakEl = document.getElementById("vouch-summary-breakdown");
-      if (!statsEl || !breakEl) return;
-
-      const total = allVouches.length;
-      if (!total) {
-        statsEl.textContent = "0 vouches • ★ 0.0 avg";
-        breakEl.textContent = "5★: 0 • 4★: 0";
-        return;
-      }
-
-      const sum = allVouches.reduce((acc, item) => acc + Math.max(1, Math.min(5, Number(item.stars || 5))), 0);
-      const avg = (sum / total).toFixed(1);
-      const count5 = allVouches.filter((item) => Number(item.stars || 5) === 5).length;
-      const count4 = allVouches.filter((item) => Number(item.stars || 5) === 4).length;
-
-      statsEl.textContent = `${total} vouches • ★ ${avg} avg`;
-      breakEl.textContent = `5★: ${count5} • 4★: ${count4}`;
     }
 
     function setVouchFilter(starVal) {
@@ -4257,33 +2515,21 @@
     }
 
     function renderVouches() {
-      updateVouchSummary();
       const container = document.getElementById("vouches-list-container");
       container.innerHTML = "";
 
-      const sortBy = document.getElementById("vouch-sort-select")?.value || "recent";
-      let list = selectedVouchStars === "ALL"
-        ? [...allVouches]
+      const list = selectedVouchStars === "ALL"
+        ? allVouches
         : allVouches.filter((v) => String(Number(v.stars || 5)) === selectedVouchStars);
 
-      if (sortBy === "stars") {
-        list.sort((a, b) => Number(b.stars || 5) - Number(a.stars || 5));
-      }
-
       if (!list.length) {
-        container.innerHTML = `
-          <div class="vouch-card">
-            <p class="vouch-note" style="margin-bottom:8px;">No member vouches match this star filter.</p>
-            <button type="button" class="mini-action-btn" onclick="resetCrosstradeFilters()">Reset Filters</button>
-          </div>
-        `;
+        container.innerHTML = `<div class="vouch-card"><p class="vouch-note">No member vouches match this star filter.</p></div>`;
         return;
       }
 
-      list.forEach((v, idx) => {
+      list.forEach((v) => {
         const starsNum = Math.max(1, Math.min(5, Number(v.stars || 5)));
         const starsDisplay = "★".repeat(starsNum) + "☆".repeat(5 - starsNum);
-        const stampText = v.stamp || (starsNum === 5 && idx === 0 ? "Verified Escrow" : "");
         const card = document.createElement("div");
         card.className = "vouch-card tilt-3d";
         card.dataset.tiltMax = "4";
@@ -4314,11 +2560,7 @@
         }
 
         const nameCol = document.createElement("div");
-        const stampHtml = stampText ? `<span class="vouch-stamp">${escapeHtml(stampText)}</span>` : "";
-        nameCol.innerHTML = `
-          <div class="vouch-name">${escapeHtml(v.name || "Server Member")} ${stampHtml}</div>
-          <div class="vouch-tag">${escapeHtml(v.trade_tag || "Roblox Crosstrade")}</div>
-        `;
+        nameCol.innerHTML = `<div class="vouch-name">${escapeHtml(v.name || "Server Member")}</div><div class="vouch-tag">${escapeHtml(v.trade_tag || "Roblox Crosstrade")}</div>`;
         memberWrap.appendChild(nameCol);
 
         const starEl = document.createElement("div");
@@ -4337,173 +2579,6 @@
         attach3DTilt(card);
         container.appendChild(card);
       });
-    }
-
-    function normalizeMention(handle) {
-      const cleaned = String(handle || "").trim();
-      if (!cleaned) return "@unassigned";
-      return cleaned.startsWith("@") ? cleaned : `@${cleaned}`;
-    }
-
-    function collectTicketPayload(statusState) {
-      const ticketType = document.getElementById("ticket-type").value;
-      const game = document.getElementById("ticket-game").value;
-      const trader1Name = document.getElementById("trader1-name").value.trim() || "Trader 1";
-      const trader1Avatar = document.getElementById("trader1-avatar").value.trim();
-      const trader1Items = document.getElementById("trader1-items").value.trim() || "Items";
-      const trader2Name = document.getElementById("trader2-name").value.trim() || "Trader 2";
-      const trader2Avatar = document.getElementById("trader2-avatar").value.trim();
-      const trader2Items = document.getElementById("trader2-items").value.trim() || "Items";
-      const claimedBy = normalizeMention(document.getElementById("claimed-by-user").value);
-      const tradeValue = document.getElementById("ticket-value").value.trim() || "Standard";
-      const notes = document.getElementById("ticket-notes").value.trim();
-      const code = `VX-${Math.floor(1000 + Math.random() * 9000)}`;
-
-      return {
-        ticket_id: code,
-        status: statusState,
-        ticket_type: ticketType,
-        game,
-        trade_value: tradeValue,
-        trader_1: {
-          name: trader1Name,
-          avatar_url: trader1Avatar,
-          giving_items: trader1Items,
-        },
-        trader_2: {
-          name: trader2Name,
-          avatar_url: trader2Avatar,
-          giving_items: trader2Items,
-        },
-        claimed_by: claimedBy,
-        notes,
-        server_id: currentServerId,
-        closed_at: new Date().toISOString(),
-      };
-    }
-
-    function handleTicketSubmit(event) {
-      event.preventDefault();
-      const rec = collectTicketPayload("OPEN");
-      ticketRecords.unshift(rec);
-      renderTicketsFeed();
-      showToast(`Ticket ${rec.ticket_id} created (Open).`);
-    }
-
-    async function closeAndSendTicketToWebsite(btnEl) {
-      const rec = collectTicketPayload("CLOSED");
-      ticketRecords.unshift(rec);
-      renderTicketsFeed();
-
-      try {
-        const res = await fetch("/api/tickets/closed", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(rec),
-        });
-        if (res.ok) {
-          rec.synced_to_website = true;
-          renderTicketsFeed();
-          pulseCopied(btnEl);
-          showToast(`Closed ticket ${rec.ticket_id} sent to website.`);
-          return;
-        }
-      } catch {
-        // Fallback when running standalone or before backend endpoint is wired
-      }
-
-      rec.synced_to_website = false;
-      renderTicketsFeed();
-      pulseCopied(btnEl);
-      showToast(`Ticket ${rec.ticket_id} closed & queued (POST /api/tickets/closed).`);
-    }
-
-    function buildTraderAvatarHtml(trader) {
-      if (trader.avatar_url) {
-        return `<img class="trader-avatar" src="${escapeHtml(trader.avatar_url)}" alt="${escapeHtml(trader.name)}" onerror="this.outerHTML='<div class=\'trader-avatar\'>${escapeHtml(getInitials(trader.name))}</div>'" />`;
-      }
-      return `<div class="trader-avatar">${escapeHtml(getInitials(trader.name))}</div>`;
-    }
-
-    function renderTicketsFeed() {
-      const container = document.getElementById("tickets-feed-container");
-      const countEl = document.getElementById("closed-tickets-count");
-      if (!container || !countEl) return;
-
-      countEl.textContent = String(ticketRecords.length);
-      container.innerHTML = "";
-
-      if (!ticketRecords.length) {
-        container.innerHTML = `<div class="vouch-card"><p class="vouch-note">No tickets logged in this session yet. Fill out the form above and click <strong>Close Ticket &amp; Send to Website</strong>.</p></div>`;
-        return;
-      }
-
-      ticketRecords.forEach((t, idx) => {
-        const card = document.createElement("div");
-        card.className = "closed-ticket-card";
-        const syncBadge = t.status === "CLOSED"
-          ? `<span class="vouch-stamp">${t.synced_to_website ? "Sent to Website" : "Logged Locally"}</span>`
-          : `<span class="game-tier-badge">OPEN</span>`;
-
-        card.innerHTML = `
-          <div class="closed-ticket-top">
-            <div style="display:flex;align-items:center;gap:7px;flex-wrap:wrap;">
-              <span class="ticket-id-pill">${escapeHtml(t.ticket_id)}</span>
-              <span style="font-size:0.8rem;font-weight:700;color:#fbbf24;">${escapeHtml(t.game)} • ${escapeHtml(t.ticket_type)}</span>
-              ${syncBadge}
-            </div>
-            <span style="font-size:0.76rem;font-weight:700;color:#e9d5ff;">Claimed by <strong>${escapeHtml(t.claimed_by)}</strong></span>
-          </div>
-          <div class="traders-pair-grid">
-            <div class="trader-box">
-              ${buildTraderAvatarHtml(t.trader_1)}
-              <div style="min-width:0;">
-                <div style="font-size:0.82rem;font-weight:800;color:#fff;">Trader 1: ${escapeHtml(t.trader_1.name)}</div>
-                <div style="font-size:0.74rem;color:#cbd5e1;">Gives: ${escapeHtml(t.trader_1.giving_items)}</div>
-              </div>
-            </div>
-            <div class="trader-box">
-              ${buildTraderAvatarHtml(t.trader_2)}
-              <div style="min-width:0;">
-                <div style="font-size:0.82rem;font-weight:800;color:#fff;">Trader 2: ${escapeHtml(t.trader_2.name)}</div>
-                <div style="font-size:0.74rem;color:#cbd5e1;">Gives: ${escapeHtml(t.trader_2.giving_items)}</div>
-              </div>
-            </div>
-          </div>
-          ${t.notes ? `<p class="vouch-note" style="margin-bottom:8px;">Notes: ${escapeHtml(t.notes)}</p>` : ""}
-          <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button type="button" class="m-copy-btn" onclick="copyTicketSummary(${idx}, this)">Copy Ticket Summary</button>
-            ${t.status === "OPEN" ? `<button type="button" class="m-copy-btn" onclick="markTicketClosed(${idx})">Mark Closed &amp; Send</button>` : ""}
-          </div>
-        `;
-        container.appendChild(card);
-      });
-    }
-
-    function copyTicketSummary(idx, btnEl) {
-      const t = ticketRecords[idx];
-      if (!t) return;
-      const summary = `[${t.ticket_id}] (${t.status}) ${t.game} — Trader 1 (${t.trader_1.name}) gives [${t.trader_1.giving_items}] | Trader 2 (${t.trader_2.name}) gives [${t.trader_2.giving_items}] | Claimed by ${t.claimed_by}`;
-      copyText(summary, `Copied summary for ${t.ticket_id}.`, null, btnEl);
-    }
-
-    async function markTicketClosed(idx) {
-      const t = ticketRecords[idx];
-      if (!t) return;
-      t.status = "CLOSED";
-      t.closed_at = new Date().toISOString();
-      try {
-        const res = await fetch("/api/tickets/closed", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(t),
-        });
-        t.synced_to_website = res.ok;
-      } catch {
-        t.synced_to_website = false;
-      }
-      renderTicketsFeed();
-      showToast(`Ticket ${t.ticket_id} marked CLOSED.`);
     }
 
     function applyStatusGlow(status) {
@@ -4531,39 +2606,17 @@
       document.getElementById("boost-meter-fill").style.width = `${pct}%`;
     }
 
-    function tickSyncCountdown() {
-      const labelEl = document.getElementById("sync-countdown-label");
-      const fillEl = document.getElementById("sync-countdown-fill");
-      if (autoSyncPaused) {
-        if (labelEl) labelEl.textContent = "Auto-sync paused";
-        return;
-      }
-      const remainingMs = Math.max(0, nextSyncAt - Date.now());
-      const secLeft = Math.ceil(remainingMs / 1000);
-      const pct = Math.max(0, Math.min(100, (remainingMs / SYNC_INTERVAL_MS) * 100));
-      if (labelEl) labelEl.textContent = `Next sync in ${secLeft}s`;
-      if (fillEl) fillEl.style.width = `${pct}%`;
-    }
-
     async function refreshShowcase(manual = false) {
-      nextSyncAt = Date.now() + SYNC_INTERVAL_MS;
-      tickSyncCountdown();
-
       const grid = document.getElementById("showcase-grid");
       grid.classList.add("refreshing");
       try {
         const res = await fetch("/api/showcase", { cache: "no-store" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        if (!res.ok) return;
         const payload = await res.json();
 
         if (payload.last_synced) {
-          lastSuccessfulSyncLabel = payload.last_synced;
           document.getElementById("last-synced-text").textContent = `Synced ${payload.last_synced}`;
-        } else {
-          lastSuccessfulSyncLabel = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-          document.getElementById("last-synced-text").textContent = `Synced ${lastSuccessfulSyncLabel}`;
         }
-        updateSyncPillState(false);
 
         const d = payload.profile || {};
         currentUserId = d.id || "1540575139538796634";
@@ -4577,11 +2630,7 @@
         bioLink.href = d.store_url || "https://vortexshop.onrender.com";
         document.getElementById("store-cta-link").href = d.store_url || "https://vortexshop.onrender.com";
 
-        const avatarEl = document.getElementById("avatar");
-        if (d.avatar_url) {
-          avatarEl.src = d.avatar_url;
-          avatarEl.onerror = () => { avatarEl.src = "https://cdn.discordapp.com/embed/avatars/0.png"; };
-        }
+        if (d.avatar_url) document.getElementById("avatar").src = d.avatar_url;
 
         const bannerEl = document.getElementById("banner");
         bannerEl.style.backgroundPosition = d.banner_position || "center";
@@ -4595,7 +2644,6 @@
         if (d.avatar_decoration_url) {
           decoEl.src = d.avatar_decoration_url;
           decoEl.style.display = "block";
-          decoEl.onerror = () => { decoEl.style.display = "none"; };
         } else {
           decoEl.style.display = "none";
         }
@@ -4711,8 +2759,6 @@
         const s = payload.server || {};
         currentServerId = s.id || "1542941315933667348";
         currentServerInvite = s.invite_url || "https://discord.gg/3JPatMmyF";
-        const rulesServerIdEl = document.getElementById("rules-server-id");
-        if (rulesServerIdEl) rulesServerIdEl.textContent = currentServerId;
 
         const sName = s.name || "Discord Server";
         const totalMembers = Number(s.member_count || 0);
@@ -4743,7 +2789,7 @@
 
         const iconBox = document.getElementById("server-icon-box");
         if (s.icon_url) {
-          iconBox.innerHTML = `<img src="${escapeHtml(s.icon_url)}" alt="${escapeHtml(sName)}" onerror="this.outerHTML='<span class=\'server-icon-fallback\'>${escapeHtml(getInitials(sName))}</span>'" />`;
+          iconBox.innerHTML = `<img src="${escapeHtml(s.icon_url)}" alt="${escapeHtml(sName)}" />`;
         } else {
           const initials = getInitials(sName);
           iconBox.innerHTML = `<span class="server-icon-fallback">${escapeHtml(initials)}</span>`;
@@ -4751,499 +2797,15 @@
 
         if (manual) showToast("Showcase synced with latest bot data.");
       } catch (err) {
-        updateSyncPillState(true);
-        if (manual) showToast(`Showing cached snapshot (last synced ${lastSuccessfulSyncLabel}).`);
+        console.error("Failed to refresh showcase:", err);
       } finally {
         setTimeout(() => grid.classList.remove("refreshing"), 140);
       }
     }
 
     initAll3DTilts();
-    renderTicketsFeed();
-
-    const initialHash = (window.location.hash || "").replace(/^#/, "");
-    if (VALID_TABS.includes(initialHash)) {
-      switchTab(initialHash, false);
-    }
-    window.addEventListener("hashchange", () => {
-      const h = (window.location.hash || "").replace(/^#/, "");
-      if (VALID_TABS.includes(h)) switchTab(h, false);
-    });
-
     refreshShowcase(false);
-    setInterval(() => {
-      if (!autoSyncPaused) refreshShowcase(false);
-    }, SYNC_INTERVAL_MS);
-    setInterval(tickSyncCountdown, 250);
-
-    // Shop & Admin Item State + Sync
-    let shopCatalogItems = [];
-    let shopUploadedDataUrl = "";
-    let verifiedAdminPassword = "";
-    const deletedShopItemIds = new Set();
-
-    function openAdminGateModal() {
-      switchTab("shop");
-      const inp = document.getElementById("admin-gate-password");
-      if (inp) inp.value = "";
-      document.getElementById("admin-gate-modal").classList.add("open");
-      setTimeout(() => inp && inp.focus(), 50);
-    }
-
-    function closeAdminGateModal() {
-      document.getElementById("admin-gate-modal").classList.remove("open");
-    }
-
-    let editItemUploadedDataUrl = "";
-    let isAdminUnlocked = false;
-
-    document.addEventListener("keydown", (e) => {
-      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key.toLowerCase() === "a") {
-        e.preventDefault();
-        openAdminGateModal();
-      }
-    });
-
-    async function verifyAdminPassword(e) {
-      e.preventDefault();
-      const pwd = document.getElementById("admin-gate-password").value;
-      if (!pwd) return;
-
-      try {
-        const res = await fetch("/api/admin/verify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ admin_password: pwd }),
-        });
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.ok === false) {
-            showToast(data.error || "Invalid admin password.");
-            return;
-          }
-        }
-      } catch {}
-
-      verifiedAdminPassword = pwd;
-      isAdminUnlocked = true;
-      closeAdminGateModal();
-      const sec = document.getElementById("shop-admin-section");
-      if (sec) sec.style.display = "block";
-      renderShopItemsList();
-      showToast("Secret admin panel unlocked.");
-    }
-
-    function lockAdminPanel() {
-      verifiedAdminPassword = "";
-      isAdminUnlocked = false;
-      const sec = document.getElementById("shop-admin-section");
-      if (sec) sec.style.display = "none";
-      renderShopItemsList();
-      showToast("Admin panel locked.");
-    }
-
-    async function dispatchShopWebhook(eventType, itemObj, extra = {}) {
-      try {
-        await fetch("/api/shop/webhook", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            event: eventType,
-            admin_password: verifiedAdminPassword,
-            item: itemObj,
-            ...extra,
-            timestamp: new Date().toISOString(),
-          }),
-        });
-      } catch {}
-    }
-
-    async function adjustItemMinusOne(itemId) {
-      if (!isAdminUnlocked) {
-        openAdminGateModal();
-        return;
-      }
-      const target = shopCatalogItems.find((i) => i.id === itemId);
-      if (!target) return;
-
-      try {
-        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}/minus`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ admin_password: verifiedAdminPassword, delta: -1 }),
-        });
-        const data = await res.json();
-        if (res.ok && data.ok && data.item) {
-          shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? data.item : it));
-          renderShopItemsList();
-          showToast(`Stock -1 on "${data.item.name}" (Stock: ${data.item.stock}) & sent via webhook.`);
-          return;
-        }
-      } catch {}
-
-      const nextStock = Math.max(0, Number(target.stock || 0) - 1);
-      const updated = { ...target, stock: nextStock, status: nextStock <= 0 ? "SOLD" : "AVAILABLE" };
-      shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? updated : it));
-      renderShopItemsList();
-      await dispatchShopWebhook("stock_minus", updated, { delta: -1 });
-      showToast(`Stock -1 on "${updated.name}" (Stock: ${updated.stock}) & webhook triggered.`);
-    }
-
-    async function soldOneShopItem(itemId) {
-      if (!isAdminUnlocked) {
-        openAdminGateModal();
-        return;
-      }
-      const target = shopCatalogItems.find((i) => i.id === itemId);
-      if (!target) return;
-
-      try {
-        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}/sold`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ admin_password: verifiedAdminPassword, sold_qty: 1, auto_send_channel: true }),
-        });
-        const data = await res.json();
-        if (res.ok && data.ok && data.item) {
-          shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? data.item : it));
-          renderShopItemsList();
-          showToast(`Sold 1 "${data.item.name}" & sent to channel via webhook.`);
-          return;
-        }
-      } catch {}
-
-      const nextStock = Math.max(0, Number(target.stock || 1) - 1);
-      const updated = { ...target, stock: nextStock, status: nextStock <= 0 ? "SOLD" : "AVAILABLE" };
-      shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? updated : it));
-      renderShopItemsList();
-      await dispatchShopWebhook("sold_1", updated, { sold_qty: 1, auto_send_channel: true });
-      showToast(`Sold 1 "${updated.name}" & sent from channel via webhook.`);
-    }
-
-    async function deleteShopItem(itemId) {
-      if (!isAdminUnlocked) {
-        openAdminGateModal();
-        return;
-      }
-      const target = shopCatalogItems.find((i) => i.id === itemId);
-      if (!target) return;
-
-      try {
-        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}`, {
-          method: "DELETE",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ admin_password: verifiedAdminPassword }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok || data.ok === false) {
-          showToast(data.error || "Delete failed on server. Item was not removed.");
-          return;
-        }
-        deletedShopItemIds.add(String(itemId));
-        shopCatalogItems = shopCatalogItems.filter((it) => String(it.id) !== String(itemId));
-        renderShopItemsList();
-        showToast(`Permanently deleted "${target.name}".`);
-        return;
-      } catch {
-        showToast("Network error while deleting item. Please try again.");
-      }
-    }
-
-    function openEditItemModal(itemId) {
-      if (!isAdminUnlocked) {
-        openAdminGateModal();
-        return;
-      }
-      const item = shopCatalogItems.find((i) => i.id === itemId);
-      if (!item) return;
-      editItemUploadedDataUrl = "";
-      document.getElementById("edit-item-id").value = item.id;
-      document.getElementById("edit-item-name").value = item.name || "";
-      document.getElementById("edit-item-price").value = item.price ?? 0;
-      document.getElementById("edit-item-currency").value = item.currency || "USD";
-      document.getElementById("edit-item-stock").value = item.stock ?? 0;
-      document.getElementById("edit-item-category").value = item.category || "";
-      document.getElementById("edit-item-image-url").value = (item.image_url || "").startsWith("data:") ? "" : (item.image_url || "");
-      const fileInp = document.getElementById("edit-item-image-file");
-      if (fileInp) fileInp.value = "";
-      document.getElementById("edit-shop-item-modal").classList.add("open");
-    }
-
-    function closeEditItemModal() {
-      document.getElementById("edit-shop-item-modal").classList.remove("open");
-    }
-
-    function handleEditItemImageFile(e) {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      if (file.size > 3 * 1024 * 1024) {
-        showToast("Image must be 3 MB or smaller.");
-        e.target.value = "";
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        editItemUploadedDataUrl = String(reader.result || "");
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function saveEditedShopItem(e) {
-      e.preventDefault();
-      const itemId = document.getElementById("edit-item-id").value;
-      const existing = shopCatalogItems.find((i) => i.id === itemId);
-      if (!existing) return;
-
-      const nextImage =
-        editItemUploadedDataUrl ||
-        document.getElementById("edit-item-image-url").value.trim() ||
-        existing.image_url ||
-        "";
-      const nextStock = Math.max(0, Number(document.getElementById("edit-item-stock").value || 0));
-
-      const updatedPayload = {
-        admin_password: verifiedAdminPassword,
-        name: document.getElementById("edit-item-name").value.trim(),
-        price: Number(document.getElementById("edit-item-price").value || 0).toFixed(2),
-        currency: document.getElementById("edit-item-currency").value,
-        stock: nextStock,
-        category: document.getElementById("edit-item-category").value.trim() || existing.category || "Item",
-        image_url: nextImage,
-        status: nextStock <= 0 ? "SOLD" : "AVAILABLE",
-      };
-
-      try {
-        const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(updatedPayload),
-        });
-        const data = await res.json();
-        if (res.ok && data.ok && data.item) {
-          shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? data.item : it));
-          renderShopItemsList();
-          closeEditItemModal();
-          showToast(`Updated "${data.item.name}" & synced via webhook.`);
-          return;
-        }
-      } catch {}
-
-      const merged = { ...existing, ...updatedPayload };
-      shopCatalogItems = shopCatalogItems.map((it) => (it.id === itemId ? merged : it));
-      renderShopItemsList();
-      closeEditItemModal();
-      await dispatchShopWebhook("item_updated", merged);
-      showToast(`Updated "${merged.name}" & webhook triggered.`);
-    }
-
-    function handleShopImageFile(e) {
-      const file = e.target.files && e.target.files[0];
-      if (!file) return;
-      if (file.size > 3 * 1024 * 1024) {
-        showToast("Product image must be 3 MB or smaller.");
-        e.target.value = "";
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = () => {
-        shopUploadedDataUrl = String(reader.result || "");
-        const prev = document.getElementById("shop-image-preview");
-        if (prev) {
-          prev.src = shopUploadedDataUrl;
-          prev.style.display = "block";
-        }
-      };
-      reader.readAsDataURL(file);
-    }
-
-    async function handleShopAddItem(e) {
-      e.preventDefault();
-      const adminPassword = verifiedAdminPassword;
-      if (!adminPassword) {
-        openAdminGateModal();
-        return;
-      }
-      const imageUrl = document.getElementById("shop-image-url").value.trim() || shopUploadedDataUrl;
-      const payload = {
-        admin_password: adminPassword,
-        name: document.getElementById("shop-item-name").value.trim(),
-        category: document.getElementById("shop-item-category").value.trim(),
-        stock: Math.max(1, Number(document.getElementById("shop-item-stock").value || 1)),
-        price: Number(document.getElementById("shop-item-price").value || 0).toFixed(2),
-        currency: document.getElementById("shop-item-currency").value,
-        posted_by: normalizeMention(document.getElementById("shop-item-poster").value),
-        description: document.getElementById("shop-item-desc").value.trim(),
-        image_url: imageUrl,
-      };
-
-      try {
-        const res = await fetch("/api/shop/items", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-          showToast(data.error || "Failed to add item (check admin password).");
-          return;
-        }
-        shopCatalogItems.unshift(data.item);
-        renderShopItemsList();
-        document.getElementById("shop-admin-item-form").reset();
-        document.getElementById("shop-item-stock").value = "1";
-        document.getElementById("shop-item-poster").value = "@mvn412.";
-        shopUploadedDataUrl = "";
-        const prev = document.getElementById("shop-image-preview");
-        if (prev) {
-          prev.src = "";
-          prev.style.display = "none";
-        }
-        showToast(`Added "${data.item.name}" & sent item-added webhook.`);
-      } catch {
-        if (adminPassword !== "vortexadmin2026") {
-          showToast("Invalid admin password.");
-          return;
-        }
-        const localItem = {
-          id: "item-" + Date.now(),
-          ...payload,
-          status: "AVAILABLE",
-        };
-        shopCatalogItems.unshift(localItem);
-        renderShopItemsList();
-        document.getElementById("shop-admin-item-form").reset();
-        document.getElementById("shop-item-stock").value = "1";
-        document.getElementById("shop-item-poster").value = "@mvn412.";
-        shopUploadedDataUrl = "";
-        const prev = document.getElementById("shop-image-preview");
-        if (prev) {
-          prev.src = "";
-          prev.style.display = "none";
-        }
-        showToast(`Added "${localItem.name}" locally.`);
-      }
-    }
-
-    function makeTicketToBuy(itemId) {
-      const item = shopCatalogItems.find((i) => i.id === itemId);
-      if (!item) return;
-      switchTab("tickets");
-      document.getElementById("trader1-name").value = item.posted_by.replace(/^@/, "");
-      document.getElementById("trader1-items").value = `${item.name} (${item.price} ${item.currency})`;
-      document.getElementById("trader2-items").value = `Pay ${item.posted_by} directly in ticket (no site pre-payment)`;
-      document.getElementById("ticket-value").value = `${item.price} ${item.currency}`;
-      const existingNotes = document.getElementById("ticket-notes").value.trim();
-      const buyNote = `Buy request for ${item.name} [${item.category}] posted by ${item.posted_by}.`;
-      document.getElementById("ticket-notes").value = existingNotes ? `${existingNotes} | ${buyNote}` : buyNote;
-      showToast(`Ticket ready for "${item.name}". Pay ${item.posted_by} inside your ticket.`);
-    }
-
-    function updateShopStats() {
-      const totalEl = document.getElementById("shop-stat-total");
-      const availEl = document.getElementById("shop-stat-avail");
-      const soldEl = document.getElementById("shop-stat-sold");
-      if (!totalEl || !availEl || !soldEl) return;
-
-      const total = shopCatalogItems.length;
-      const soldCount = shopCatalogItems.filter((it) => Number(it.stock || 0) <= 0 || it.status === "SOLD").length;
-      const totalStock = shopCatalogItems.reduce((sum, it) => sum + Math.max(0, Number(it.stock || 0)), 0);
-
-      totalEl.textContent = String(total);
-      availEl.textContent = String(totalStock);
-      soldEl.textContent = String(soldCount);
-    }
-
-    function applyQuickCategory(catName) {
-      const catInput = document.getElementById("shop-item-category");
-      if (catInput) {
-        catInput.value = catName;
-        catInput.focus();
-      }
-    }
-
-    function renderShopItemsList() {
-      updateShopStats();
-      const grid = document.getElementById("shop-items-grid");
-      if (!grid) return;
-      const q = (document.getElementById("shop-search-input")?.value || "").trim().toLowerCase();
-      const filterVal = document.getElementById("shop-filter-select")?.value || "ALL";
-
-      const items = shopCatalogItems.filter((it) => {
-        const soldOut = Number(it.stock || 0) <= 0 || it.status === "SOLD";
-        if (filterVal === "AVAILABLE" && soldOut) return false;
-        if (filterVal === "SOLD" && !soldOut) return false;
-        if (!q) return true;
-        const hay = `${it.name || ""} ${it.category || ""} ${it.posted_by || ""} ${it.description || ""}`.toLowerCase();
-        return hay.includes(q);
-      });
-
-      if (!items.length) {
-        grid.innerHTML = `<div class="shop-empty-state"><div style="font-size:1.3rem;margin-bottom:6px;">🛍️</div><p class="vouch-note" style="margin:0;">No items posted in Shop yet.</p></div>`;
-        return;
-      }
-
-      grid.innerHTML = items.map((it) => {
-        const soldOut = Number(it.stock || 0) <= 0 || it.status === "SOLD";
-        const imgSrc = it.image_url || "https://cdn.discordapp.com/embed/avatars/0.png";
-        return `
-          <div class="shop-item-card">
-            <div>
-              <div class="shop-item-img-box" onclick="openLightbox('${escapeHtml(it.name)}', '${escapeHtml(imgSrc)}')">
-                <img src="${escapeHtml(imgSrc)}" alt="${escapeHtml(it.name)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'" />
-                <span class="shop-stock-badge ${soldOut ? "sold-out" : ""}">${soldOut ? "SOLD OUT" : `Stock: ${it.stock}`}</span>
-              </div>
-              <div class="shop-item-body">
-                <div class="shop-item-cat">${escapeHtml(it.category || "Item")}</div>
-                <div class="shop-item-name">${escapeHtml(it.name)}</div>
-                <div class="shop-item-price">${escapeHtml(it.price)} ${escapeHtml(it.currency || "USD")}</div>
-                ${it.description ? `<p class="shop-item-desc">${escapeHtml(it.description)}</p>` : ""}
-                <div class="shop-item-poster">Posted by <strong>${escapeHtml(it.posted_by || "@mvn412.")}</strong></div>
-              </div>
-            </div>
-            <div class="shop-item-body" style="padding-top:0;">
-              <div style="display:flex;gap:6px;flex-wrap:wrap;">
-                <button type="button" class="btn-ticket-primary" style="padding:7px 10px;font-size:0.74rem;" ${soldOut ? "disabled" : ""} onclick="makeTicketToBuy('${escapeHtml(it.id)}')">
-                  Make Ticket to Buy
-                </button>
-              </div>
-              ${isAdminUnlocked ? `
-                <div class="admin-item-controls">
-                  <button type="button" class="btn-minus-one" ${soldOut ? "disabled" : ""} onclick="adjustItemMinusOne('${escapeHtml(it.id)}')">-1 Stock</button>
-                  <button type="button" class="btn-sold-one" ${soldOut ? "disabled" : ""} onclick="soldOneShopItem('${escapeHtml(it.id)}')">Sold 1</button>
-                  <button type="button" class="btn-edit-item" onclick="openEditItemModal('${escapeHtml(it.id)}')">Edit</button>
-                  <button type="button" class="btn-delete-item" onclick="deleteShopItem('${escapeHtml(it.id)}')">Delete</button>
-                </div>
-              ` : ""}
-            </div>
-          </div>
-        `;
-      }).join("");
-    }
-
-    async function syncShopStateFromBackend() {
-      try {
-        const res = await fetch("/api/state", { cache: "no-store" });
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data.items)) {
-            shopCatalogItems = data.items.filter((it) => !deletedShopItemIds.has(String(it.id)));
-            renderShopItemsList();
-          }
-          if (Array.isArray(data.closed_tickets) && data.closed_tickets.length) {
-            const existingIds = new Set(ticketRecords.map((t) => t.ticket_id));
-            data.closed_tickets.forEach((t) => {
-              if (!existingIds.has(t.ticket_id)) {
-                ticketRecords.push({ ...t, synced_to_website: true });
-              }
-            });
-            renderTicketsFeed();
-          }
-        }
-      } catch {}
-    }
-
-    renderShopItemsList();
-    syncShopStateFromBackend();
+    setInterval(() => refreshShowcase(false), 12000);
   </script>
 </body>
 </html>
