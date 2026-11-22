@@ -265,6 +265,18 @@
       color: #86efac;
     }
 
+    .btn-ticket-order {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      border: none;
+      color: #120d1d;
+      padding: 6px 12px;
+      border-radius: 9px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-ticket-order:hover { filter: brightness(1.06); }
+
     .page-view {
       display: none;
       width: 100%;
@@ -811,9 +823,6 @@
     .rules-list { margin: 0 0 12px; padding-left: 18px; color: #e2e8f0; font-size: 0.86rem; line-height: 1.55; }
     .rules-list li { margin-bottom: 6px; }
 
-    /* ======================================================================
-       SHOP PAGE & SECRET ADMIN ROOM
-       ====================================================================== */
     .shop-page-card {
       background: rgba(18, 12, 30, 0.95);
       border: 1px solid rgba(168, 85, 247, 0.32);
@@ -1004,8 +1013,8 @@
     }
 
     .sales-log-list {
-      margin-top: 14px;
-      max-height: 190px;
+      margin-top: 10px;
+      max-height: 170px;
       overflow-y: auto;
       font-size: 0.78rem;
     }
@@ -1019,7 +1028,16 @@
       color: #e2e8f0;
     }
 
-    /* Very small letter trigger for Secret Admin Room */
+    .ticket-preview-box {
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      margin-bottom: 12px;
+      font-size: 0.82rem;
+      color: #e2e8f0;
+    }
+
     .secret-letter-trigger {
       position: fixed;
       right: 10px;
@@ -1054,7 +1072,7 @@
 
     .modal-box {
       width: 100%;
-      max-width: 420px;
+      max-width: 440px;
       background: #170c2b;
       border: 1px solid rgba(245, 158, 11, 0.45);
       border-radius: 18px;
@@ -1273,7 +1291,7 @@
       <div class="shop-header-bar">
         <div>
           <h2>VortexShop Catalog</h2>
-          <div style="font-size:0.84rem;color:#cbd5e1;">Live SQLite catalog • Open a ticket in Discord to claim any item.</div>
+          <div style="font-size:0.84rem;color:#cbd5e1;">Click <strong>Ticket Order</strong> on any item to enter your Discord ID/Username and open a private ticket.</div>
         </div>
         <div id="admin-unlocked-pill" style="display:none;padding:5px 12px;border-radius:999px;background:rgba(245,158,11,0.16);border:1px solid rgba(245,158,11,0.5);color:#fde68a;font-size:0.78rem;font-weight:800;">
           Admin Room Unlocked
@@ -1290,7 +1308,7 @@
       <div class="shop-grid" id="public-shop-grid"></div>
     </div>
 
-    <!-- SECRET ADMIN ROOM (Unlocked via tiny letter + password) -->
+    <!-- SECRET ADMIN ROOM -->
     <div id="secret-admin-room" class="admin-room-panel">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
         <div>
@@ -1301,7 +1319,6 @@
       </div>
 
       <div class="admin-two-col">
-        <!-- Left: Add New Item -->
         <form class="admin-box" id="add-product-form" onsubmit="handleCreateItem(event)">
           <div style="font-size:0.72rem;font-weight:800;letter-spacing:0.06em;color:#94a3b8;">PRODUCT DETAILS</div>
           <h4 style="margin:4px 0 10px;color:#fff;">Add a new item</h4>
@@ -1355,11 +1372,13 @@
           <button type="submit" class="btn-add-prod">+ Add product</button>
         </form>
 
-        <!-- Right: Live Inventory & Sold Webhook Log -->
         <div class="admin-box">
           <div style="font-size:0.72rem;font-weight:800;letter-spacing:0.06em;color:#94a3b8;">YOUR LIVE CATALOG</div>
           <h4 style="margin:4px 0 10px;color:#fff;">Inventory (<span id="admin-inv-count">0</span>)</h4>
           <div id="admin-inventory-list"></div>
+
+          <h4 style="margin:14px 0 8px;color:#fbbf24;font-size:0.9rem;">Recent Ticket Orders</h4>
+          <div id="admin-tickets-log" class="sales-log-list"></div>
 
           <h4 style="margin:14px 0 8px;color:#fbbf24;font-size:0.9rem;">Recent Sold Webhook Log</h4>
           <div id="admin-sales-log" class="sales-log-list"></div>
@@ -1367,6 +1386,29 @@
       </div>
     </div>
   </section>
+
+  <!-- TICKET ORDER MODAL -->
+  <div id="ticket-order-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Open Order Ticket</h3>
+        <button type="button" class="modal-close" onclick="closeTicketOrderModal()">✕</button>
+      </div>
+      <div id="ticket-item-summary" class="ticket-preview-box"></div>
+      <form onsubmit="submitTicketOrder(event)">
+        <div class="form-group" style="margin-top:0;">
+          <label class="form-label" for="ticket-buyer-discord">Your Discord ID or Username *</label>
+          <input type="text" id="ticket-buyer-discord" class="field-input" placeholder="e.g., 123456789012345678 or your_username" required />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="ticket-buyer-notes">Extra Note (optional)</label>
+          <input type="text" id="ticket-buyer-notes" class="field-input" placeholder="Payment method or trade note..." />
+        </div>
+        <div id="ticket-order-status" style="margin-top:8px;font-size:0.8rem;color:#86efac;min-height:18px;"></div>
+        <button type="submit" class="btn-add-prod" style="margin-top:8px;">Submit &amp; Create Private Ticket</button>
+      </form>
+    </div>
+  </div>
 
   <!-- Very Small Letter Trigger for Secret Admin Room -->
   <button type="button" class="secret-letter-trigger" title="Letter" aria-label="Letter" onclick="openAdminPasswordModal()">✉</button>
@@ -1464,6 +1506,8 @@
 
     let shopItems = [];
     let recentSales = [];
+    let recentTickets = [];
+    let selectedTicketItem = null;
     let adminPasswordToken = "";
     let uploadedImageDataUrl = "";
 
@@ -1625,6 +1669,67 @@
     function openMmModal() { document.getElementById("mm-modal").classList.add("open"); }
     function closeMmModal() { document.getElementById("mm-modal").classList.remove("open"); }
 
+    function openTicketOrderModal(itemId) {
+      const item = shopItems.find((i) => i.id === itemId);
+      if (!item) return;
+      selectedTicketItem = item;
+      document.getElementById("ticket-order-status").textContent = "";
+      document.getElementById("ticket-buyer-discord").value = "";
+      document.getElementById("ticket-buyer-notes").value = "";
+      document.getElementById("ticket-item-summary").innerHTML = `
+        <div><strong>Item:</strong> ${escapeHtml(item.name)}</div>
+        <div><strong>Category:</strong> ${escapeHtml(item.category)} • <strong>Price:</strong> ${Number(item.price).toFixed(2)} ${escapeHtml(item.currency)}</div>
+        <div style="margin-top:4px;color:#cbd5e1;">${escapeHtml(item.description || "No description")}</div>
+      `;
+      document.getElementById("ticket-order-modal").classList.add("open");
+      setTimeout(() => document.getElementById("ticket-buyer-discord").focus(), 40);
+    }
+
+    function closeTicketOrderModal() {
+      document.getElementById("ticket-order-modal").classList.remove("open");
+      selectedTicketItem = null;
+    }
+
+    async function submitTicketOrder(event) {
+      event.preventDefault();
+      if (!selectedTicketItem) return;
+
+      const buyerDiscord = document.getElementById("ticket-buyer-discord").value.trim();
+      const buyerNotes = document.getElementById("ticket-buyer-notes").value.trim();
+      const statusEl = document.getElementById("ticket-order-status");
+      statusEl.textContent = "Creating private ticket in Discord...";
+
+      const res = await fetch("/api/tickets/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          item_id: selectedTicketItem.id,
+          item_name: selectedTicketItem.name,
+          category: selectedTicketItem.category,
+          price: selectedTicketItem.price,
+          currency: selectedTicketItem.currency,
+          description: selectedTicketItem.description || "",
+          image_url: selectedTicketItem.image_url || "",
+          buyer_discord: buyerDiscord,
+          buyer_notes: buyerNotes,
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        statusEl.style.color = "#fca5a5";
+        statusEl.textContent = data.error || "Could not create ticket.";
+        return;
+      }
+
+      statusEl.style.color = "#86efac";
+      if (data.ticket?.channel_name) {
+        statusEl.textContent = `Ticket created: #${data.ticket.channel_name}`;
+      } else {
+        statusEl.textContent = "Ticket order submitted!";
+      }
+      setTimeout(() => closeTicketOrderModal(), 1200);
+    }
+
     function openAdminPasswordModal() {
       document.getElementById("admin-pw-error").textContent = "";
       document.getElementById("admin-pw-input").value = "";
@@ -1639,6 +1744,7 @@
     function lockAdminRoom() {
       adminPasswordToken = "";
       recentSales = [];
+      recentTickets = [];
       document.getElementById("secret-admin-room").classList.remove("unlocked");
       document.getElementById("admin-unlocked-pill").style.display = "none";
     }
@@ -1662,6 +1768,7 @@
       adminPasswordToken = pw;
       shopItems = data.items || [];
       recentSales = data.sales || [];
+      recentTickets = data.tickets || [];
       closeAdminPasswordModal();
       document.getElementById("secret-admin-room").classList.add("unlocked");
       document.getElementById("admin-unlocked-pill").style.display = "inline-block";
@@ -1829,8 +1936,6 @@
           ? `<img class="shop-thumb" src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.name)}" />`
           : `<div class="shop-thumb">🛍️</div>`;
 
-        const orderSummary = `Item: ${item.name} | Category: ${item.category} | Price: ${Number(item.price).toFixed(2)} ${item.currency}`;
-
         return `
           <article class="shop-item-card">
             <div>
@@ -1844,7 +1949,7 @@
             </div>
             <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
               <span class="price-tag">${Number(item.price).toFixed(2)} ${escapeHtml(item.currency)}</span>
-              <button type="button" class="mini-action-btn" onclick="copyText(${JSON.stringify(orderSummary)}, 'Copied ticket order details.', this)">Copy for Ticket</button>
+              <button type="button" class="btn-ticket-order" onclick="openTicketOrderModal('${escapeHtml(item.id)}')">Ticket Order</button>
             </div>
           </article>
         `;
@@ -1874,6 +1979,17 @@
             </div>
           `;
         }).join("");
+      }
+
+      const ticketsEl = document.getElementById("admin-tickets-log");
+      if (!recentTickets.length) {
+        ticketsEl.innerHTML = `<div style="color:#94a3b8;">No ticket orders yet.</div>`;
+      } else {
+        ticketsEl.innerHTML = recentTickets.map((t) => `
+          <div class="sale-entry">
+            <strong>${escapeHtml(t.buyer_discord)}</strong> → ${escapeHtml(t.item_name)} (${Number(t.price).toFixed(2)} ${escapeHtml(t.currency)}) • <span>${escapeHtml(t.channel_name || "pending channel")}</span>
+          </div>
+        `).join("");
       }
 
       const salesEl = document.getElementById("admin-sales-log");
@@ -1993,6 +2109,7 @@
         shopItems = data.items || [];
         if (adminPasswordToken) {
           recentSales = data.sales || [];
+          recentTickets = data.tickets || [];
           renderAdminInventory();
         }
         renderPublicShop();
@@ -2111,6 +2228,7 @@
     document.addEventListener("keydown", (e) => {
       if (e.key === "Escape") {
         closeMmModal();
+        closeTicketOrderModal();
         closeAdminPasswordModal();
         closeEditModal();
       }
