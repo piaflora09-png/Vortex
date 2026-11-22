@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>VortexShop — 3D Roblox Crosstrading, Role Members &amp; Server Showcase</title>
+  <title>VortexShop — Showcase &amp; Live Shop</title>
   <style>
     :root {
       --bg-dark: #07050c;
@@ -14,8 +14,6 @@
       --accent-gold: #f59e0b;
       --accent-pink: #e879f9;
       --status-ring: #23a55a;
-      --server-border: rgba(245, 158, 11, 0.62);
-      --sparkle-color: rgba(216, 180, 254, 0.55);
     }
 
     body.theme-crimson {
@@ -24,8 +22,12 @@
       --rose-glow: rgba(251, 113, 133, 0.18);
       --accent-primary: #e11d48;
       --accent-pink: #fb7185;
-      --server-border: rgba(251, 113, 133, 0.65);
-      --sparkle-color: rgba(253, 164, 175, 0.58);
+    }
+
+    @property --rim-angle {
+      syntax: "<angle>";
+      initial-value: 0deg;
+      inherits: false;
     }
 
     * { box-sizing: border-box; }
@@ -48,7 +50,7 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 18px 56px;
+      padding: 24px 18px 68px;
       background:
         radial-gradient(circle at 14% 16%, var(--purple-glow), transparent 46%),
         radial-gradient(circle at 86% 78%, var(--gold-glow), transparent 48%),
@@ -100,15 +102,25 @@
     }
 
     @keyframes settleIn {
-      from { opacity: 0; transform: translateY(12px) scale(0.99); }
+      from { opacity: 0; transform: translateY(10px) scale(0.99); }
       to { opacity: 1; transform: translateY(0) scale(1); }
     }
 
-    @keyframes effectShimmer {
-      0% { transform: translateX(-115%) rotate(14deg); opacity: 0; }
-      35% { opacity: 0.8; }
-      70% { opacity: 0.45; }
-      100% { transform: translateX(240%) rotate(14deg); opacity: 0; }
+    @keyframes spinRim {
+      to { --rim-angle: 360deg; }
+    }
+
+    @keyframes copyBounce {
+      0% { transform: scale(1); }
+      45% { transform: scale(1.07); }
+      100% { transform: scale(1); }
+    }
+
+    .copied-pulse {
+      animation: copyBounce 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+      background: rgba(34, 197, 94, 0.24) !important;
+      border-color: rgba(74, 222, 128, 0.75) !important;
+      color: #bbf7d0 !important;
     }
 
     .tilt-3d {
@@ -134,13 +146,11 @@
       transition: opacity 0.22s ease;
       background: radial-gradient(
         340px circle at var(--spot-x) var(--spot-y),
-        rgba(232, 121, 249, 0.2),
-        rgba(245, 158, 11, 0.12) 42%,
+        rgba(232, 121, 249, 0.22),
+        rgba(245, 158, 11, 0.13) 42%,
         transparent 72%
       );
     }
-
-    .depth-lift { transform: translateZ(18px); }
 
     .top-nav {
       position: relative;
@@ -153,13 +163,30 @@
       justify-content: space-between;
       gap: 12px;
       margin-bottom: 20px;
-      padding: 11px 16px;
+      padding: 11px 16px 15px;
       border-radius: 18px;
-      background: rgba(20, 12, 34, 0.88);
+      background: rgba(20, 12, 34, 0.92);
       border: 1px solid rgba(255, 255, 255, 0.11);
       box-shadow: 0 14px 36px rgba(0, 0, 0, 0.55);
       backdrop-filter: blur(14px);
+      overflow: hidden;
       animation: settleIn 0.35s ease;
+    }
+
+    .sync-countdown-strip {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.06);
+    }
+
+    .sync-countdown-fill {
+      height: 100%;
+      width: 100%;
+      background: linear-gradient(90deg, var(--accent-primary), var(--accent-pink), var(--accent-gold));
+      transition: width 0.25s linear;
     }
 
     .nav-tabs {
@@ -181,10 +208,13 @@
     }
     .nav-tab:hover { background: rgba(168, 85, 247, 0.2); color: #ffffff; transform: translateY(-1px); }
     .nav-tab.active {
-      background: linear-gradient(135deg, var(--accent-primary), #d97706);
+      background:
+        linear-gradient(135deg, var(--accent-primary), #d97706) padding-box,
+        conic-gradient(from var(--rim-angle), #f59e0b, #e879f9, #8b5cf6, #f59e0b) border-box;
+      border: 1.5px solid transparent;
       color: #ffffff;
-      border-color: transparent;
-      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+      box-shadow: 0 6px 20px rgba(124, 58, 237, 0.42);
+      animation: spinRim 6s linear infinite;
     }
 
     .sync-status-group {
@@ -235,73 +265,40 @@
       color: #86efac;
     }
 
-    .showcase-grid {
+    .page-view {
+      display: none;
+      width: 100%;
+      max-width: 1080px;
       position: relative;
       z-index: 2;
+      animation: settleIn 0.25s ease;
+    }
+    .page-view.active { display: block; }
+
+    .showcase-grid {
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
       justify-content: center;
       gap: 34px;
-      max-width: 1080px;
       width: 100%;
-      animation: settleIn 0.45s ease;
-    }
-
-    .sync-fade {
-      transition: opacity 0.25s ease;
-    }
-    .sync-fade.refreshing {
-      opacity: 0.72;
     }
 
     .outer-stage {
-      position: relative;
       width: 398px;
       max-width: 100%;
-      padding-top: 26px;
       flex-shrink: 0;
-      perspective: 1150px;
-    }
-
-    .top-decor {
-      position: absolute;
-      top: -12px;
-      left: 6px;
-      right: 6px;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      padding: 0 8px;
-      z-index: 6;
-      pointer-events: none;
-    }
-
-    .hearts-group {
-      display: flex;
-      align-items: flex-end;
-      gap: 4px;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.65));
-    }
-
-    .bunny-mascot {
-      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.7));
     }
 
     .frame-shell {
-      position: relative;
       border-radius: 26px;
       padding: 8px;
-      background: linear-gradient(180deg, #b057f5 0%, var(--accent-primary) 52%, #4c1d95 100%);
-      box-shadow:
-        0 0 0 2px rgba(216, 180, 254, 0.28),
-        0 26px 70px rgba(0, 0, 0, 0.88);
-    }
-
-    .frame-shell:hover {
-      box-shadow:
-        0 0 30px rgba(168, 85, 247, 0.42),
-        0 32px 76px rgba(0, 0, 0, 0.92);
+      background:
+        linear-gradient(180deg, #b057f5 0%, var(--accent-primary) 52%, #4c1d95 100%) padding-box,
+        conic-gradient(from var(--rim-angle), rgba(245, 158, 11, 0.75), rgba(232, 121, 249, 0.8), rgba(139, 92, 246, 0.75), rgba(245, 158, 11, 0.75)) border-box;
+      border: 2px solid transparent;
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.88);
+      animation: spinRim 9s linear infinite;
     }
 
     .card {
@@ -309,42 +306,6 @@
       background: linear-gradient(180deg, #240d44 0%, #1c0936 55%, #150629 100%);
       border-radius: 20px;
       overflow: hidden;
-      z-index: 2;
-      transform-style: preserve-3d;
-    }
-
-    .profile-effect-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 5;
-      overflow: hidden;
-      display: none;
-    }
-    .profile-effect-layer.active {
-      display: block;
-    }
-    .profile-effect-layer img.effect-asset {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.72;
-      mix-blend-mode: screen;
-    }
-    .profile-effect-sweep {
-      position: absolute;
-      top: -40%;
-      left: -40%;
-      width: 55%;
-      height: 180%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(232, 121, 249, 0.24),
-        rgba(245, 158, 11, 0.18),
-        transparent
-      );
-      animation: effectShimmer 4.5s ease-in-out infinite;
     }
 
     .banner {
@@ -362,20 +323,6 @@
         );
       background-size: cover;
       background-position: center;
-      z-index: 1;
-    }
-
-    .banner::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(
-        180deg,
-        rgba(7, 5, 12, 0.35) 0%,
-        rgba(7, 5, 12, 0.05) 55%,
-        rgba(21, 6, 41, 0.52) 100%
-      );
-      pointer-events: none;
     }
 
     .banner-top-actions {
@@ -391,24 +338,16 @@
       width: 30px;
       height: 30px;
       border-radius: 50%;
-      background: rgba(15, 8, 28, 0.82);
+      background: rgba(15, 8, 28, 0.85);
       border: 1px solid rgba(255, 255, 255, 0.18);
       color: #f5f3ff;
-      display: grid;
-      place-items: center;
       font-size: 0.76rem;
       font-weight: 700;
       cursor: pointer;
-      transition: transform 0.12s ease, background 0.12s ease;
     }
-    .circle-btn:hover { background: rgba(124, 58, 237, 0.82); transform: scale(1.06); }
+    .circle-btn:hover { background: rgba(124, 58, 237, 0.82); }
 
-    .card-body {
-      position: relative;
-      padding: 0 18px 18px;
-      z-index: 3;
-      transform-style: preserve-3d;
-    }
+    .card-body { padding: 0 18px 18px; }
 
     .avatar-thought-row {
       display: flex;
@@ -423,7 +362,6 @@
       width: 92px;
       height: 92px;
       flex-shrink: 0;
-      transform: translateZ(26px);
     }
 
     .avatar-img {
@@ -434,10 +372,6 @@
       border: 4px solid rgba(245, 158, 11, 0.45);
       outline: 3px solid #220b40;
       background: #140726;
-      box-shadow:
-        0 12px 24px rgba(0, 0, 0, 0.75),
-        0 0 22px rgba(168, 85, 247, 0.35),
-        inset 0 1px 2px rgba(255, 255, 255, 0.35);
     }
 
     .avatar-deco {
@@ -459,35 +393,13 @@
       border-radius: 50%;
       border: 4px solid #220b40;
       background: #23a55a;
-      box-shadow: 0 0 10px var(--status-ring);
       z-index: 4;
     }
     .status-dot.idle { background: #f0b232; }
     .status-dot.dnd { background: #f23f43; }
     .status-dot.offline { background: #747f8d; }
 
-    .status-bubble-wrap {
-      margin-top: 10px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      transform: translateZ(16px);
-    }
-
-    .mini-dots {
-      display: flex;
-      gap: 4px;
-      margin-left: 10px;
-      margin-bottom: 3px;
-    }
-
-    .mini-dots span {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: #191624;
-      border: 1px solid rgba(255, 255, 255, 0.12);
-    }
+    .status-bubble-wrap { margin-top: 10px; }
 
     .status-bubble {
       background: #171422;
@@ -496,15 +408,6 @@
       border-radius: 14px;
       padding: 9px 14px;
       font-size: 0.92rem;
-      font-weight: 500;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
-    }
-
-    .display-name-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-top: 2px;
     }
 
     .display-name {
@@ -513,29 +416,15 @@
       font-weight: 800;
       font-style: italic;
       color: var(--accent-pink);
-      text-shadow: 0 2px 12px rgba(217, 70, 239, 0.35);
     }
-
-    .note-icon-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      color: #e9d5ff;
-      border-radius: 6px;
-      padding: 2px 7px;
-      font-size: 0.78rem;
-      cursor: pointer;
-    }
-    .note-icon-btn:hover { background: rgba(168, 85, 247, 0.3); }
 
     .username-sub {
-      margin: 2px 0 10px;
+      margin: 4px 0 10px;
       font-size: 0.92rem;
       color: #e2e8f0;
-      font-weight: 500;
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-variant-numeric: tabular-nums;
     }
 
     .copy-handle-inline {
@@ -547,14 +436,8 @@
       font-size: 0.72rem;
       cursor: pointer;
     }
-    .copy-handle-inline:hover { color: #fff; background: rgba(168, 85, 247, 0.25); }
 
-    .bio-link {
-      font-size: 0.92rem;
-      color: #f3e8ff;
-      margin-bottom: 10px;
-      word-break: break-word;
-    }
+    .bio-link { font-size: 0.92rem; margin-bottom: 10px; }
     .bio-link a { color: #f3e8ff; text-decoration: none; }
     .bio-link a:hover { text-decoration: underline; color: #f0abfc; }
 
@@ -566,28 +449,7 @@
       margin-bottom: 12px;
     }
 
-    .clan-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      background: rgba(18, 7, 36, 0.85);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 8px;
-      padding: 4px 9px;
-      font-size: 0.8rem;
-      font-weight: 700;
-      color: #f5f3ff;
-      min-height: 28px;
-    }
-
-    .clan-chip img {
-      width: 16px;
-      height: 16px;
-      object-fit: contain;
-      border-radius: 3px;
-    }
-
-    .badge-pill-bar {
+    .clan-chip, .badge-pill-bar {
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -595,43 +457,17 @@
       border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 8px;
       padding: 4px 9px;
-      min-height: 28px;
+      font-size: 0.8rem;
+      font-weight: 700;
     }
 
     .badge-icon-item {
-      position: relative;
       display: inline-flex;
       align-items: center;
       justify-content: center;
       width: 20px;
       height: 20px;
       font-size: 0.92rem;
-      cursor: pointer;
-      transition: transform 0.14s ease;
-    }
-    .badge-icon-item:hover { transform: translateY(-2px) scale(1.1); }
-
-    .badge-icon-item img {
-      width: 18px;
-      height: 18px;
-      object-fit: contain;
-    }
-
-    .badge-icon-item:hover::after {
-      content: attr(data-tooltip);
-      position: absolute;
-      bottom: 135%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: #090512;
-      color: #fff;
-      font-size: 0.7rem;
-      font-weight: 600;
-      padding: 4px 8px;
-      border-radius: 6px;
-      white-space: nowrap;
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      z-index: 30;
     }
 
     .mutual-row {
@@ -642,28 +478,7 @@
       font-size: 0.88rem;
       color: #cbd5e1;
       margin-bottom: 14px;
-      font-variant-numeric: tabular-nums;
     }
-
-    .mini-stack {
-      display: inline-flex;
-      align-items: center;
-    }
-
-    .mini-stack span {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      font-size: 0.65rem;
-      font-weight: 800;
-      margin-left: -4px;
-      border: 2px solid #1d0a38;
-    }
-    .mini-stack span:first-child { margin-left: 0; background: #111827; color: #fff; }
-    .mini-stack span:nth-child(2) { background: #1d4ed8; color: #fff; }
-    .mini-stack span:nth-child(3) { background: #4c1d95; color: #f5d0fe; }
 
     .role-pill {
       display: inline-flex;
@@ -679,27 +494,10 @@
       margin-bottom: 10px;
     }
 
-    .owner-text {
-      font-size: 0.9rem;
-      color: #f3e8ff;
-      line-height: 1.4;
-      margin-bottom: 12px;
-    }
+    .owner-text { font-size: 0.9rem; color: #f3e8ff; line-height: 1.4; margin-bottom: 12px; }
+    .invite-link { color: #60a5fa; text-decoration: underline; word-break: break-all; }
 
-    .invite-link {
-      color: #60a5fa;
-      text-decoration: underline;
-      word-break: break-all;
-    }
-
-    .bio-actions-row {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 12px;
-      font-size: 0.84rem;
-    }
-
+    .bio-actions-row { display: flex; gap: 14px; margin-bottom: 12px; }
     .link-btn {
       background: none;
       border: none;
@@ -708,7 +506,6 @@
       font-size: 0.84rem;
       font-weight: 600;
       cursor: pointer;
-      text-decoration: none;
     }
     .link-btn:hover { text-decoration: underline; color: #fbbf24; }
 
@@ -724,18 +521,8 @@
       line-height: 1.45;
     }
 
-    .member-label {
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #e9d5ff;
-      margin-bottom: 3px;
-    }
-
-    .member-date {
-      font-size: 0.88rem;
-      color: #cbd5e1;
-      margin-bottom: 14px;
-    }
+    .member-label { font-size: 0.78rem; font-weight: 700; color: #e9d5ff; margin-bottom: 3px; }
+    .member-date { font-size: 0.88rem; color: #cbd5e1; margin-bottom: 14px; }
 
     .game-collection-bar {
       display: flex;
@@ -746,16 +533,10 @@
       border-radius: 12px;
       padding: 9px 12px;
       cursor: pointer;
-      transition: border-color 0.15s ease, transform 0.15s ease;
     }
-    .game-collection-bar:hover {
-      border-color: rgba(245, 158, 11, 0.5);
-      transform: translateY(-1px);
-    }
+    .game-collection-bar:hover { border-color: rgba(245, 158, 11, 0.5); }
 
-    .gc-title { font-size: 0.92rem; font-weight: 600; color: #e2e8f0; }
-    .gc-icons { display: flex; align-items: center; gap: 7px; }
-
+    .gc-icons { display: flex; gap: 7px; }
     .gc-tile {
       width: 30px;
       height: 30px;
@@ -763,125 +544,43 @@
       display: grid;
       place-items: center;
       font-weight: 900;
-      font-size: 0.95rem;
-      transition: transform 0.14s ease;
     }
-    .gc-tile:hover { transform: scale(1.08); }
-
     .gc-roblox { background: #e2e8f0; color: #0f172a; }
-    .gc-mm {
-      background: rgba(168, 85, 247, 0.24);
-      color: #f5d0fe;
-      border: 1px solid rgba(232, 121, 249, 0.42);
-    }
+    .gc-mm { background: rgba(168, 85, 247, 0.24); color: #f5d0fe; border: 1px solid rgba(232, 121, 249, 0.42); }
 
     .server-column {
       width: 560px;
       max-width: 100%;
-      padding-top: 26px;
       flex-shrink: 0;
       display: flex;
       flex-direction: column;
       gap: 18px;
-      perspective: 1150px;
     }
 
     .server-card {
-      position: relative;
-      background: linear-gradient(165deg, rgba(36, 16, 62, 0.97), rgba(16, 10, 27, 0.99));
+      background:
+        linear-gradient(165deg, rgba(36, 16, 62, 0.97), rgba(16, 10, 27, 0.99)) padding-box,
+        conic-gradient(from var(--rim-angle), rgba(245, 158, 11, 0.72), rgba(232, 121, 249, 0.65), rgba(139, 92, 246, 0.65), rgba(245, 158, 11, 0.72)) border-box;
       border-radius: 22px;
       padding: 0 26px 22px;
-      border: 1.5px solid var(--server-border);
-      box-shadow:
-        0 0 34px rgba(245, 158, 11, 0.16),
-        0 26px 70px rgba(0, 0, 0, 0.88);
+      border: 1.5px solid transparent;
+      box-shadow: 0 26px 70px rgba(0, 0, 0, 0.88);
       overflow: hidden;
-      transform-style: preserve-3d;
-    }
-
-    .server-card:hover {
-      box-shadow:
-        0 0 42px rgba(245, 158, 11, 0.26),
-        0 32px 76px rgba(0, 0, 0, 0.92);
+      animation: spinRim 11s linear infinite;
     }
 
     .server-banner-strip {
-      display: block;
       margin: 0 -26px 20px;
-      height: 118px;
+      height: 112px;
       background:
         radial-gradient(circle at 88% 20%, rgba(168, 85, 247, 0.38), transparent 52%),
         linear-gradient(180deg, rgba(16, 10, 28, 0.96), rgba(24, 12, 42, 0.92));
       background-size: cover;
       background-position: center;
-      position: relative;
       border-bottom: 1px solid rgba(245, 158, 11, 0.24);
-      padding: 12px 18px;
-      overflow: hidden;
-      transform-style: preserve-3d;
     }
 
-    .server-banner-strip.custom-guild-banner .banner-3d-items {
-      opacity: 0;
-      pointer-events: none;
-    }
-
-    .banner-3d-items {
-      position: relative;
-      z-index: 2;
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 10px;
-      height: 100%;
-      transition: opacity 0.2s ease;
-      transform-style: preserve-3d;
-    }
-
-    .banner-3d-slot {
-      border-radius: 10px;
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      padding: 6px;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
-      transform: translateZ(14px);
-      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-    }
-
-    .server-banner-strip:hover .banner-3d-slot {
-      transform: translateZ(26px) translateY(-2px);
-      border-color: rgba(245, 158, 11, 0.45);
-      box-shadow: 0 14px 26px rgba(0, 0, 0, 0.65), 0 0 14px rgba(168, 85, 247, 0.25);
-    }
-
-    .banner-3d-tag {
-      font-size: 0.58rem;
-      font-weight: 800;
-      letter-spacing: 0.05em;
-      padding: 1px 6px;
-      border-radius: 999px;
-      background: rgba(15, 23, 42, 0.82);
-      color: #fde68a;
-      border: 1px solid rgba(245, 158, 11, 0.35);
-    }
-
-    .banner-3d-art {
-      font-size: 1.15rem;
-      line-height: 1;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.6));
-    }
-
-    .server-header {
-      display: flex;
-      align-items: center;
-      gap: 18px;
-      margin-bottom: 20px;
-      transform: translateZ(20px);
-    }
+    .server-header { display: flex; align-items: center; gap: 18px; margin-bottom: 20px; }
 
     .server-icon-box {
       width: 74px;
@@ -889,71 +588,28 @@
       border-radius: 18px;
       background: linear-gradient(135deg, #3b0764, #1e1b4b);
       border: 1.5px solid rgba(245, 158, 11, 0.65);
-      outline: 3px solid rgba(139, 92, 246, 0.28);
       display: grid;
       place-items: center;
       overflow: hidden;
       flex-shrink: 0;
-      box-shadow:
-        0 14px 28px rgba(0, 0, 0, 0.72),
-        0 0 22px rgba(245, 158, 11, 0.25),
-        inset 0 1px 2px rgba(255, 255, 255, 0.35);
     }
+    .server-icon-box img { width: 100%; height: 100%; object-fit: cover; }
+    .server-icon-fallback { font-size: 1.65rem; font-weight: 900; color: var(--accent-gold); }
 
-    .server-icon-box img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .server-icon-fallback {
-      font-size: 1.65rem;
-      font-weight: 900;
-      color: var(--accent-gold);
-      letter-spacing: 0.04em;
-    }
-
-    .server-title {
-      margin: 0;
-      font-size: 1.65rem;
-      font-weight: 800;
-      color: #ffffff;
-      letter-spacing: -0.01em;
-      line-height: 1.15;
-    }
-
-    .server-id-sub {
-      margin-top: 6px;
-      font-size: 0.88rem;
-      color: #a1a1aa;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-      font-variant-numeric: tabular-nums;
-    }
+    .server-title { margin: 0; font-size: 1.65rem; font-weight: 800; color: #ffffff; }
+    .server-id-sub { margin-top: 6px; font-size: 0.88rem; color: #a1a1aa; font-family: monospace; }
 
     .members-primary-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-      font-size: 1.12rem;
-      color: #e4e4e7;
       margin-bottom: 12px;
-      font-variant-numeric: tabular-nums;
-      transform: translateZ(14px);
+      font-size: 1.12rem;
     }
+    .members-left { display: inline-flex; align-items: center; gap: 10px; }
 
-    .members-left {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .members-primary-row strong {
-      color: #ffffff;
-      font-size: 1.24rem;
-      font-weight: 800;
-    }
+    .dot-green { width: 11px; height: 11px; border-radius: 50%; background: #22c55e; display: inline-block; }
+    .dot-gray { width: 9px; height: 9px; border-radius: 50%; background: #71717a; display: inline-block; }
 
     .ratio-pill {
       font-size: 0.76rem;
@@ -965,25 +621,13 @@
       color: #86efac;
     }
 
-    .dot-green {
-      width: 11px;
-      height: 11px;
-      border-radius: 50%;
-      background: #22c55e;
-      box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
-      display: inline-block;
-    }
-
     .presence-boost-row {
       display: flex;
       flex-wrap: wrap;
-      align-items: center;
       gap: 12px;
       font-size: 0.9rem;
       color: #cbd5e1;
       margin-bottom: 16px;
-      font-variant-numeric: tabular-nums;
-      transform: translateZ(12px);
     }
 
     .stat-inline {
@@ -996,60 +640,12 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    .stat-inline strong {
-      color: #f4f4f5;
-      font-weight: 700;
-    }
+    .boost-meter-wrap { margin-bottom: 20px; }
+    .boost-meter-label { display: flex; justify-content: space-between; font-size: 0.76rem; color: #cbd5e1; margin-bottom: 6px; }
+    .boost-meter-track { width: 100%; height: 6px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+    .boost-meter-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-primary), #f59e0b); transition: width 0.4s ease; }
 
-    .dot-gray {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      background: #71717a;
-      display: inline-block;
-    }
-
-    .boost-gem {
-      color: #c084fc;
-      font-size: 1rem;
-    }
-
-    .boost-meter-wrap {
-      margin-bottom: 20px;
-      transform: translateZ(12px);
-    }
-
-    .boost-meter-label {
-      display: flex;
-      justify-content: space-between;
-      font-size: 0.76rem;
-      color: #cbd5e1;
-      margin-bottom: 6px;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .boost-meter-track {
-      width: 100%;
-      height: 6px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.08);
-      overflow: hidden;
-    }
-
-    .boost-meter-fill {
-      height: 100%;
-      width: 0%;
-      border-radius: 999px;
-      background: linear-gradient(90deg, var(--accent-primary), #f59e0b);
-      transition: width 0.4s ease;
-    }
-
-    .server-actions {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      transform: translateZ(22px);
-    }
+    .server-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 
     .btn-copy-invite {
       background: linear-gradient(180deg, #f59e0b 0%, #d97706 100%);
@@ -1060,14 +656,7 @@
       font-size: 0.98rem;
       font-weight: 800;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 9px;
-      box-shadow: 0 10px 26px rgba(245, 158, 11, 0.3);
-      transition: transform 0.12s ease, filter 0.12s ease;
     }
-    .btn-copy-invite:hover { filter: brightness(1.07); transform: translateY(-1px); }
 
     .btn-copy-id {
       background: rgba(24, 18, 36, 0.92);
@@ -1078,14 +667,7 @@
       font-size: 0.98rem;
       font-weight: 700;
       cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
-      transition: background 0.12s ease, transform 0.12s ease;
     }
-    .btn-copy-id:hover { background: rgba(42, 31, 62, 0.95); transform: translateY(-1px); }
 
     .toast-msg {
       margin-top: 12px;
@@ -1104,19 +686,7 @@
       padding: 20px;
       box-shadow: 0 20px 46px rgba(0, 0, 0, 0.72);
     }
-    .sub-panel.active { display: block; animation: settleIn 0.26s ease; }
-
-    .sub-panel h3 {
-      margin: 0 0 10px;
-      font-size: 1.08rem;
-      color: #f5d0fe;
-    }
-
-    .sub-panel h4 {
-      margin: 14px 0 9px;
-      font-size: 0.95rem;
-      color: #fbbf24;
-    }
+    .sub-panel.active { display: block; animation: settleIn 0.24s ease; }
 
     .custom-note-box {
       padding: 11px 13px;
@@ -1138,21 +708,6 @@
       margin-bottom: 12px;
     }
 
-    .search-input {
-      flex: 1;
-      min-width: 190px;
-      background: rgba(11, 7, 20, 0.9);
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      border-radius: 10px;
-      padding: 8px 12px;
-      color: #ffffff;
-      font-size: 0.84rem;
-      outline: none;
-    }
-    .search-input:focus {
-      border-color: var(--accent-gold);
-    }
-
     .filter-chips-row {
       display: flex;
       flex-wrap: wrap;
@@ -1172,29 +727,11 @@
       font-size: 0.75rem;
       font-weight: 700;
       cursor: pointer;
-      transition: all 0.14s ease;
-    }
-    .filter-chip:hover {
-      border-color: rgba(245, 158, 11, 0.45);
-      color: #ffffff;
     }
     .filter-chip.active {
       background: linear-gradient(135deg, var(--accent-primary), #d97706);
       border-color: transparent;
       color: #ffffff;
-    }
-    .filter-chip img {
-      width: 14px;
-      height: 14px;
-      object-fit: contain;
-      border-radius: 3px;
-    }
-
-    .member-showcase-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 14px;
-      perspective: 1100px;
     }
 
     .member-showcase-card {
@@ -1204,187 +741,60 @@
       background: linear-gradient(180deg, rgba(35, 14, 62, 0.96), rgba(16, 8, 29, 0.98));
       border: 1px solid rgba(232, 121, 249, 0.28);
       box-shadow: 0 16px 34px rgba(0, 0, 0, 0.7);
-      cursor: pointer;
-      transform-style: preserve-3d;
-      animation: settleIn 0.24s ease;
-    }
-
-    .member-showcase-card:hover {
-      border-color: rgba(245, 158, 11, 0.58);
-      box-shadow: 0 22px 44px rgba(0, 0, 0, 0.82), 0 0 24px rgba(168, 85, 247, 0.24);
-    }
-
-    .member-card-effect {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 4;
-      overflow: hidden;
-    }
-
-    .member-card-effect img.m-effect-img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      opacity: 0.52;
-      mix-blend-mode: screen;
-    }
-
-    .member-card-effect .m-effect-sweep {
-      position: absolute;
-      top: -35%;
-      left: -45%;
-      width: 50%;
-      height: 170%;
-      background: linear-gradient(
-        90deg,
-        transparent,
-        rgba(232, 121, 249, 0.2),
-        rgba(245, 158, 11, 0.16),
-        transparent
-      );
-      animation: effectShimmer 5s ease-in-out infinite;
+      margin-bottom: 12px;
     }
 
     .member-banner-box {
-      position: relative;
-      height: 88px;
-      background:
-        linear-gradient(125deg, rgba(139, 92, 246, 0.45), rgba(236, 72, 153, 0.28), rgba(245, 158, 11, 0.2)),
-        #180a2e;
+      height: 78px;
+      background: linear-gradient(125deg, rgba(139, 92, 246, 0.45), rgba(236, 72, 153, 0.28)), #180a2e;
       background-size: cover;
       background-position: center;
-      z-index: 1;
     }
 
-    .member-banner-box::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(7, 5, 12, 0.18), rgba(19, 9, 34, 0.86));
-    }
-
-    .member-card-body {
-      position: relative;
-      padding: 0 16px 15px;
-      z-index: 3;
-      transform-style: preserve-3d;
-    }
+    .member-card-body { padding: 0 16px 14px; }
 
     .member-identity-row {
       display: flex;
       align-items: flex-end;
       justify-content: space-between;
       gap: 12px;
-      margin-top: -28px;
-      margin-bottom: 10px;
+      margin-top: -26px;
+      margin-bottom: 8px;
       flex-wrap: wrap;
     }
 
-    .member-avatar-wrap {
-      display: flex;
-      align-items: flex-end;
-      gap: 12px;
-      min-width: 0;
-      transform: translateZ(18px);
-    }
+    .member-avatar-wrap { display: flex; align-items: flex-end; gap: 12px; }
 
-    .m-avatar-ring {
-      position: relative;
-      width: 64px;
-      height: 64px;
-      flex-shrink: 0;
-    }
-
+    .m-avatar-ring { position: relative; width: 58px; height: 58px; flex-shrink: 0; }
     .m-avatar-photo {
-      width: 64px;
-      height: 64px;
+      width: 58px;
+      height: 58px;
       border-radius: 50%;
       object-fit: cover;
       border: 3px solid rgba(245, 158, 11, 0.42);
       outline: 2.5px solid #210c3e;
       background: #120624;
-      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.72), 0 0 14px rgba(168, 85, 247, 0.25);
-    }
-
-    .m-avatar-deco {
-      position: absolute;
-      top: -9px;
-      left: -9px;
-      width: 82px;
-      height: 82px;
-      pointer-events: none;
-      z-index: 3;
     }
 
     .m-status-badge {
       position: absolute;
       right: 1px;
       bottom: 1px;
-      width: 15px;
-      height: 15px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       border: 2.5px solid #210c3e;
       background: #23a55a;
-      z-index: 4;
     }
     .m-status-badge.idle { background: #f0b232; }
     .m-status-badge.dnd { background: #f23f43; }
     .m-status-badge.offline { background: #747f8d; }
 
-    .m-name-block {
-      padding-top: 28px;
-      min-width: 0;
-    }
+    .m-name-block { padding-top: 24px; }
+    .m-display-name { font-size: 1.02rem; font-weight: 800; color: #fff; }
+    .m-username-line { font-size: 0.76rem; color: #cbd5e1; font-family: monospace; }
 
-    .m-display-name {
-      font-size: 1.05rem;
-      font-weight: 800;
-      color: #ffffff;
-      line-height: 1.2;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .m-username-line {
-      font-size: 0.77rem;
-      color: #cbd5e1;
-      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
-    }
-
-    .m-card-actions {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      flex-wrap: wrap;
-      transform: translateZ(16px);
-    }
-
-    .m-copy-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.16);
-      color: #f5f3ff;
-      border-radius: 8px;
-      padding: 4px 9px;
-      font-size: 0.72rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: transform 0.12s ease, background 0.12s ease;
-    }
-    .m-copy-btn:hover {
-      background: rgba(245, 158, 11, 0.22);
-      border-color: rgba(245, 158, 11, 0.5);
-      transform: translateY(-1px);
-    }
-
-    .m-roles-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      transform: translateZ(12px);
-    }
-
+    .m-roles-row { display: flex; flex-wrap: wrap; gap: 6px; }
     .staff-role-pill {
       display: inline-flex;
       align-items: center;
@@ -1398,94 +808,6 @@
       color: #fef3c7;
     }
 
-    .staff-role-pill img {
-      width: 15px;
-      height: 15px;
-      object-fit: contain;
-      border-radius: 3px;
-    }
-
-    .game-card-item {
-      padding: 12px 14px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.035);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      margin-bottom: 10px;
-    }
-    .game-card-item strong { color: #fbbf24; display: block; margin-bottom: 4px; font-size: 0.95rem; }
-    .game-card-item span { font-size: 0.85rem; color: #cbd5e1; line-height: 1.45; display: block; }
-
-    .vouch-filter-row {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-
-    .vouch-card {
-      padding: 11px 13px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.03);
-      border: 1px solid rgba(255, 255, 255, 0.09);
-      margin-bottom: 10px;
-      animation: settleIn 0.22s ease;
-    }
-
-    .vouch-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-
-    .vouch-member {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-    }
-
-    .vouch-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 1.5px solid rgba(245, 158, 11, 0.5);
-      background: #240d44;
-      display: grid;
-      place-items: center;
-      font-size: 0.78rem;
-      font-weight: 800;
-      color: #fbbf24;
-      flex-shrink: 0;
-    }
-
-    .vouch-name {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: #ffffff;
-    }
-
-    .vouch-tag {
-      font-size: 0.72rem;
-      color: #cbd5e1;
-    }
-
-    .vouch-stars {
-      color: #fbbf24;
-      font-size: 0.86rem;
-      letter-spacing: 1px;
-      white-space: nowrap;
-      font-weight: 700;
-    }
-
-    .vouch-note {
-      margin: 0;
-      font-size: 0.83rem;
-      color: #e2e8f0;
-      line-height: 1.42;
-    }
-
     .safety-callout {
       padding: 10px 12px;
       border-radius: 10px;
@@ -1497,84 +819,266 @@
       margin-bottom: 12px;
     }
 
-    .checklist-box {
-      padding: 11px 13px;
-      border-radius: 12px;
-      background: rgba(255, 255, 255, 0.035);
-      border: 1px solid rgba(168, 85, 247, 0.28);
-      margin-top: 12px;
-    }
-
-    .checklist-title {
-      font-size: 0.85rem;
-      font-weight: 800;
-      color: #fbbf24;
-      margin-bottom: 8px;
-    }
-
-    .checklist-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.83rem;
-      color: #e2e8f0;
-      margin-bottom: 6px;
-      cursor: pointer;
-    }
-    .checklist-item:last-child { margin-bottom: 0; }
-    .checklist-item input { accent-color: #f59e0b; cursor: pointer; }
-
-    .rules-list {
-      margin: 0 0 12px;
-      padding-left: 18px;
-      color: #e2e8f0;
-      font-size: 0.86rem;
-      line-height: 1.55;
-    }
+    .rules-list { margin: 0 0 12px; padding-left: 18px; color: #e2e8f0; font-size: 0.86rem; line-height: 1.55; }
     .rules-list li { margin-bottom: 6px; }
 
-    .store-cta-btn {
-      display: inline-block;
-      margin-top: 4px;
-      padding: 9px 14px;
+    /* ======================================================================
+       SHOP PAGE & SECRET ADMIN ROOM
+       ====================================================================== */
+    .shop-page-card {
+      background: rgba(18, 12, 30, 0.95);
+      border: 1px solid rgba(168, 85, 247, 0.32);
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.82);
+    }
+
+    .shop-header-bar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .shop-header-bar h2 { margin: 0; font-size: 1.4rem; color: #fff; }
+
+    .shop-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 18px; }
+
+    .field-input, .field-select, .field-textarea {
+      width: 100%;
+      background: rgba(9, 6, 17, 0.92);
+      border: 1px solid rgba(255, 255, 255, 0.14);
       border-radius: 10px;
-      background: linear-gradient(135deg, var(--accent-primary), #ec4899);
-      color: #ffffff;
-      font-size: 0.85rem;
+      padding: 9px 12px;
+      color: #f8fafc;
+      font-size: 0.86rem;
+      outline: none;
+      font-family: inherit;
+    }
+    .field-input:focus, .field-select:focus, .field-textarea:focus { border-color: var(--accent-gold); }
+    .field-textarea { min-height: 76px; resize: vertical; }
+
+    .shop-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(255px, 1fr));
+      gap: 14px;
+    }
+
+    .shop-item-card {
+      background: rgba(27, 17, 46, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.11);
+      border-radius: 16px;
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .shop-thumb {
+      width: 100%;
+      height: 128px;
+      border-radius: 12px;
+      object-fit: cover;
+      background: rgba(11, 7, 20, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      display: grid;
+      place-items: center;
+      color: #cbd5e1;
+      font-size: 1.8rem;
+    }
+
+    .stock-badge {
+      display: inline-block;
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+    }
+    .stock-in {
+      background: rgba(34, 197, 94, 0.16);
+      border: 1px solid rgba(34, 197, 94, 0.4);
+      color: #86efac;
+    }
+    .stock-out {
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #fca5a5;
+    }
+
+    .price-tag { font-size: 1rem; font-weight: 800; color: #fbbf24; }
+
+    .admin-room-panel {
+      display: none;
+      margin-top: 22px;
+      padding: 20px;
+      border-radius: 20px;
+      background: rgba(12, 16, 29, 0.97);
+      border: 1.5px solid rgba(245, 158, 11, 0.55);
+      box-shadow: 0 20px 55px rgba(0, 0, 0, 0.85);
+    }
+    .admin-room-panel.unlocked { display: block; animation: settleIn 0.25s ease; }
+
+    .admin-two-col {
+      display: grid;
+      grid-template-columns: minmax(290px, 1fr) minmax(320px, 1.35fr);
+      gap: 18px;
+      margin-top: 14px;
+    }
+
+    .admin-box {
+      background: rgba(18, 24, 42, 0.88);
+      border: 1px solid rgba(148, 163, 184, 0.18);
+      border-radius: 16px;
+      padding: 16px;
+    }
+
+    .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+    .form-group { margin-top: 10px; }
+    .form-label { display: block; font-size: 0.78rem; color: #cbd5e1; margin-bottom: 4px; font-weight: 600; }
+
+    .upload-drop {
+      margin-top: 8px;
+      border: 1px dashed rgba(148, 163, 184, 0.35);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      font-size: 0.78rem;
+      color: #94a3b8;
+      cursor: pointer;
+    }
+    .upload-drop:hover { border-color: var(--accent-gold); color: #f8fafc; }
+
+    .btn-add-prod {
+      margin-top: 14px;
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: none;
+      background: linear-gradient(135deg, #2563eb, #7c3aed);
+      color: #fff;
+      font-weight: 800;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    .inv-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: rgba(9, 13, 24, 0.82);
+      border: 1px solid rgba(148, 163, 184, 0.14);
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+    }
+
+    .inv-btns { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+    .btn-sold-one {
+      background: rgba(245, 158, 11, 0.18);
+      border: 1px solid rgba(245, 158, 11, 0.5);
+      color: #fde68a;
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .btn-sold-one:hover:not(:disabled) { background: rgba(245, 158, 11, 0.32); }
+    .btn-sold-one:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-edit-item {
+      background: rgba(59, 130, 246, 0.16);
+      border: 1px solid rgba(59, 130, 246, 0.45);
+      color: #bfdbfe;
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-size: 0.75rem;
       font-weight: 700;
-      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .btn-del-item {
+      background: rgba(239, 68, 68, 0.16);
+      border: 1px solid rgba(239, 68, 68, 0.45);
+      color: #fca5a5;
+      border-radius: 8px;
+      padding: 5px 9px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .sales-log-list {
+      margin-top: 14px;
+      max-height: 190px;
+      overflow-y: auto;
+      font-size: 0.78rem;
+    }
+
+    .sale-entry {
+      padding: 7px 10px;
+      border-radius: 9px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      margin-bottom: 6px;
+      color: #e2e8f0;
+    }
+
+    /* Very small letter trigger for Secret Admin Room */
+    .secret-letter-trigger {
+      position: fixed;
+      right: 10px;
+      bottom: 8px;
+      z-index: 40;
+      background: transparent;
+      border: none;
+      padding: 2px 4px;
+      font-size: 11px;
+      line-height: 1;
+      color: rgba(226, 232, 240, 0.28);
+      cursor: pointer;
+      user-select: none;
+      transition: color 0.15s ease, transform 0.15s ease;
+    }
+    .secret-letter-trigger:hover {
+      color: #fbbf24;
+      transform: scale(1.2);
     }
 
     .modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(4, 2, 10, 0.78);
+      background: rgba(4, 2, 10, 0.82);
       backdrop-filter: blur(5px);
-      z-index: 50;
+      z-index: 60;
       place-items: center;
       padding: 16px;
     }
     .modal-backdrop.open { display: grid; }
-    #lightbox-modal { z-index: 65; }
 
     .modal-box {
       width: 100%;
-      max-width: 440px;
+      max-width: 420px;
       background: #170c2b;
       border: 1px solid rgba(245, 158, 11, 0.45);
       border-radius: 18px;
-      padding: 20px 22px;
-      box-shadow: 0 24px 60px rgba(0, 0, 0, 0.85);
-      animation: settleIn 0.2s ease;
+      padding: 20px;
     }
+
     .modal-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 12px;
     }
-    .modal-header h3 { margin: 0; color: #fbbf24; font-size: 1.1rem; }
+    .modal-header h3 { margin: 0; color: #fbbf24; font-size: 1.05rem; }
     .modal-close {
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.15);
@@ -1585,60 +1089,17 @@
       font-weight: 700;
     }
 
-    .inspector-banner {
-      height: 92px;
-      border-radius: 12px;
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.4), rgba(236, 72, 153, 0.25)), #120822;
-      background-size: cover;
-      background-position: center;
-      margin-bottom: 12px;
-      border: 1px solid rgba(255, 255, 255, 0.14);
-      cursor: zoom-in;
+    @media (max-width: 820px) {
+      .admin-two-col { grid-template-columns: 1fr; }
     }
-
-    .inspector-avatar-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 10px;
-    }
-
-    .inspector-avatar-thumb {
-      width: 54px;
-      height: 54px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 2px solid rgba(245, 158, 11, 0.55);
-      cursor: zoom-in;
-    }
-
-    .inspector-meta {
-      font-size: 0.82rem;
-      color: #cbd5e1;
-      line-height: 1.5;
-      margin-bottom: 12px;
-    }
-
-    .lightbox-box {
-      max-width: 680px;
-      text-align: center;
-    }
-    .lightbox-img {
-      max-width: 100%;
-      max-height: 70vh;
-      border-radius: 14px;
-      border: 1px solid rgba(245, 158, 11, 0.4);
-      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
-    }
-
     @media (max-width: 520px) {
       .server-actions { grid-template-columns: 1fr; }
-      .banner-3d-items { grid-template-columns: repeat(2, 1fr); }
-      .server-banner-strip { height: auto; min-height: 112px; }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .ambient-orb, .profile-effect-sweep, #sparkle-canvas { animation: none !important; }
+      .ambient-orb, #sparkle-canvas, .frame-shell, .server-card, .nav-tab.active {
+        animation: none !important;
+      }
       .tilt-3d { transform: none !important; transition: none !important; }
     }
   </style>
@@ -1650,392 +1111,377 @@
 
   <header class="top-nav" aria-label="Navigation and Sync Controls">
     <div class="nav-tabs" role="tablist">
-      <button type="button" class="nav-tab active" data-tab="overview" onclick="switchTab('overview')">Overview</button>
-      <button type="button" class="nav-tab" data-tab="staff" onclick="switchTab('staff')">Role Members</button>
-      <button type="button" class="nav-tab" data-tab="games" onclick="switchTab('games')">Roblox Crosstrading</button>
-      <button type="button" class="nav-tab" data-tab="rules" onclick="switchTab('rules')">MM &amp; Rules</button>
+      <button type="button" class="nav-tab active" data-page="showcase" data-tab="overview" onclick="openPage('showcase', 'overview')">Overview</button>
+      <button type="button" class="nav-tab" data-page="showcase" data-tab="staff" onclick="openPage('showcase', 'staff')">Role Members</button>
+      <button type="button" class="nav-tab" data-page="showcase" data-tab="rules" onclick="openPage('showcase', 'rules')">MM &amp; Rules</button>
+      <button type="button" class="nav-tab" data-page="shop" onclick="openPage('shop')">Shop</button>
     </div>
 
     <div class="sync-status-group">
       <span class="live-pill"><span class="live-pulse"></span> Live Sync</span>
       <span id="last-synced-text">Synced just now</span>
-      <button type="button" class="mini-action-btn" id="btn-refresh-now" onclick="refreshShowcase(true)">Refresh Now</button>
+      <span id="sync-countdown-label">Next sync in 12s</span>
+      <button type="button" class="mini-action-btn" onclick="refreshAll(true)">Refresh Now</button>
       <button type="button" class="mini-action-btn" id="btn-theme-toggle" onclick="toggleTheme()">Theme: Violet</button>
-      <button type="button" class="mini-action-btn" id="btn-share-page" onclick="sharePageLink()">Share Page</button>
+    </div>
+
+    <div class="sync-countdown-strip" aria-hidden="true">
+      <div class="sync-countdown-fill" id="sync-countdown-fill"></div>
     </div>
   </header>
 
-  <main class="showcase-grid sync-fade" id="showcase-grid">
-    <section class="outer-stage" aria-label="Owner Discord Profile">
-      <div class="top-decor">
-        <div class="hearts-group">
-          <svg width="42" height="38" viewBox="0 0 64 60" fill="none">
-            <path d="M32 54C32 54 6 37 6 19C6 10 13 4 21 4C26.5 4 30.5 7 32 10.5L28 22L36 28L29 41L32 54Z" fill="#ec4899" stroke="#140726" stroke-width="4" stroke-linejoin="round"/>
-            <path d="M32 10.5C33.5 7 37.5 4 43 4C51 4 58 10 58 19C58 37 32 54 32 54L29 41L36 28L28 22L32 10.5Z" fill="#f472b6" stroke="#140726" stroke-width="4" stroke-linejoin="round"/>
-          </svg>
-          <svg width="36" height="34" viewBox="0 0 64 60" fill="none">
-            <path d="M32 54C32 54 6 37 6 19C6 10 13 4 21 4C26.5 4 30.5 7 32 10.5L27 24L35 30L32 54Z" fill="#6366f1" stroke="#140726" stroke-width="4" stroke-linejoin="round"/>
-            <path d="M32 10.5C33.5 7 37.5 4 43 4C51 4 58 10 58 19C58 37 32 54 32 54L35 30L27 24L32 10.5Z" fill="#818cf8" stroke="#140726" stroke-width="4" stroke-linejoin="round"/>
-          </svg>
-        </div>
-
-        <div class="bunny-mascot">
-          <svg width="64" height="48" viewBox="0 0 110 86" fill="none">
-            <ellipse cx="38" cy="20" rx="9" ry="20" transform="rotate(-18 38 20)" fill="#180b29" stroke="#d8b4fe" stroke-width="3"/>
-            <ellipse cx="72" cy="20" rx="9" ry="20" transform="rotate(18 72 20)" fill="#180b29" stroke="#d8b4fe" stroke-width="3"/>
-            <ellipse cx="55" cy="52" rx="28" ry="22" fill="#180b29" stroke="#d8b4fe" stroke-width="3"/>
-            <polygon points="44,44 52,48 44,52" fill="#e879f9"/>
-            <polygon points="66,44 58,48 66,52" fill="#e879f9"/>
-            <path d="M48 60C50 64 54 64 55 60C56 64 60 64 62 60" stroke="#f472b6" stroke-width="2.5" stroke-linecap="round"/>
-          </svg>
-        </div>
-      </div>
-
-      <div class="frame-shell tilt-3d" data-tilt-max="7">
-        <div class="card">
-          <div id="profile-effect-layer" class="profile-effect-layer active">
-            <img id="profile-effect-img" class="effect-asset" src="" alt="" style="display:none;" />
-            <div class="profile-effect-sweep"></div>
-          </div>
-
-          <div id="banner" class="banner">
-            <div class="banner-top-actions">
-              <button type="button" class="circle-btn" title="Copy User ID" aria-label="Copy User ID" onclick="copyUserId()">ID</button>
-              <button type="button" class="circle-btn" title="MM Safety Guide" aria-label="MM Safety Guide" onclick="openModal()">!</button>
-            </div>
-          </div>
-
-          <div class="card-body">
-            <div class="avatar-thought-row">
-              <div class="avatar-box">
-                <img id="avatar" class="avatar-img" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" />
-                <img id="avatar-deco" class="avatar-deco" src="" alt="" style="display:none;" />
-                <span id="status-dot" class="status-dot"></span>
-              </div>
-
-              <div class="status-bubble-wrap">
-                <div class="mini-dots"><span></span><span></span></div>
-                <div id="status-bubble" class="status-bubble">Very nice day</div>
+  <!-- SHOWCASE PAGE -->
+  <section id="page-showcase" class="page-view active">
+    <main class="showcase-grid" id="showcase-grid">
+      <section class="outer-stage" aria-label="Owner Discord Profile">
+        <div class="frame-shell tilt-3d" data-tilt-max="6">
+          <div class="card">
+            <div id="banner" class="banner">
+              <div class="banner-top-actions">
+                <button type="button" class="circle-btn" title="Copy User ID" onclick="copyText(currentUserId, 'Owner User ID copied.', this)">ID</button>
+                <button type="button" class="circle-btn" title="MM Safety Guide" onclick="openMmModal()">!</button>
               </div>
             </div>
 
-            <div class="display-name-line depth-lift">
+            <div class="card-body">
+              <div class="avatar-thought-row">
+                <div class="avatar-box">
+                  <img id="avatar" class="avatar-img" src="https://cdn.discordapp.com/embed/avatars/0.png" alt="Avatar" />
+                  <img id="avatar-deco" class="avatar-deco" src="" alt="" style="display:none;" />
+                  <span id="status-dot" class="status-dot"></span>
+                </div>
+                <div class="status-bubble-wrap">
+                  <div id="status-bubble" class="status-bubble">Very nice day</div>
+                </div>
+              </div>
+
               <h1 id="display-name" class="display-name">VortexShop</h1>
-              <button type="button" class="note-icon-btn" title="Toggle Full Bio" aria-label="Toggle Full Bio" onclick="toggleFullBio()">📝+</button>
-            </div>
-
-            <div class="username-sub">
-              <span id="username">mvn412. •</span>
-              <button type="button" class="copy-handle-inline" id="btn-copy-handle" onclick="copyHandle()">Copy</button>
-            </div>
-
-            <div class="bio-link">
-              <a id="bio-link" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
-                Check out vortexshop.onrender.com
-              </a>
-            </div>
-
-            <div class="tags-badges-row">
-              <div id="clan-chip" class="clan-chip">
-                <img id="clan-badge-img" src="" alt="Clan Tag" style="display:none;" />
-                <span id="clan-emoji">🍃</span>
-                <span id="clan-tag">VEM</span>
+              <div class="username-sub">
+                <span id="username">mvn412. •</span>
+                <button type="button" class="copy-handle-inline" onclick="copyText(currentHandle, 'Handle copied.', this)">Copy</button>
               </div>
-              <div id="badge-pill-bar" class="badge-pill-bar"></div>
-            </div>
 
-            <div class="mutual-row">
-              <div class="mini-stack">
-                <span></span>
-                <span>BL</span>
-                <span>▤</span>
+              <div class="bio-link">
+                <a id="bio-link" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
+                  Check out vortexshop.onrender.com
+                </a>
               </div>
-              <span id="mutual-text">4 Mutual Servers</span>
-              <span id="vouches-text" style="color:#fbbf24;font-weight:700;">• 120+ Vouches</span>
-            </div>
 
-            <div id="role-pill" class="role-pill">
-              <img id="role-pill-icon" src="" alt="" style="width:16px;height:16px;object-fit:contain;border-radius:3px;display:none;" />
-              <span id="role-pill-emoji">👑</span>
-              <span id="role-pill-text">Founder • VortexShop</span>
-            </div>
+              <div class="tags-badges-row">
+                <div class="clan-chip">
+                  <span id="clan-emoji">🍃</span>
+                  <span id="clan-tag">VEM</span>
+                </div>
+                <div id="badge-pill-bar" class="badge-pill-bar"></div>
+              </div>
 
-            <div class="owner-text">
-              <span id="owner-line">Owner of this server-</span><br />
-              <a id="invite-link" class="invite-link" href="https://discord.gg/3JPatMmyF" target="_blank" rel="noopener">
-                https://discord.gg/3JPatMmyF...
-              </a>
-            </div>
+              <div class="mutual-row">
+                <span id="mutual-text">4 Mutual Servers</span>
+                <span id="vouches-text" style="color:#fbbf24;font-weight:700;">• 120+ Vouches</span>
+              </div>
 
-            <div class="bio-actions-row">
-              <button type="button" class="link-btn" onclick="toggleFullBio()">View Full Bio</button>
-              <button type="button" class="link-btn" onclick="openModal()">How MM Works</button>
-            </div>
-            <div id="full-bio-panel" class="full-bio-panel"></div>
+              <div class="role-pill">
+                <span>👑</span>
+                <span id="role-pill-text">Founder • VortexShop</span>
+              </div>
 
-            <div class="member-label">Member Since</div>
-            <div id="member-since" class="member-date">Aug 22, 2026</div>
+              <div class="owner-text">
+                <span id="owner-line">Owner of this server-</span><br />
+                <a id="invite-link" class="invite-link" href="https://discord.gg/3JPatMmyF" target="_blank" rel="noopener">
+                  https://discord.gg/3JPatMmyF...
+                </a>
+              </div>
 
-            <div class="game-collection-bar" onclick="switchTab('staff')" title="Browse Members with Tracked Roles">
-              <span class="gc-title">Role Members Showcase</span>
-              <div class="gc-icons">
-                <div class="gc-tile gc-roblox" title="Role Members">❖</div>
-                <div class="gc-tile gc-mm" title="Avatars, Banners, Decorations & Effects">✦</div>
+              <div class="bio-actions-row">
+                <button type="button" class="link-btn" onclick="toggleFullBio()">View Full Bio</button>
+                <button type="button" class="link-btn" onclick="openPage('shop')">Open Shop Page →</button>
+              </div>
+              <div id="full-bio-panel" class="full-bio-panel"></div>
+
+              <div class="member-label">Member Since</div>
+              <div id="member-since" class="member-date">Aug 22, 2026</div>
+
+              <div class="game-collection-bar" onclick="openPage('showcase', 'staff')">
+                <span>Role Members Showcase</span>
+                <div class="gc-icons">
+                  <div class="gc-tile gc-roblox">❖</div>
+                  <div class="gc-tile gc-mm">✦</div>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <section class="server-column" aria-label="Target Discord Server">
-      <div class="server-card tilt-3d" id="server-card" data-tilt-max="6">
-        <div class="server-banner-strip" id="server-banner-strip">
-          <div class="banner-3d-items" aria-hidden="true">
-            <div class="banner-3d-slot">
-              <span class="banner-3d-tag">EXCLUSIVE</span>
-              <span class="banner-3d-art">🍓</span>
+      <section class="server-column" aria-label="Target Discord Server">
+        <div class="server-card tilt-3d" data-tilt-max="5">
+          <div class="server-banner-strip" id="server-banner-strip"></div>
+          <div class="server-header">
+            <div class="server-icon-box" id="server-icon-box">
+              <span class="server-icon-fallback" id="server-icon-initials">VX</span>
             </div>
-            <div class="banner-3d-slot">
-              <span class="banner-3d-tag">LIMITED</span>
-              <span class="banner-3d-art">🏹</span>
-            </div>
-            <div class="banner-3d-slot">
-              <span class="banner-3d-tag">LIMITED</span>
-              <span class="banner-3d-art">🔫</span>
-            </div>
-            <div class="banner-3d-slot">
-              <span class="banner-3d-tag">CHROMA</span>
-              <span class="banner-3d-art">🧪</span>
+            <div>
+              <h2 class="server-title" id="server-name">Vortex Exchange &amp; MM</h2>
+              <div class="server-id-sub" id="server-id-text">ID: 1542941315933667348</div>
             </div>
           </div>
-        </div>
 
-        <div class="server-header">
-          <div class="server-icon-box" id="server-icon-box">
-            <span class="server-icon-fallback" id="server-icon-initials">VX</span>
+          <div class="members-primary-row">
+            <div class="members-left">
+              <span class="dot-green"></span>
+              <span><strong id="server-members">0</strong> members</span>
+            </div>
+            <span class="ratio-pill" id="online-ratio-pill">0% online</span>
           </div>
-          <div>
-            <h2 class="server-title" id="server-name">Vortex Exchange &amp; MM</h2>
-            <div class="server-id-sub" id="server-id-text">ID: 1542941315933667348</div>
+
+          <div class="presence-boost-row">
+            <span class="stat-inline"><span class="dot-green"></span><span><strong id="server-online">0</strong> online</span></span>
+            <span class="stat-inline"><span class="dot-gray"></span><span><strong id="server-offline">0</strong> offline</span></span>
+            <span class="stat-inline"><span>✦</span><span><strong id="server-boosts">0</strong> boosts</span></span>
           </div>
-        </div>
 
-        <div class="members-primary-row">
-          <div class="members-left">
-            <span class="dot-green"></span>
-            <span><strong id="server-members">0</strong> members</span>
+          <div class="boost-meter-wrap">
+            <div class="boost-meter-label">
+              <span id="boost-tier-label">Boost Progress</span>
+              <span id="boost-progress-text">0 / 2 boosts</span>
+            </div>
+            <div class="boost-meter-track">
+              <div class="boost-meter-fill" id="boost-meter-fill"></div>
+            </div>
           </div>
-          <span class="ratio-pill" id="online-ratio-pill">0% online</span>
-        </div>
 
-        <div class="presence-boost-row">
-          <span class="stat-inline">
-            <span class="dot-green"></span>
-            <span><strong id="server-online">0</strong> online</span>
-          </span>
-          <span class="stat-inline">
-            <span class="dot-gray"></span>
-            <span><strong id="server-offline">0</strong> offline</span>
-          </span>
-          <span class="stat-inline">
-            <span class="boost-gem">✦</span>
-            <span><strong id="server-boosts">0</strong> boosts</span>
-          </span>
-        </div>
-
-        <div class="boost-meter-wrap">
-          <div class="boost-meter-label">
-            <span id="boost-tier-label">Boost Progress</span>
-            <span id="boost-progress-text">0 / 2 boosts</span>
+          <div class="server-actions">
+            <button type="button" class="btn-copy-invite" onclick="copyText(currentServerInvite, 'Server invite copied.', this)">🔗 Copy Invite</button>
+            <button type="button" class="btn-copy-id" onclick="copyText(currentServerId, 'Server ID copied.', this)"># Copy ID</button>
           </div>
-          <div class="boost-meter-track">
-            <div class="boost-meter-fill" id="boost-meter-fill"></div>
+          <div class="toast-msg" id="toast-msg"></div>
+        </div>
+
+        <div id="panel-staff" class="sub-panel">
+          <h3>Members with Tracked Roles (<span id="staff-count-label">0</span>)</h3>
+          <div class="controls-toolbar">
+            <input type="search" id="staff-search-input" class="field-input" style="flex:1;min-width:180px;" placeholder="Search member or ID..." oninput="renderStaffSection()" />
+            <button type="button" id="btn-online-only" class="mini-action-btn" onclick="toggleOnlineOnly()">Online Only: Off</button>
           </div>
+          <div class="filter-chips-row" id="role-filter-chips"></div>
+          <div id="staff-members-container"></div>
         </div>
 
-        <div class="server-actions">
-          <button type="button" class="btn-copy-invite" id="btn-copy-invite" onclick="copyInviteLink()">
-            <span>🔗</span>
-            <span id="btn-copy-invite-text">Copy Invite</span>
-          </button>
-          <button type="button" class="btn-copy-id" id="btn-copy-id" onclick="copyServerId()">
-            <span>#</span>
-            <span id="btn-copy-id-text">Copy ID</span>
-          </button>
+        <div id="panel-rules" class="sub-panel">
+          <h3>Middleman &amp; Safety Rules</h3>
+          <div class="safety-callout">
+            Always open an official ticket inside Vortex Exchange &amp; MM and verify the Middleman's Discord ID before trading.
+          </div>
+          <ol class="rules-list" id="rules-list-container"></ol>
         </div>
+      </section>
+    </main>
+  </section>
 
-        <div class="toast-msg" id="toast-msg"></div>
+  <!-- DEDICATED SHOP PAGE -->
+  <section id="page-shop" class="page-view">
+    <div class="shop-page-card">
+      <div class="shop-header-bar">
+        <div>
+          <h2>VortexShop Catalog</h2>
+          <div style="font-size:0.84rem;color:#cbd5e1;">Live SQLite catalog • Open a ticket in Discord to claim any item.</div>
+        </div>
+        <div id="admin-unlocked-pill" style="display:none;padding:5px 12px;border-radius:999px;background:rgba(245,158,11,0.16);border:1px solid rgba(245,158,11,0.5);color:#fde68a;font-size:0.78rem;font-weight:800;">
+          Admin Room Unlocked
+        </div>
       </div>
 
-      <div id="panel-staff" class="sub-panel">
-        <h3>Members with Tracked Roles (<span id="staff-count-label">0</span>)</h3>
-        <div class="custom-note-box">
-          Showing members holding role IDs <code>1568386943945801839</code>, <code>1568387066709024788</code>, <code>1568387138322694268</code>, or <code>1568387457752371270</code> with profile image, banner image, avatar decoration, and effect overlay. Hover cards for 3D spotlight &amp; tilt or click to inspect.
-        </div>
-
-        <div class="controls-toolbar">
-          <input
-            type="search"
-            id="staff-search-input"
-            class="search-input"
-            placeholder="Search by name, @username, or ID..."
-            oninput="renderStaffSection()"
-          />
-          <button
-            type="button"
-            id="btn-online-only"
-            class="mini-action-btn"
-            onclick="toggleOnlineOnly()"
-          >
-            Online Only: Off
-          </button>
-        </div>
-
-        <div class="filter-chips-row" id="role-filter-chips"></div>
-
-        <div class="member-showcase-grid" id="staff-members-container"></div>
+      <div class="shop-toolbar">
+        <input type="search" id="shop-search-input" class="field-input" style="flex:1;min-width:190px;" placeholder="Search items..." oninput="renderPublicShop()" />
+        <select id="shop-category-filter" class="field-select" style="width:auto;min-width:150px;" onchange="renderPublicShop()">
+          <option value="ALL">All Categories</option>
+        </select>
       </div>
 
-      <div id="panel-games" class="sub-panel">
-        <h3>Roblox Crosstrading (Any Game) &amp; Shop</h3>
-        <div class="custom-note-box" id="custom-trade-note-box"></div>
-        <div id="games-list-container"></div>
+      <div class="shop-grid" id="public-shop-grid"></div>
+    </div>
 
-        <h4>Member Vouches</h4>
-        <div class="vouch-filter-row" id="vouch-filter-row">
-          <button type="button" class="filter-chip active" data-stars="ALL" onclick="setVouchFilter('ALL')">All Vouches</button>
-          <button type="button" class="filter-chip" data-stars="5" onclick="setVouchFilter('5')">5★ Only</button>
-          <button type="button" class="filter-chip" data-stars="4" onclick="setVouchFilter('4')">4★ Only</button>
+    <!-- SECRET ADMIN ROOM (Unlocked via tiny letter + password) -->
+    <div id="secret-admin-room" class="admin-room-panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;">
+        <div>
+          <h3 style="margin:0;color:#fbbf24;">Secret Admin Room — Database &amp; Stock Control</h3>
+          <div style="font-size:0.78rem;color:#94a3b8;">Clicking <strong>-1 Sold</strong> deducts 1 stock in SQLite, records a sale, and posts to your webhook.</div>
         </div>
-        <div id="vouches-list-container"></div>
-
-        <a id="store-cta-link" class="store-cta-btn" href="https://vortexshop.onrender.com" target="_blank" rel="noopener">
-          Visit vortexshop.onrender.com →
-        </a>
+        <button type="button" class="mini-action-btn" onclick="lockAdminRoom()">Lock Room</button>
       </div>
 
-      <div id="panel-rules" class="sub-panel">
-        <h3>Middleman &amp; Safety Rules</h3>
-        <div class="safety-callout">
-          Anti-Scam Reminder: Always open an official server ticket and verify the Middleman's Discord ID before trading. Avoid unverified direct in-game trade windows or off-server impersonators.
-        </div>
-        <ol class="rules-list" id="rules-list-container"></ol>
+      <div class="admin-two-col">
+        <!-- Left: Add New Item -->
+        <form class="admin-box" id="add-product-form" onsubmit="handleCreateItem(event)">
+          <div style="font-size:0.72rem;font-weight:800;letter-spacing:0.06em;color:#94a3b8;">PRODUCT DETAILS</div>
+          <h4 style="margin:4px 0 10px;color:#fff;">Add a new item</h4>
 
-        <div class="checklist-box">
-          <div class="checklist-title">✓ Verify Ticket Checklist</div>
-          <label class="checklist-item">
-            <input type="checkbox" />
-            <span>Opened an official ticket inside Vortex Exchange &amp; MM</span>
+          <label class="upload-drop" for="prod-image-file">
+            <div id="prod-upload-label">↑ Upload product image (PNG, JPG, WebP) or paste URL below</div>
+            <input type="file" id="prod-image-file" accept="image/png,image/jpeg,image/webp,image/gif" style="display:none;" onchange="handleImageFileChange(event)" />
           </label>
-          <label class="checklist-item">
-            <input type="checkbox" />
-            <span>Confirmed the Middleman's Discord ID &amp; role in the ticket</span>
-          </label>
-          <label class="checklist-item">
-            <input type="checkbox" />
-            <span>Double-checked both sides' items and trade terms</span>
-          </label>
+
+          <div class="form-group">
+            <label class="form-label" for="prod-image-url">Image URL (optional)</label>
+            <input type="text" id="prod-image-url" class="field-input" placeholder="https://..." />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prod-name">Item name *</label>
+            <input type="text" id="prod-name" class="field-input" placeholder="e.g., VIP Pass / Item Name" required />
+          </div>
+
+          <div class="form-row-2">
+            <div>
+              <label class="form-label" for="prod-category">Category *</label>
+              <input type="text" id="prod-category" class="field-input" placeholder="e.g., Passes" required />
+            </div>
+            <div>
+              <label class="form-label" for="prod-stock">Available stock *</label>
+              <input type="number" id="prod-stock" class="field-input" min="0" value="1" required />
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div>
+              <label class="form-label" for="prod-price">Price *</label>
+              <input type="number" id="prod-price" class="field-input" min="0" step="0.01" value="0.00" required />
+            </div>
+            <div>
+              <label class="form-label" for="prod-currency">Currency *</label>
+              <select id="prod-currency" class="field-select">
+                <option value="USD">USD — US Dollar</option>
+                <option value="PHP">PHP — Philippine Peso</option>
+                <option value="EUR">EUR — Euro</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="prod-desc">Description (optional)</label>
+            <textarea id="prod-desc" class="field-textarea" placeholder="Delivery notes, terms, or details..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-add-prod">+ Add product</button>
+        </form>
+
+        <!-- Right: Live Inventory & Sold Webhook Log -->
+        <div class="admin-box">
+          <div style="font-size:0.72rem;font-weight:800;letter-spacing:0.06em;color:#94a3b8;">YOUR LIVE CATALOG</div>
+          <h4 style="margin:4px 0 10px;color:#fff;">Inventory (<span id="admin-inv-count">0</span>)</h4>
+          <div id="admin-inventory-list"></div>
+
+          <h4 style="margin:14px 0 8px;color:#fbbf24;font-size:0.9rem;">Recent Sold Webhook Log</h4>
+          <div id="admin-sales-log" class="sales-log-list"></div>
         </div>
       </div>
-    </section>
-  </main>
+    </div>
+  </section>
 
-  <div id="mm-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="mm-modal-title">
+  <!-- Very Small Letter Trigger for Secret Admin Room -->
+  <button type="button" class="secret-letter-trigger" title="Letter" aria-label="Letter" onclick="openAdminPasswordModal()">✉</button>
+
+  <!-- Admin Password Modal -->
+  <div id="admin-pw-modal" class="modal-backdrop" role="dialog" aria-modal="true">
     <div class="modal-box">
       <div class="modal-header">
-        <h3 id="mm-modal-title">Middleman &amp; Trade Safety</h3>
-        <button type="button" class="modal-close" onclick="closeModal()">✕</button>
+        <h3>Admin Access</h3>
+        <button type="button" class="modal-close" onclick="closeAdminPasswordModal()">✕</button>
       </div>
-      <div class="safety-callout">
-        Verify tickets &amp; middleman IDs inside the server before completing any crosstrade.
+      <form onsubmit="submitAdminPassword(event)">
+        <label class="form-label" for="admin-pw-input">Enter admin password</label>
+        <input type="password" id="admin-pw-input" class="field-input" placeholder="Password..." required />
+        <div id="admin-pw-error" style="color:#fca5a5;font-size:0.78rem;margin-top:6px;min-height:18px;"></div>
+        <button type="submit" class="btn-add-prod" style="margin-top:8px;">Unlock Admin Room</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Edit Item Modal -->
+  <div id="edit-item-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Edit Shop Item</h3>
+        <button type="button" class="modal-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <form onsubmit="handleUpdateItem(event)">
+        <input type="hidden" id="edit-item-id" />
+        <div class="form-group" style="margin-top:0;">
+          <label class="form-label" for="edit-item-name">Item name *</label>
+          <input type="text" id="edit-item-name" class="field-input" required />
+        </div>
+        <div class="form-row-2">
+          <div>
+            <label class="form-label" for="edit-item-category">Category *</label>
+            <input type="text" id="edit-item-category" class="field-input" required />
+          </div>
+          <div>
+            <label class="form-label" for="edit-item-stock">Stock *</label>
+            <input type="number" id="edit-item-stock" class="field-input" min="0" required />
+          </div>
+        </div>
+        <div class="form-row-2">
+          <div>
+            <label class="form-label" for="edit-item-price">Price *</label>
+            <input type="number" id="edit-item-price" class="field-input" min="0" step="0.01" required />
+          </div>
+          <div>
+            <label class="form-label" for="edit-item-currency">Currency *</label>
+            <select id="edit-item-currency" class="field-select">
+              <option value="USD">USD</option>
+              <option value="PHP">PHP</option>
+              <option value="EUR">EUR</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-item-image">Image URL</label>
+          <input type="text" id="edit-item-image" class="field-input" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="edit-item-desc">Description</label>
+          <textarea id="edit-item-desc" class="field-textarea"></textarea>
+        </div>
+        <button type="submit" class="btn-add-prod" style="margin-top:12px;">Save Changes</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MM Safety Modal -->
+  <div id="mm-modal" class="modal-backdrop" role="dialog" aria-modal="true">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3>Middleman &amp; Trade Safety</h3>
+        <button type="button" class="modal-close" onclick="closeMmModal()">✕</button>
       </div>
       <ol class="rules-list" id="modal-rules-list"></ol>
     </div>
   </div>
 
-  <div id="member-inspector-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="inspector-title">
-    <div class="modal-box">
-      <div class="modal-header">
-        <h3 id="inspector-title">Member Profile Details</h3>
-        <button type="button" class="modal-close" onclick="closeInspectorModal()">✕</button>
-      </div>
-      <div id="inspector-banner" class="inspector-banner" title="Click to enlarge banner"></div>
-      <div class="inspector-avatar-row">
-        <img id="inspector-avatar" class="inspector-avatar-thumb" src="" alt="" title="Click to enlarge avatar" />
-        <div>
-          <div id="inspector-sub" style="font-size:0.86rem;font-weight:700;color:#fff;"></div>
-          <div style="font-size:0.74rem;color:#cbd5e1;">Click banner or avatar to view full size</div>
-        </div>
-      </div>
-      <div id="inspector-meta" class="inspector-meta"></div>
-      <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
-        <button type="button" class="mini-action-btn" id="inspector-copy-id">Copy ID</button>
-        <button type="button" class="mini-action-btn" id="inspector-copy-mention">Copy Mention (&lt;@id&gt;)</button>
-      </div>
-      <div id="inspector-roles" class="m-roles-row"></div>
-    </div>
-  </div>
-
-  <div id="lightbox-modal" class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="lightbox-title">
-    <div class="modal-box lightbox-box">
-      <div class="modal-header">
-        <h3 id="lightbox-title">Full-Size Preview</h3>
-        <button type="button" class="modal-close" onclick="closeLightbox()">✕</button>
-      </div>
-      <img id="lightbox-img" class="lightbox-img" src="" alt="Full size preview" />
-    </div>
-  </div>
-
   <script>
+    const SYNC_INTERVAL_MS = 12000;
+    let nextSyncAt = Date.now() + SYNC_INTERVAL_MS;
+
     let currentServerInvite = "https://discord.gg/3JPatMmyF";
     let currentServerId = "1542941315933667348";
     let currentUserId = "1540575139538796634";
     let currentHandle = "mvn412.";
-    let allGames = [];
-    let allVouches = [];
-    let selectedVouchStars = "ALL";
+
     let roleCatalog = [];
     let staffMembers = [];
     let selectedRoleFilter = "ALL";
     let onlineOnlyFilter = false;
 
-    const displayedCounts = {
-      members: 0,
-      online: 0,
-      offline: 0,
-      boosts: 0,
-    };
+    let shopItems = [];
+    let recentSales = [];
+    let adminPasswordToken = "";
+    let uploadedImageDataUrl = "";
 
-    function animateCounter(elId, key, targetVal) {
-      const el = document.getElementById(elId);
-      if (!el) return;
-      const target = Math.max(0, Number(targetVal || 0));
-      const start = displayedCounts[key] ?? 0;
-      if (start === target) {
-        el.textContent = target.toLocaleString();
-        return;
-      }
-      const duration = 550;
-      const startTime = performance.now();
-
-      function tick(now) {
-        const progress = Math.min(1, (now - startTime) / duration);
-        const eased = 1 - Math.pow(1 - progress, 3);
-        const current = Math.round(start + (target - start) * eased);
-        el.textContent = current.toLocaleString();
-        if (progress < 1) {
-          requestAnimationFrame(tick);
-        } else {
-          displayedCounts[key] = target;
-          el.textContent = target.toLocaleString();
-        }
-      }
-      requestAnimationFrame(tick);
-    }
+    const prefersReducedMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     function attach3DTilt(el) {
-      if (!el || el.dataset.tiltBound === "1") return;
+      if (!el || el.dataset.tiltBound === "1" || prefersReducedMotion) return;
       el.dataset.tiltBound = "1";
       const maxDeg = Number(el.dataset.tiltMax || "6");
 
@@ -2045,15 +1491,14 @@
         if (!rect.width || !rect.height) return;
         const x = e.clientX - rect.left;
         const y = e.clientY - rect.top;
-        const px = x / rect.width - 0.5;
-        const py = y / rect.height - 0.5;
-        const rotY = (px * maxDeg * 2).toFixed(2);
-        const rotX = (-py * maxDeg * 2).toFixed(2);
+        const rotY = ((x / rect.width - 0.5) * maxDeg * 2).toFixed(2);
+        const rotX = (-(y / rect.height - 0.5) * maxDeg * 2).toFixed(2);
+
         el.classList.remove("resetting");
         el.style.setProperty("--spot-x", `${x.toFixed(1)}px`);
         el.style.setProperty("--spot-y", `${y.toFixed(1)}px`);
         el.style.setProperty("--spot-opacity", "1");
-        el.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.012, 1.012, 1.012)`;
+        el.style.transform = `perspective(1100px) rotateX(${rotX}deg) rotateY(${rotY}deg) scale3d(1.01, 1.01, 1.01)`;
       });
 
       el.addEventListener("pointerleave", () => {
@@ -2069,30 +1514,23 @@
 
     (function initSparkleField() {
       const canvas = document.getElementById("sparkle-canvas");
-      if (!canvas) return;
+      if (!canvas || prefersReducedMotion) return;
       const ctx = canvas.getContext("2d");
       let width = (canvas.width = window.innerWidth);
       let height = (canvas.height = window.innerHeight);
-      let pointerOffsetX = 0;
-      let pointerOffsetY = 0;
 
-      const stars = Array.from({ length: 42 }, (_, idx) => ({
+      const stars = Array.from({ length: 36 }, (_, idx) => ({
         x: Math.random() * width,
         y: Math.random() * height,
         r: 0.9 + (idx % 3) * 0.65,
         vy: 0.14 + (idx % 4) * 0.06,
-        alpha: 0.25 + (idx % 5) * 0.12,
+        alpha: 0.25 + (idx % 5) * 0.11,
       }));
 
       window.addEventListener("resize", () => {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
       });
-
-      window.addEventListener("pointermove", (e) => {
-        pointerOffsetX = (e.clientX / Math.max(1, width) - 0.5) * 18;
-        pointerOffsetY = (e.clientY / Math.max(1, height) - 0.5) * 14;
-      }, { passive: true });
 
       function draw() {
         ctx.clearRect(0, 0, width, height);
@@ -2103,10 +1541,8 @@
             s.y = height + 10;
             s.x = Math.random() * width;
           }
-          const drawX = (s.x + pointerOffsetX * (s.r * 0.6) + width) % width;
-          const drawY = (s.y + pointerOffsetY * (s.r * 0.6) + height) % height;
           ctx.beginPath();
-          ctx.arc(drawX, drawY, s.r, 0, Math.PI * 2);
+          ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
           ctx.fillStyle = isCrimson
             ? `rgba(253, 164, 175, ${s.alpha})`
             : `rgba(216, 180, 254, ${s.alpha})`;
@@ -2116,6 +1552,15 @@
       }
       requestAnimationFrame(draw);
     })();
+
+    function pulseCopied(btnEl) {
+      if (!btnEl) return;
+      btnEl.classList.remove("copied-pulse");
+      void btnEl.offsetWidth;
+      btnEl.classList.add("copied-pulse");
+      clearTimeout(btnEl._pulseTimer);
+      btnEl._pulseTimer = setTimeout(() => btnEl.classList.remove("copied-pulse"), 450);
+    }
 
     function escapeHtml(str) {
       return String(str ?? "")
@@ -2128,20 +1573,14 @@
 
     function showToast(msg) {
       const el = document.getElementById("toast-msg");
-      el.textContent = msg;
-      clearTimeout(window._toastTimer);
-      window._toastTimer = setTimeout(() => { el.textContent = ""; }, 2500);
+      if (el) {
+        el.textContent = msg;
+        clearTimeout(window._toastTimer);
+        window._toastTimer = setTimeout(() => { el.textContent = ""; }, 2600);
+      }
     }
 
-    function flashLabel(elId, tempText, originalText) {
-      const el = document.getElementById(elId);
-      if (!el) return;
-      el.textContent = tempText;
-      clearTimeout(el._flashTimer);
-      el._flashTimer = setTimeout(() => { el.textContent = originalText; }, 1600);
-    }
-
-    async function copyText(text, successMsg, flashFn) {
+    async function copyText(text, successMsg, triggerBtn = null) {
       try {
         await navigator.clipboard.writeText(text);
       } catch {
@@ -2152,36 +1591,8 @@
         document.execCommand("copy");
         inp.remove();
       }
+      pulseCopied(triggerBtn);
       showToast(successMsg);
-      if (flashFn) flashFn();
-    }
-
-    function copyInviteLink() {
-      copyText(currentServerInvite, "Server invite copied.", () => {
-        flashLabel("btn-copy-invite-text", "Copied!", "Copy Invite");
-      });
-    }
-
-    function copyServerId() {
-      copyText(currentServerId, "Server ID copied.", () => {
-        flashLabel("btn-copy-id-text", "Copied!", "Copy ID");
-      });
-    }
-
-    function copyUserId() {
-      copyText(currentUserId, "Owner User ID copied.");
-    }
-
-    function copyHandle() {
-      copyText(currentHandle, `Copied handle: ${currentHandle}`, () => {
-        flashLabel("btn-copy-handle", "Copied", "Copy");
-      });
-    }
-
-    function sharePageLink() {
-      copyText(window.location.href, "Page URL copied to clipboard.", () => {
-        flashLabel("btn-share-page", "Copied!", "Share Page");
-      });
     }
 
     function toggleTheme() {
@@ -2202,109 +1613,296 @@
       renderStaffSection();
     }
 
-    function openModal() {
-      document.getElementById("mm-modal").classList.add("open");
-    }
+    function openPage(pageName, subTab = null) {
+      document.getElementById("page-showcase").classList.toggle("active", pageName === "showcase");
+      document.getElementById("page-shop").classList.toggle("active", pageName === "shop");
 
-    function closeModal() {
-      document.getElementById("mm-modal").classList.remove("open");
-    }
-
-    function openLightbox(title, url) {
-      if (!url) return;
-      document.getElementById("lightbox-title").textContent = title || "Full-Size Preview";
-      document.getElementById("lightbox-img").src = url;
-      document.getElementById("lightbox-modal").classList.add("open");
-    }
-
-    function closeLightbox() {
-      document.getElementById("lightbox-modal").classList.remove("open");
-    }
-
-    function openInspectorModal(member) {
-      document.getElementById("inspector-title").textContent = `${member.display_name || member.username}`;
-      document.getElementById("inspector-sub").textContent = `@${member.username} • ID ${member.id}`;
-
-      const bannerEl = document.getElementById("inspector-banner");
-      bannerEl.style.backgroundImage = member.banner_url ? `url("${member.banner_url}")` : "";
-      bannerEl.onclick = () => {
-        if (member.banner_url) {
-          openLightbox(`${member.display_name || member.username} — Banner`, member.banner_url);
-        } else {
-          showToast("No custom banner image on this member.");
-        }
-      };
-
-      const avEl = document.getElementById("inspector-avatar");
-      const avSrc = member.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
-      avEl.src = avSrc;
-      avEl.onclick = () => openLightbox(`${member.display_name || member.username} — Avatar`, avSrc);
-
-      const eff = member.profile_effect || {};
-      document.getElementById("inspector-meta").innerHTML = `
-        <strong>User ID:</strong> <code>${escapeHtml(member.id)}</code><br />
-        <strong>Mention:</strong> <code>&lt;@${escapeHtml(member.id)}&gt;</code><br />
-        <strong>Status:</strong> ${escapeHtml(member.status || "online")}<br />
-        <strong>Effect Source:</strong> ${escapeHtml(eff.source || "elwey.fr/effects")}${eff.name ? ` (${escapeHtml(eff.name)})` : ""}<br />
-        <strong>Decoration:</strong> ${member.avatar_decoration_url ? "Active" : "None"}
-      `;
-
-      document.getElementById("inspector-copy-id").onclick = () => {
-        copyText(member.id, `Copied ID for ${member.display_name || member.username}.`);
-      };
-      document.getElementById("inspector-copy-mention").onclick = () => {
-        copyText(`<@${member.id}>`, `Copied mention <@${member.id}>.`);
-      };
-
-      const rolesBox = document.getElementById("inspector-roles");
-      rolesBox.innerHTML = "";
-      (member.roles || []).forEach((roleItem) => {
-        const pill = document.createElement("span");
-        pill.className = "staff-role-pill";
-        if (roleItem.icon_url) {
-          const rImg = document.createElement("img");
-          rImg.src = roleItem.icon_url;
-          rImg.alt = roleItem.name;
-          rImg.onerror = () => { rImg.remove(); };
-          pill.appendChild(rImg);
-        }
-        const labelSpan = document.createElement("span");
-        labelSpan.textContent = roleItem.name;
-        pill.appendChild(labelSpan);
-        rolesBox.appendChild(pill);
-      });
-
-      document.getElementById("member-inspector-modal").classList.add("open");
-    }
-
-    function closeInspectorModal() {
-      document.getElementById("member-inspector-modal").classList.remove("open");
-    }
-
-    document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape") {
-        closeLightbox();
-        closeInspectorModal();
-        closeModal();
-      }
-    });
-
-    function switchTab(tabName) {
       document.querySelectorAll(".nav-tab").forEach((btn) => {
-        btn.classList.toggle("active", btn.getAttribute("data-tab") === tabName);
+        const p = btn.getAttribute("data-page");
+        const t = btn.getAttribute("data-tab");
+        if (pageName === "shop") {
+          btn.classList.toggle("active", p === "shop");
+        } else {
+          btn.classList.toggle("active", p === "showcase" && (!subTab || t === subTab));
+        }
       });
-      document.getElementById("panel-staff").classList.toggle("active", tabName === "staff");
-      document.getElementById("panel-games").classList.toggle("active", tabName === "games");
-      document.getElementById("panel-rules").classList.toggle("active", tabName === "rules");
+
+      if (pageName === "showcase" && subTab) {
+        document.getElementById("panel-staff").classList.toggle("active", subTab === "staff");
+        document.getElementById("panel-rules").classList.toggle("active", subTab === "rules");
+      }
     }
 
-    function getInitials(name) {
-      return (name || "VX")
-        .split(/\s+/)
-        .filter(Boolean)
-        .slice(0, 2)
-        .map((w) => w[0].toUpperCase())
-        .join("") || "VX";
+    function openMmModal() { document.getElementById("mm-modal").classList.add("open"); }
+    function closeMmModal() { document.getElementById("mm-modal").classList.remove("open"); }
+
+    function openAdminPasswordModal() {
+      document.getElementById("admin-pw-error").textContent = "";
+      document.getElementById("admin-pw-input").value = "";
+      document.getElementById("admin-pw-modal").classList.add("open");
+      setTimeout(() => document.getElementById("admin-pw-input").focus(), 40);
+    }
+
+    function closeAdminPasswordModal() {
+      document.getElementById("admin-pw-modal").classList.remove("open");
+    }
+
+    function lockAdminRoom() {
+      adminPasswordToken = "";
+      recentSales = [];
+      document.getElementById("secret-admin-room").classList.remove("unlocked");
+      document.getElementById("admin-unlocked-pill").style.display = "none";
+    }
+
+    async function submitAdminPassword(event) {
+      event.preventDefault();
+      const pw = document.getElementById("admin-pw-input").value;
+      const errEl = document.getElementById("admin-pw-error");
+
+      const res = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: pw }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        errEl.textContent = data.error || "Invalid password.";
+        return;
+      }
+
+      adminPasswordToken = pw;
+      shopItems = data.items || [];
+      recentSales = data.sales || [];
+      closeAdminPasswordModal();
+      document.getElementById("secret-admin-room").classList.add("unlocked");
+      document.getElementById("admin-unlocked-pill").style.display = "inline-block";
+      openPage("shop");
+      renderPublicShop();
+      renderAdminInventory();
+    }
+
+    function handleImageFileChange(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        uploadedImageDataUrl = String(reader.result || "");
+        document.getElementById("prod-upload-label").textContent = `Selected: ${file.name}`;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function handleCreateItem(event) {
+      event.preventDefault();
+      if (!adminPasswordToken) return;
+
+      const name = document.getElementById("prod-name").value.trim();
+      const category = document.getElementById("prod-category").value.trim() || "General";
+      const stock = Number(document.getElementById("prod-stock").value || 0);
+      const price = Number(document.getElementById("prod-price").value || 0);
+      const currency = document.getElementById("prod-currency").value;
+      const description = document.getElementById("prod-desc").value.trim();
+      const manualUrl = document.getElementById("prod-image-url").value.trim();
+      const image_url = manualUrl || uploadedImageDataUrl || "";
+
+      const res = await fetch("/api/shop/items", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Password": adminPasswordToken,
+        },
+        body: JSON.stringify({ name, category, stock, price, currency, description, image_url }),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        shopItems = data.items || [];
+        event.target.reset();
+        uploadedImageDataUrl = "";
+        document.getElementById("prod-upload-label").textContent = "↑ Upload product image (PNG, JPG, WebP) or paste URL below";
+        renderPublicShop();
+        renderAdminInventory();
+      }
+    }
+
+    function openEditModal(itemId) {
+      const item = shopItems.find((i) => i.id === itemId);
+      if (!item) return;
+      document.getElementById("edit-item-id").value = item.id;
+      document.getElementById("edit-item-name").value = item.name || "";
+      document.getElementById("edit-item-category").value = item.category || "General";
+      document.getElementById("edit-item-stock").value = Number(item.stock ?? 0);
+      document.getElementById("edit-item-price").value = Number(item.price ?? 0);
+      document.getElementById("edit-item-currency").value = item.currency || "USD";
+      document.getElementById("edit-item-image").value = item.image_url || "";
+      document.getElementById("edit-item-desc").value = item.description || "";
+      document.getElementById("edit-item-modal").classList.add("open");
+    }
+
+    function closeEditModal() {
+      document.getElementById("edit-item-modal").classList.remove("open");
+    }
+
+    async function handleUpdateItem(event) {
+      event.preventDefault();
+      if (!adminPasswordToken) return;
+      const itemId = document.getElementById("edit-item-id").value;
+      const payload = {
+        name: document.getElementById("edit-item-name").value.trim(),
+        category: document.getElementById("edit-item-category").value.trim() || "General",
+        stock: Number(document.getElementById("edit-item-stock").value || 0),
+        price: Number(document.getElementById("edit-item-price").value || 0),
+        currency: document.getElementById("edit-item-currency").value,
+        image_url: document.getElementById("edit-item-image").value.trim(),
+        description: document.getElementById("edit-item-desc").value.trim(),
+      };
+
+      const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Admin-Password": adminPasswordToken,
+        },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        shopItems = data.items || [];
+        recentSales = data.sales || [];
+        closeEditModal();
+        renderPublicShop();
+        renderAdminInventory();
+      }
+    }
+
+    async function handleMinusOneSold(itemId) {
+      if (!adminPasswordToken) return;
+      const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}/minus-one`, {
+        method: "POST",
+        headers: { "X-Admin-Password": adminPasswordToken },
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        shopItems = data.items || [];
+        recentSales = data.sales || [];
+        renderPublicShop();
+        renderAdminInventory();
+      } else if (data.error) {
+        alert(data.error);
+      }
+    }
+
+    async function handleDeleteItem(itemId) {
+      if (!adminPasswordToken) return;
+      const res = await fetch(`/api/shop/items/${encodeURIComponent(itemId)}`, {
+        method: "DELETE",
+        headers: { "X-Admin-Password": adminPasswordToken },
+      });
+      const data = await res.json();
+      if (res.ok && data.ok) {
+        shopItems = data.items || [];
+        recentSales = data.sales || [];
+        renderPublicShop();
+        renderAdminInventory();
+      }
+    }
+
+    function renderPublicShop() {
+      const catSelect = document.getElementById("shop-category-filter");
+      const currentCat = catSelect.value || "ALL";
+      const categories = Array.from(new Set(shopItems.map((i) => i.category).filter(Boolean)));
+      catSelect.innerHTML = `<option value="ALL">All Categories</option>` +
+        categories.map((c) => `<option value="${escapeHtml(c)}" ${c === currentCat ? "selected" : ""}>${escapeHtml(c)}</option>`).join("");
+
+      const q = (document.getElementById("shop-search-input")?.value || "").trim().toLowerCase();
+      const filtered = shopItems.filter((item) => {
+        if (catSelect.value !== "ALL" && item.category !== catSelect.value) return false;
+        if (q) {
+          const hay = `${item.name} ${item.category} ${item.description}`.toLowerCase();
+          if (!hay.includes(q)) return false;
+        }
+        return true;
+      });
+
+      const grid = document.getElementById("public-shop-grid");
+      if (!filtered.length) {
+        grid.innerHTML = `<div class="member-showcase-card" style="grid-column:1/-1;padding:16px;"><div style="color:#cbd5e1;">No shop items listed right now.</div></div>`;
+        return;
+      }
+
+      grid.innerHTML = filtered.map((item) => {
+        const stockNum = Number(item.stock || 0);
+        const inStock = stockNum > 0;
+        const badgeHtml = inStock
+          ? `<span class="stock-badge stock-in">${stockNum} in stock</span>`
+          : `<span class="stock-badge stock-out">Out of stock</span>`;
+
+        const thumbHtml = item.image_url
+          ? `<img class="shop-thumb" src="${escapeHtml(item.image_url)}" alt="${escapeHtml(item.name)}" />`
+          : `<div class="shop-thumb">🛍️</div>`;
+
+        const orderSummary = `Item: ${item.name} | Category: ${item.category} | Price: ${Number(item.price).toFixed(2)} ${item.currency}`;
+
+        return `
+          <article class="shop-item-card">
+            <div>
+              ${thumbHtml}
+              <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:10px;">
+                <span style="font-size:0.75rem;color:#c4b5fd;font-weight:700;">${escapeHtml(item.category)}</span>
+                ${badgeHtml}
+              </div>
+              <div style="font-size:1.02rem;font-weight:800;color:#fff;margin-top:4px;">${escapeHtml(item.name)}</div>
+              <div style="font-size:0.82rem;color:#cbd5e1;margin-top:4px;">${escapeHtml(item.description || "")}</div>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.08);">
+              <span class="price-tag">${Number(item.price).toFixed(2)} ${escapeHtml(item.currency)}</span>
+              <button type="button" class="mini-action-btn" onclick="copyText(${JSON.stringify(orderSummary)}, 'Copied ticket order details.', this)">Copy for Ticket</button>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    function renderAdminInventory() {
+      document.getElementById("admin-inv-count").textContent = String(shopItems.length);
+      const listEl = document.getElementById("admin-inventory-list");
+
+      if (!shopItems.length) {
+        listEl.innerHTML = `<div style="font-size:0.82rem;color:#94a3b8;">No items in database yet.</div>`;
+      } else {
+        listEl.innerHTML = shopItems.map((item) => {
+          const stockNum = Number(item.stock || 0);
+          return `
+            <div class="inv-row">
+              <div>
+                <div style="font-weight:700;color:#fff;">${escapeHtml(item.name)}</div>
+                <div style="font-size:0.76rem;color:#94a3b8;">${escapeHtml(item.category)} • ${Number(item.price).toFixed(2)} ${escapeHtml(item.currency)} • <strong>${stockNum}</strong> stock</div>
+              </div>
+              <div class="inv-btns">
+                <button type="button" class="btn-sold-one" onclick="handleMinusOneSold('${escapeHtml(item.id)}')" ${stockNum <= 0 ? "disabled" : ""}>-1 Sold</button>
+                <button type="button" class="btn-edit-item" onclick="openEditModal('${escapeHtml(item.id)}')">Edit</button>
+                <button type="button" class="btn-del-item" onclick="handleDeleteItem('${escapeHtml(item.id)}')">Delete</button>
+              </div>
+            </div>
+          `;
+        }).join("");
+      }
+
+      const salesEl = document.getElementById("admin-sales-log");
+      if (!recentSales.length) {
+        salesEl.innerHTML = `<div style="color:#94a3b8;">No sold items logged yet.</div>`;
+      } else {
+        salesEl.innerHTML = recentSales.map((s) => `
+          <div class="sale-entry">
+            <strong>${escapeHtml(s.item_name)}</strong> (${escapeHtml(s.category)}) — ${Number(s.price).toFixed(2)} ${escapeHtml(s.currency)} • Left: ${Number(s.remaining_stock)} • <span>${escapeHtml(s.sold_at)}</span>
+          </div>
+        `).join("");
+      }
+    }
+
+    function countMembersForRole(roleId) {
+      return staffMembers.filter((m) =>
+        (m.roles || []).some((r) => r.id === roleId || r.role_key === roleId)
+      ).length;
     }
 
     function renderFilterChips() {
@@ -2323,19 +1921,11 @@
       container.appendChild(allChip);
 
       roleCatalog.forEach((r) => {
+        const count = countMembersForRole(r.id);
         const chip = document.createElement("button");
         chip.type = "button";
         chip.className = `filter-chip ${selectedRoleFilter === r.id ? "active" : ""}`;
-        if (r.icon_url) {
-          const img = document.createElement("img");
-          img.src = r.icon_url;
-          img.alt = r.label;
-          img.onerror = () => { img.remove(); };
-          chip.appendChild(img);
-        }
-        const txt = document.createElement("span");
-        txt.textContent = r.short_label || r.label;
-        chip.appendChild(txt);
+        chip.textContent = `${r.short_label || r.label} (${count})`;
         chip.onclick = () => {
           selectedRoleFilter = r.id;
           renderFilterChips();
@@ -2346,269 +1936,87 @@
     }
 
     function renderStaffSection() {
-      const queryVal = (document.getElementById("staff-search-input")?.value || "").trim().toLowerCase();
+      const q = (document.getElementById("staff-search-input")?.value || "").trim().toLowerCase();
       const filtered = staffMembers.filter((m) => {
         if (onlineOnlyFilter && (m.status || "offline") === "offline") return false;
         if (selectedRoleFilter !== "ALL") {
-          const hasRole = (m.roles || []).some(
-            (r) => r.id === selectedRoleFilter || r.role_key === selectedRoleFilter
-          );
+          const hasRole = (m.roles || []).some((r) => r.id === selectedRoleFilter || r.role_key === selectedRoleFilter);
           if (!hasRole) return false;
         }
-        if (queryVal) {
+        if (q) {
           const hay = `${m.display_name || ""} ${m.username || ""} ${m.id || ""}`.toLowerCase();
-          if (!hay.includes(queryVal)) return false;
+          if (!hay.includes(q)) return false;
         }
         return true;
       });
 
-      const membersEl = document.getElementById("staff-members-container");
-      const countEl = document.getElementById("staff-count-label");
-      membersEl.innerHTML = "";
-      countEl.textContent = String(filtered.length);
+      document.getElementById("staff-count-label").textContent = String(filtered.length);
+      const staffEl = document.getElementById("staff-members-container");
 
       if (!filtered.length) {
-        membersEl.innerHTML = `<div class="vouch-card"><p class="vouch-note">No matching members found for the current filter.</p></div>`;
+        staffEl.innerHTML = `<div class="member-showcase-card" style="padding:14px;"><div style="color:#cbd5e1;font-size:0.84rem;">No matching members found.</div></div>`;
         return;
       }
 
-      filtered.forEach((m) => {
-        const card = document.createElement("article");
-        card.className = "member-showcase-card tilt-3d";
-        card.dataset.tiltMax = "5";
-        card.onclick = () => openInspectorModal(m);
+      staffEl.innerHTML = filtered.map((m) => {
+        const avSrc = m.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
+        const bannerStyle = m.banner_url ? `style="background-image:url('${escapeHtml(m.banner_url)}')"` : "";
+        const rolesHtml = (m.roles || []).map((r) => `<span class="staff-role-pill">${escapeHtml(r.name)}</span>`).join("");
 
-        const eff = m.profile_effect || {};
-        const effectLayer = document.createElement("div");
-        effectLayer.className = "member-card-effect";
-        if (eff.asset_url) {
-          const effImg = document.createElement("img");
-          effImg.className = "m-effect-img";
-          effImg.src = eff.asset_url;
-          effImg.alt = eff.name || "Profile Effect";
-          effImg.onerror = () => { effImg.remove(); };
-          effectLayer.appendChild(effImg);
-        }
-        const sweep = document.createElement("div");
-        sweep.className = "m-effect-sweep";
-        effectLayer.appendChild(sweep);
-        card.appendChild(effectLayer);
-
-        const banner = document.createElement("div");
-        banner.className = "member-banner-box";
-        if (m.banner_url) {
-          banner.style.backgroundImage = `url("${m.banner_url}")`;
-        }
-        card.appendChild(banner);
-
-        const body = document.createElement("div");
-        body.className = "member-card-body";
-
-        const idRow = document.createElement("div");
-        idRow.className = "member-identity-row";
-
-        const avWrap = document.createElement("div");
-        avWrap.className = "member-avatar-wrap";
-
-        const ring = document.createElement("div");
-        ring.className = "m-avatar-ring";
-
-        const av = document.createElement("img");
-        av.className = "m-avatar-photo";
-        av.src = m.avatar_url || "https://cdn.discordapp.com/embed/avatars/0.png";
-        av.alt = m.display_name || m.username || "Member";
-        ring.appendChild(av);
-
-        if (m.avatar_decoration_url) {
-          const deco = document.createElement("img");
-          deco.className = "m-avatar-deco";
-          deco.src = m.avatar_decoration_url;
-          deco.alt = "Avatar Decoration";
-          deco.onerror = () => { deco.remove(); };
-          ring.appendChild(deco);
-        }
-
-        const stDot = document.createElement("span");
-        stDot.className = `m-status-badge ${m.status || "offline"}`;
-        ring.appendChild(stDot);
-
-        const nameBlock = document.createElement("div");
-        nameBlock.className = "m-name-block";
-        nameBlock.innerHTML = `<div class="m-display-name">${escapeHtml(m.display_name || m.username)}</div><div class="m-username-line">@${escapeHtml(m.username)}</div>`;
-
-        avWrap.appendChild(ring);
-        avWrap.appendChild(nameBlock);
-
-        const actionsWrap = document.createElement("div");
-        actionsWrap.className = "m-card-actions";
-
-        const copyIdBtn = document.createElement("button");
-        copyIdBtn.type = "button";
-        copyIdBtn.className = "m-copy-btn";
-        copyIdBtn.textContent = "Copy ID";
-        copyIdBtn.onclick = (ev) => {
-          ev.stopPropagation();
-          copyText(m.id, `Copied ID for ${m.display_name || m.username}.`);
-        };
-
-        const copyMentionBtn = document.createElement("button");
-        copyMentionBtn.type = "button";
-        copyMentionBtn.className = "m-copy-btn";
-        copyMentionBtn.textContent = "@Mention";
-        copyMentionBtn.onclick = (ev) => {
-          ev.stopPropagation();
-          copyText(`<@${m.id}>`, `Copied mention <@${m.id}>.`);
-        };
-
-        actionsWrap.appendChild(copyIdBtn);
-        actionsWrap.appendChild(copyMentionBtn);
-
-        idRow.appendChild(avWrap);
-        idRow.appendChild(actionsWrap);
-        body.appendChild(idRow);
-
-        const rolesWrap = document.createElement("div");
-        rolesWrap.className = "m-roles-row";
-
-        (m.roles || []).forEach((roleItem) => {
-          const pill = document.createElement("span");
-          pill.className = "staff-role-pill";
-          if (roleItem.icon_url) {
-            const rImg = document.createElement("img");
-            rImg.src = roleItem.icon_url;
-            rImg.alt = roleItem.name;
-            rImg.onerror = () => { rImg.remove(); };
-            pill.appendChild(rImg);
-          }
-          const labelSpan = document.createElement("span");
-          labelSpan.textContent = roleItem.name;
-          pill.appendChild(labelSpan);
-          rolesWrap.appendChild(pill);
-        });
-
-        body.appendChild(rolesWrap);
-        card.appendChild(body);
-        attach3DTilt(card);
-        membersEl.appendChild(card);
-      });
+        return `
+          <article class="member-showcase-card">
+            <div class="member-banner-box" ${bannerStyle}></div>
+            <div class="member-card-body">
+              <div class="member-identity-row">
+                <div class="member-avatar-wrap">
+                  <div class="m-avatar-ring">
+                    <img class="m-avatar-photo" src="${escapeHtml(avSrc)}" alt="${escapeHtml(m.display_name || m.username)}" />
+                    <span class="m-status-badge ${escapeHtml(m.status || "offline")}"></span>
+                  </div>
+                  <div class="m-name-block">
+                    <div class="m-display-name">${escapeHtml(m.display_name || m.username)}</div>
+                    <div class="m-username-line">@${escapeHtml(m.username)} • ID ${escapeHtml(m.id)}</div>
+                  </div>
+                </div>
+                <button type="button" class="mini-action-btn" onclick="copyText('${escapeHtml(m.id)}', 'Copied member ID.', this)">Copy ID</button>
+              </div>
+              <div class="m-roles-row">${rolesHtml}</div>
+            </div>
+          </article>
+        `;
+      }).join("");
     }
 
-    function renderGames() {
-      const container = document.getElementById("games-list-container");
-      container.innerHTML = "";
-      allGames.forEach((g) => {
-        const box = document.createElement("div");
-        box.className = "game-card-item tilt-3d";
-        box.dataset.tiltMax = "4";
-        box.innerHTML = `<strong>${escapeHtml(g.tag || "•")} ${escapeHtml(g.title)}</strong><span>${escapeHtml(g.note)}</span>`;
-        attach3DTilt(box);
-        container.appendChild(box);
-      });
+    function tickSyncCountdown() {
+      const remainingMs = Math.max(0, nextSyncAt - Date.now());
+      const secLeft = Math.ceil(remainingMs / 1000);
+      const pct = Math.max(0, Math.min(100, (remainingMs / SYNC_INTERVAL_MS) * 100));
+      document.getElementById("sync-countdown-label").textContent = `Next sync in ${secLeft}s`;
+      document.getElementById("sync-countdown-fill").style.width = `${pct}%`;
     }
 
-    function setVouchFilter(starVal) {
-      selectedVouchStars = starVal;
-      document.querySelectorAll("#vouch-filter-row .filter-chip").forEach((btn) => {
-        btn.classList.toggle("active", btn.getAttribute("data-stars") === starVal);
-      });
-      renderVouches();
-    }
-
-    function renderVouches() {
-      const container = document.getElementById("vouches-list-container");
-      container.innerHTML = "";
-
-      const list = selectedVouchStars === "ALL"
-        ? allVouches
-        : allVouches.filter((v) => String(Number(v.stars || 5)) === selectedVouchStars);
-
-      if (!list.length) {
-        container.innerHTML = `<div class="vouch-card"><p class="vouch-note">No member vouches match this star filter.</p></div>`;
-        return;
+    async function refreshShopOnly() {
+      try {
+        const headers = adminPasswordToken ? { "X-Admin-Password": adminPasswordToken } : {};
+        const res = await fetch("/api/shop", { cache: "no-store", headers });
+        if (!res.ok) return;
+        const data = await res.json();
+        shopItems = data.items || [];
+        if (adminPasswordToken) {
+          recentSales = data.sales || [];
+          renderAdminInventory();
+        }
+        renderPublicShop();
+      } catch (e) {
+        console.error("Shop sync error:", e);
       }
-
-      list.forEach((v) => {
-        const starsNum = Math.max(1, Math.min(5, Number(v.stars || 5)));
-        const starsDisplay = "★".repeat(starsNum) + "☆".repeat(5 - starsNum);
-        const card = document.createElement("div");
-        card.className = "vouch-card tilt-3d";
-        card.dataset.tiltMax = "4";
-
-        const top = document.createElement("div");
-        top.className = "vouch-top";
-
-        const memberWrap = document.createElement("div");
-        memberWrap.className = "vouch-member";
-
-        if (v.avatar_url) {
-          const img = document.createElement("img");
-          img.className = "vouch-avatar";
-          img.src = v.avatar_url;
-          img.alt = v.name || "Member";
-          img.onerror = () => {
-            const fb = document.createElement("div");
-            fb.className = "vouch-avatar";
-            fb.textContent = getInitials(v.name);
-            img.replaceWith(fb);
-          };
-          memberWrap.appendChild(img);
-        } else {
-          const fb = document.createElement("div");
-          fb.className = "vouch-avatar";
-          fb.textContent = getInitials(v.name);
-          memberWrap.appendChild(fb);
-        }
-
-        const nameCol = document.createElement("div");
-        nameCol.innerHTML = `<div class="vouch-name">${escapeHtml(v.name || "Server Member")}</div><div class="vouch-tag">${escapeHtml(v.trade_tag || "Roblox Crosstrade")}</div>`;
-        memberWrap.appendChild(nameCol);
-
-        const starEl = document.createElement("div");
-        starEl.className = "vouch-stars";
-        starEl.textContent = `${starsDisplay} (${starsNum}/5)`;
-
-        top.appendChild(memberWrap);
-        top.appendChild(starEl);
-
-        const noteEl = document.createElement("p");
-        noteEl.className = "vouch-note";
-        noteEl.textContent = v.note || "";
-
-        card.appendChild(top);
-        card.appendChild(noteEl);
-        attach3DTilt(card);
-        container.appendChild(card);
-      });
-    }
-
-    function applyStatusGlow(status) {
-      const colors = {
-        online: "#23a55a",
-        idle: "#f0b232",
-        dnd: "#f23f43",
-        offline: "#747f8d",
-      };
-      document.documentElement.style.setProperty("--status-ring", colors[status] || "#23a55a");
-    }
-
-    function updateBoostMeter(boosts) {
-      const count = Math.max(0, Number(boosts || 0));
-      let goal = 2;
-      let tier = "Boost Level 1";
-      if (count >= 14) { goal = 14; tier = "Boost Level 3 (Max)"; }
-      else if (count >= 7) { goal = 14; tier = "Boost Level 2"; }
-      else if (count >= 2) { goal = 7; tier = "Boost Level 1"; }
-      else { goal = 2; tier = "Starting Boosts"; }
-
-      const pct = Math.min(100, Math.round((count / goal) * 100));
-      document.getElementById("boost-tier-label").textContent = tier;
-      document.getElementById("boost-progress-text").textContent = `${count} / ${goal} boosts`;
-      document.getElementById("boost-meter-fill").style.width = `${pct}%`;
     }
 
     async function refreshShowcase(manual = false) {
-      const grid = document.getElementById("showcase-grid");
-      grid.classList.add("refreshing");
+      nextSyncAt = Date.now() + SYNC_INTERVAL_MS;
+      tickSyncCountdown();
+      await refreshShopOnly();
+
       try {
         const res = await fetch("/api/showcase", { cache: "no-store" });
         if (!res.ok) return;
@@ -2619,26 +2027,12 @@
         }
 
         const d = payload.profile || {};
-        currentUserId = d.id || "1540575139538796634";
-        currentHandle = d.username || "mvn412.";
-
+        currentUserId = d.id || currentUserId;
+        currentHandle = d.username || currentHandle;
         document.getElementById("display-name").textContent = d.display_name || "VortexShop";
         document.getElementById("username").textContent = `${currentHandle} •`;
-
-        const bioLink = document.getElementById("bio-link");
-        bioLink.textContent = d.bio_link_text || "Check out vortexshop.onrender.com";
-        bioLink.href = d.store_url || "https://vortexshop.onrender.com";
-        document.getElementById("store-cta-link").href = d.store_url || "https://vortexshop.onrender.com";
-
         if (d.avatar_url) document.getElementById("avatar").src = d.avatar_url;
-
-        const bannerEl = document.getElementById("banner");
-        bannerEl.style.backgroundPosition = d.banner_position || "center";
-        if (d.banner_url) {
-          bannerEl.style.backgroundImage = `url("${d.banner_url}")`;
-        } else {
-          bannerEl.style.backgroundImage = "";
-        }
+        document.getElementById("banner").style.backgroundImage = d.banner_url ? `url("${d.banner_url}")` : "";
 
         const decoEl = document.getElementById("avatar-deco");
         if (d.avatar_decoration_url) {
@@ -2648,164 +2042,79 @@
           decoEl.style.display = "none";
         }
 
-        const effectLayer = document.getElementById("profile-effect-layer");
-        const effectImg = document.getElementById("profile-effect-img");
-        const eff = d.profile_effect || {};
-
-        effectLayer.classList.add("active");
-        if (eff.asset_url) {
-          effectImg.src = eff.asset_url;
-          effectImg.style.display = "block";
-          effectImg.onerror = () => { effectImg.style.display = "none"; };
-        } else {
-          effectImg.style.display = "none";
-        }
-
-        const st = d.status || "online";
-        document.getElementById("status-dot").className = `status-dot ${st}`;
-        applyStatusGlow(st);
-
-        const bubble = document.getElementById("status-bubble");
-        if (d.custom_status && (d.custom_status.emoji || d.custom_status.text)) {
-          bubble.textContent = `${d.custom_status.emoji ? d.custom_status.emoji + " " : ""}${d.custom_status.text || ""}`.trim();
-        } else {
-          bubble.textContent = "Very nice day";
-        }
-
-        const clanImg = document.getElementById("clan-badge-img");
-        const clanEmoji = document.getElementById("clan-emoji");
-        if (d.clan_badge_url) {
-          clanImg.src = d.clan_badge_url;
-          clanImg.style.display = "inline-block";
-          clanEmoji.style.display = "none";
-          clanImg.onerror = () => {
-            clanImg.style.display = "none";
-            clanEmoji.style.display = "inline";
-          };
-        } else {
-          clanImg.style.display = "none";
-          clanEmoji.style.display = "inline";
-        }
-        clanEmoji.textContent = d.clan_emoji || "🍃";
-        document.getElementById("clan-tag").textContent = d.clan_tag || "VEM";
-
-        const roleIconEl = document.getElementById("role-pill-icon");
-        const roleEmojiEl = document.getElementById("role-pill-emoji");
-        if (d.role_badge_icon_url) {
-          roleIconEl.src = d.role_badge_icon_url;
-          roleIconEl.style.display = "inline-block";
-          roleEmojiEl.style.display = "none";
-          roleIconEl.onerror = () => {
-            roleIconEl.style.display = "none";
-            roleEmojiEl.style.display = "inline";
-          };
-        } else {
-          roleIconEl.style.display = "none";
-          roleEmojiEl.style.display = "inline";
-        }
-        document.getElementById("role-pill-text").textContent = d.role_badge_text || "Founder • VortexShop";
-        document.getElementById("owner-line").textContent = d.owner_line || "Owner of this server-";
-
-        const invLink = document.getElementById("invite-link");
-        if (d.invite_url) {
-          invLink.href = d.invite_url;
-          invLink.textContent = d.invite_url.length > 27 ? d.invite_url.slice(0, 27) + "..." : d.invite_url;
-        }
-
+        document.getElementById("status-dot").className = `status-dot ${d.status || "online"}`;
+        document.getElementById("status-bubble").textContent =
+          (d.custom_status && (d.custom_status.emoji || d.custom_status.text))
+            ? `${d.custom_status.emoji ? d.custom_status.emoji + " " : ""}${d.custom_status.text || ""}`.trim()
+            : "Very nice day";
         document.getElementById("full-bio-panel").textContent = d.full_bio || "";
         document.getElementById("member-since").textContent = d.member_since || "Aug 22, 2026";
         document.getElementById("mutual-text").textContent = `${d.mutual_servers_count ?? 4} Mutual Servers`;
         document.getElementById("vouches-text").textContent = `• ${d.vouches_count ?? 120}+ Vouches`;
-        document.getElementById("custom-trade-note-box").textContent =
-          d.custom_trade_note || "Verified Roblox crosstrading across any game via official server tickets.";
 
         const badgeBar = document.getElementById("badge-pill-bar");
-        badgeBar.innerHTML = "";
-        (d.badges || []).forEach((b) => {
-          const item = document.createElement("span");
-          item.className = "badge-icon-item";
-          item.setAttribute("data-tooltip", b.label || b.id);
-          if (b.icon_url) {
-            const img = document.createElement("img");
-            img.src = b.icon_url;
-            img.alt = b.label || b.id;
-            img.onerror = () => {
-              img.remove();
-              item.textContent = b.fallback_icon || "✦";
-            };
-            item.appendChild(img);
-          } else {
-            item.textContent = b.fallback_icon || "✦";
-          }
-          badgeBar.appendChild(item);
-        });
-
-        roleCatalog = payload.role_catalog || [];
-        staffMembers = payload.staff_members || [];
-        renderFilterChips();
-        renderStaffSection();
-
-        allGames = d.games || [];
-        renderGames();
-
-        allVouches = d.vouches || [];
-        renderVouches();
+        badgeBar.innerHTML = (d.badges || [])
+          .map((b) => `<span class="badge-icon-item" title="${escapeHtml(b.label || b.id)}">${escapeHtml(b.fallback_icon || "✦")}</span>`)
+          .join("");
 
         const rules = d.mm_rules || [];
         const rulesHtml = rules.map((r) => `<li>${escapeHtml(r)}</li>`).join("");
         document.getElementById("rules-list-container").innerHTML = rulesHtml;
         document.getElementById("modal-rules-list").innerHTML = rulesHtml;
 
-        const s = payload.server || {};
-        currentServerId = s.id || "1542941315933667348";
-        currentServerInvite = s.invite_url || "https://discord.gg/3JPatMmyF";
+        roleCatalog = payload.role_catalog || [];
+        staffMembers = payload.staff_members || [];
+        renderFilterChips();
+        renderStaffSection();
 
-        const sName = s.name || "Discord Server";
+        const s = payload.server || {};
+        currentServerId = s.id || currentServerId;
+        currentServerInvite = s.invite_url || currentServerInvite;
         const totalMembers = Number(s.member_count || 0);
         const onlineMembers = Number(s.online_count || 0);
         const offlineMembers = Number(s.offline_count || 0);
         const boostCount = Number(s.boost_count || 0);
 
-        document.getElementById("server-name").textContent = sName;
+        document.getElementById("server-name").textContent = s.name || "Vortex Exchange & MM";
         document.getElementById("server-id-text").textContent = `ID: ${currentServerId}`;
+        document.getElementById("server-members").textContent = totalMembers.toLocaleString();
+        document.getElementById("server-online").textContent = onlineMembers.toLocaleString();
+        document.getElementById("server-offline").textContent = offlineMembers.toLocaleString();
+        document.getElementById("server-boosts").textContent = boostCount.toLocaleString();
+        document.getElementById("online-ratio-pill").textContent =
+          `${totalMembers > 0 ? Math.round((onlineMembers / totalMembers) * 100) : 0}% online`;
+        document.getElementById("boost-progress-text").textContent = `${boostCount} / 2 boosts`;
+        document.getElementById("boost-meter-fill").style.width = `${Math.min(100, Math.round((boostCount / 2) * 100))}%`;
 
-        animateCounter("server-members", "members", totalMembers);
-        animateCounter("server-online", "online", onlineMembers);
-        animateCounter("server-offline", "offline", offlineMembers);
-        animateCounter("server-boosts", "boosts", boostCount);
-
-        const ratio = totalMembers > 0 ? Math.round((onlineMembers / totalMembers) * 100) : 0;
-        document.getElementById("online-ratio-pill").textContent = `${ratio}% online`;
-        updateBoostMeter(boostCount);
-
-        const bannerStrip = document.getElementById("server-banner-strip");
         if (s.banner_url) {
-          bannerStrip.style.backgroundImage = `url("${s.banner_url}")`;
-          bannerStrip.classList.add("custom-guild-banner");
-        } else {
-          bannerStrip.style.backgroundImage = "";
-          bannerStrip.classList.remove("custom-guild-banner");
+          document.getElementById("server-banner-strip").style.backgroundImage = `url("${s.banner_url}")`;
         }
-
-        const iconBox = document.getElementById("server-icon-box");
         if (s.icon_url) {
-          iconBox.innerHTML = `<img src="${escapeHtml(s.icon_url)}" alt="${escapeHtml(sName)}" />`;
-        } else {
-          const initials = getInitials(sName);
-          iconBox.innerHTML = `<span class="server-icon-fallback">${escapeHtml(initials)}</span>`;
+          document.getElementById("server-icon-box").innerHTML = `<img src="${escapeHtml(s.icon_url)}" alt="Server Icon" />`;
         }
 
-        if (manual) showToast("Showcase synced with latest bot data.");
+        if (manual) showToast("Synced with bot & database.");
       } catch (err) {
         console.error("Failed to refresh showcase:", err);
-      } finally {
-        setTimeout(() => grid.classList.remove("refreshing"), 140);
       }
     }
 
+    function refreshAll(manual = false) {
+      refreshShowcase(manual);
+    }
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeMmModal();
+        closeAdminPasswordModal();
+        closeEditModal();
+      }
+    });
+
     initAll3DTilts();
-    refreshShowcase(false);
-    setInterval(() => refreshShowcase(false), 12000);
+    refreshAll(false);
+    setInterval(() => refreshAll(false), SYNC_INTERVAL_MS);
+    setInterval(tickSyncCountdown, 250);
   </script>
 </body>
 </html>
