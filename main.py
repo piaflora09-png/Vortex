@@ -1,9 +1,11 @@
 import asyncio
 import os
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+import aiosqlite
 import discord
 from aiohttp import web
 from discord.ext import commands
@@ -16,12 +18,14 @@ GUILD_ID = int(os.getenv("GUILD_ID", "1542941315933667348"))
 OWNER_USER_ID = int(os.getenv("OWNER_USER_ID", "1540575139538796634"))
 INVITE_URL = os.getenv("INVITE_URL", "https://discord.gg/3JPatMmyF")
 STORE_URL = os.getenv("STORE_URL", "https://vortexshop.onrender.com")
+WEBHOOK_URL = os.getenv("WEBHOOK_URL", "").strip()
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "vortex-admin-2026")
 PORT = int(os.getenv("PORT", "10000"))
 
-# Path to your uploaded HTML file
 HTML_PATH = Path(os.getenv("HTML_PATH", "index.html"))
+DB_PATH = Path(os.getenv("DB_PATH", "vortexshop.db"))
 
-# Tracked Role IDs referenced in your HTML showcase
+# Tracked Role IDs referenced in your showcase
 TRACKED_ROLES = [
     {
         "id": "1568386943945801839",
@@ -51,7 +55,7 @@ TRACKED_ROLES = [
 TRACKED_ROLE_IDS = {int(r["id"]) for r in TRACKED_ROLES}
 
 # ==============================================================================
-# DISCORD BOT SETUP (Requires Server Members & Presence Intents in Dev Portal)
+# DISCORD BOT SETUP
 # ==============================================================================
 intents = discord.Intents.default()
 intents.guilds = True
@@ -59,9 +63,99 @@ intents.members = True
 intents.presences = True
 
 bot = commands.Bot(command_prefix="!", intents=intents)
-
-# Cache for fetched user banners/accents (since guild member objects lack banners)
 user_profile_cache: dict[int, dict[str, Any]] = {}
+
+
+def is_admin_authorized(request: web.Request) -> bool:
+    provided = request.headers.get("X-Admin-Password", "")
+    return bool(ADMIN_PASSWORD) and provided == ADMIN_PASSWORD
+
+
+async def init_db() -> None:
+    DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS shop_items (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                category TEXT NOT NULL DEFAULT 'General',
+                stock INTEGER NOT NULL DEFAULT 1,
+                price REAL NOT NULL DEFAULT 0.0,
+                currency TEXT NOT NULL DEFAULT 'USD',
+                description TEXT NOT NULL DEFAULT '',
+                image_url TEXT NOT NULL DEFAULT '',
+                created_at TEXT NOT NULL
+            )
+            """
+        )
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS sales_log (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                item_id TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                price REAL NOT NULL,
+                currency TEXT NOT NULL,
+                remaining_stock INTEGER NOT NULL,
+                sold_at TEXT NOT NULL
+            )
+            """
+        )
+        await db.commit()
+
+
+async def list_shop_items() -> list[dict[str, Any]]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT id, name, category, stock, price, currency, description, image_url, created_at FROM shop_items ORDER BY created_at DESC"
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
+
+
+async def list_recent_sales(limit: int = 20) -> list[dict[str, Any]]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT id, item_id, item_name, category, price, currency, remaining_stock, sold_at FROM sales_log ORDER BY id DESC LIMIT ?",
+            (limit,),
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
+
+
+async def send_sold_webhook(item: dict[str, Any], remaining_stock: int) -> bool:
+    if not WEBHOOK_URL:
+        return False
+
+    stock_label = "OUT OF STOCK (0 left)" if remaining_stock <= 0 else f"{remaining_stock} left in stock"
+    price_str = f"{float(item['price']):.2f} {item['currency']}"
+    payload = {
+        "username": "VortexShop Stock & Sales",
+        "embeds": [
+            {
+                "title": "💸 Item Marked Sold (-1)",
+                "color": 0xF59E0B if remaining_stock > 0 else 0xEF4444,
+                "fields": [
+                    {"name": "Item", "value": str(item["name"]), "inline": True},
+                    {"name": "Category", "value": str(item["category"]), "inline": True},
+                    {"name": "Price", "value": price_str, "inline": True},
+                    {"name": "Remaining Stock", "value": stock_label, "inline": False},
+                ],
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        ],
+    }
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(WEBHOOK_URL, json=payload, timeout=10) as resp:
+                return 200 <= resp.status < 300
+    except Exception as exc:
+        print(f"[WEBHOOK] Failed to send sold notification: {exc}")
+        return False
 
 
 def status_to_str(status: discord.Status | None) -> str:
@@ -85,7 +179,6 @@ def extract_custom_status(member: discord.Member | None) -> dict[str, str]:
 
 
 async def get_enriched_user_data(user_id: int) -> dict[str, Any]:
-    """Fetches full User object (for banner_url) and caches it."""
     now_ts = datetime.now(timezone.utc).timestamp()
     cached = user_profile_cache.get(user_id)
     if cached and (now_ts - cached["fetched_at"] < 120):
@@ -116,50 +209,25 @@ async def get_enriched_user_data(user_id: int) -> dict[str, Any]:
     return data
 
 
-def build_default_games() -> list[dict[str, str]]:
-    return [
-        {
-            "tag": "MM2",
-            "title": "Murder Mystery 2 — Godlies, Chromas & Sets",
-            "note": "Harvester, Icepiercer, Gingerscope, Corrupt Set, Sakura Set & Traveler's Gun.",
-        },
-        {
-            "tag": "GAG2",
-            "title": "Grow a Garden 2 — Rare Pets & Seeds",
-            "note": "Raccoons, Dragonflies, Unicorns, Ice Serpents, Black Dragons & Exotic Seeds.",
-        },
-        {
-            "tag": "PS99 / ADM",
-            "title": "Pet Simulator 99 & Adopt Me!",
-            "note": "Titanics, Huges, Gems, High-Tier Neon/Mega Pets & Verified Crosstrades.",
-        },
-        {
-            "tag": "ANY GAME",
-            "title": "Blade Ball, Steal a Brainrot & Custom Requests",
-            "note": "All crosstrades secured inside official Vortex Exchange & MM tickets.",
-        },
-    ]
-
-
 def build_default_vouches() -> list[dict[str, Any]]:
     return [
         {
             "name": "TrustedTrader_PH",
-            "trade_tag": "MM2 Harvester ↔ Robux",
+            "trade_tag": "Verified Ticket Trade",
             "stars": 5,
             "avatar_url": "",
             "note": "Super fast MM service, zero hassle and smooth handoff inside ticket.",
         },
         {
             "name": "KiroVFX",
-            "trade_tag": "PS99 Titanic ↔ Adopt Me",
+            "trade_tag": "Verified Ticket Trade",
             "stars": 5,
             "avatar_url": "",
             "note": "Legit middleman and active staff. Vouching 100%!",
         },
         {
             "name": "ZyroBlox",
-            "trade_tag": "Grow a Garden 2 Bundle",
+            "trade_tag": "Verified Ticket Trade",
             "stars": 5,
             "avatar_url": "",
             "note": "Verified ID in ticket first and finished the trade in under 3 minutes.",
@@ -180,7 +248,6 @@ def build_mm_rules() -> list[str]:
 async def build_showcase_payload() -> dict[str, Any]:
     guild = bot.get_guild(GUILD_ID)
 
-    # 1. Server Stats
     server_data: dict[str, Any] = {
         "id": str(GUILD_ID),
         "name": "Vortex Exchange & MM",
@@ -219,7 +286,6 @@ async def build_showcase_payload() -> dict[str, Any]:
 
         owner_member = guild.get_member(OWNER_USER_ID)
 
-        # Collect members holding any of the tracked role IDs
         for member in guild.members:
             if member.bot:
                 continue
@@ -227,7 +293,6 @@ async def build_showcase_payload() -> dict[str, Any]:
             if not matched_roles:
                 continue
 
-            # Sort matched roles highest hierarchy first
             matched_roles.sort(key=lambda r: r.position, reverse=True)
             enriched = await get_enriched_user_data(member.id)
             deco = getattr(member, "avatar_decoration", None)
@@ -258,11 +323,9 @@ async def build_showcase_payload() -> dict[str, Any]:
                 }
             )
 
-    # Sort staff: online/idle/dnd first, then display name
     status_rank = {"online": 0, "idle": 1, "dnd": 2, "offline": 3}
     staff_members_list.sort(key=lambda m: (status_rank.get(m["status"], 3), m["display_name"].lower()))
 
-    # 2. Owner Profile
     owner_enriched = await get_enriched_user_data(OWNER_USER_ID)
     owner_deco = getattr(owner_member, "avatar_decoration", None) if owner_member else None
 
@@ -296,15 +359,15 @@ async def build_showcase_payload() -> dict[str, Any]:
         "role_badge_text": "Founder • VortexShop",
         "owner_line": "Owner of this server-",
         "invite_url": INVITE_URL,
-        "full_bio": "Founder of Vortex Exchange & MM. Safe Roblox crosstrading, verified middleman tickets, and instant storefront stock.",
+        "full_bio": "Founder of Vortex Exchange & MM. Safe crosstrading, verified middleman tickets, and live shop stock.",
         "member_since": owner_enriched["created_at"] or "Aug 22, 2026",
-        "custom_trade_note": "Verified Roblox crosstrading across MM2, Grow a Garden 2, PS99, Adopt Me!, and Blade Ball via official server tickets.",
+        "custom_trade_note": "Browse live items in the Shop page and open an official ticket inside Vortex Exchange & MM to complete your order.",
         "badges": [
             {"id": "founder", "label": "Server Founder", "fallback_icon": "👑"},
             {"id": "verified_mm", "label": "Verified Middleman", "fallback_icon": "🛡️"},
             {"id": "booster", "label": "Nitro & Server Booster", "fallback_icon": "💎"},
         ],
-        "games": build_default_games(),
+        "games": [],
         "vouches": build_default_vouches(),
         "mm_rules": build_mm_rules(),
     }
@@ -320,7 +383,7 @@ async def build_showcase_payload() -> dict[str, Any]:
 
 
 # ==============================================================================
-# AIOHTTP WEB ROUTES
+# AIOHTTP WEB & ADMIN/SHOP API ROUTES
 # ==============================================================================
 async def handle_index(request: web.Request) -> web.Response:
     if HTML_PATH.exists():
@@ -336,6 +399,189 @@ async def handle_showcase_api(request: web.Request) -> web.Response:
     return web.json_response(payload)
 
 
+async def handle_get_shop(request: web.Request) -> web.Response:
+    items = await list_shop_items()
+    include_sales = is_admin_authorized(request)
+    sales = await list_recent_sales(25) if include_sales else []
+    return web.json_response({"items": items, "sales": sales})
+
+
+async def handle_admin_login(request: web.Request) -> web.Response:
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"ok": False, "error": "Invalid JSON"}, status=400)
+
+    pw = str(body.get("password", ""))
+    if not ADMIN_PASSWORD or pw != ADMIN_PASSWORD:
+        return web.json_response({"ok": False, "error": "Invalid admin password."}, status=401)
+
+    items = await list_shop_items()
+    sales = await list_recent_sales(25)
+    return web.json_response({"ok": True, "items": items, "sales": sales})
+
+
+async def handle_create_shop_item(request: web.Request) -> web.Response:
+    if not is_admin_authorized(request):
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    name = str(body.get("name", "")).strip()
+    category = str(body.get("category", "General")).strip() or "General"
+    currency = str(body.get("currency", "USD")).strip() or "USD"
+    description = str(body.get("description", "")).strip()
+    image_url = str(body.get("image_url", "")).strip()
+
+    if not name:
+        return web.json_response({"error": "Item name is required."}, status=400)
+
+    try:
+        stock = max(0, int(body.get("stock", 1)))
+    except (ValueError, TypeError):
+        stock = 1
+
+    try:
+        price = max(0.0, float(body.get("price", 0.0)))
+    except (ValueError, TypeError):
+        price = 0.0
+
+    item_id = f"item-{uuid.uuid4().hex[:8]}"
+    created_at = datetime.now(timezone.utc).isoformat()
+
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            INSERT INTO shop_items (id, name, category, stock, price, currency, description, image_url, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (item_id, name, category, stock, price, currency, description, image_url, created_at),
+        )
+        await db.commit()
+
+    items = await list_shop_items()
+    created = next((i for i in items if i["id"] == item_id), None)
+    return web.json_response({"ok": True, "item": created, "items": items}, status=201)
+
+
+async def handle_update_shop_item(request: web.Request) -> web.Response:
+    if not is_admin_authorized(request):
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    item_id = request.match_info["item_id"]
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"error": "Invalid JSON"}, status=400)
+
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT * FROM shop_items WHERE id = ?", (item_id,)) as cursor:
+            row = await cursor.fetchone()
+        if not row:
+            return web.json_response({"error": "Item not found"}, status=404)
+
+        current = dict(row)
+        name = str(body.get("name", current["name"])).strip() or current["name"]
+        category = str(body.get("category", current["category"])).strip() or current["category"]
+        currency = str(body.get("currency", current["currency"])).strip() or current["currency"]
+        description = str(body.get("description", current["description"])).strip()
+        image_url = str(body.get("image_url", current["image_url"])).strip()
+
+        try:
+            stock = max(0, int(body.get("stock", current["stock"])))
+        except (ValueError, TypeError):
+            stock = current["stock"]
+
+        try:
+            price = max(0.0, float(body.get("price", current["price"])))
+        except (ValueError, TypeError):
+            price = current["price"]
+
+        await db.execute(
+            """
+            UPDATE shop_items
+            SET name = ?, category = ?, stock = ?, price = ?, currency = ?, description = ?, image_url = ?
+            WHERE id = ?
+            """,
+            (name, category, stock, price, currency, description, image_url, item_id),
+        )
+        await db.commit()
+
+    items = await list_shop_items()
+    sales = await list_recent_sales(25)
+    return web.json_response({"ok": True, "items": items, "sales": sales})
+
+
+async def handle_minus_one_sold(request: web.Request) -> web.Response:
+    if not is_admin_authorized(request):
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    item_id = request.match_info["item_id"]
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute("SELECT * FROM shop_items WHERE id = ?", (item_id,)) as cursor:
+            row = await cursor.fetchone()
+        if not row:
+            return web.json_response({"error": "Item not found"}, status=404)
+
+        item = dict(row)
+        current_stock = int(item["stock"])
+        if current_stock <= 0:
+            return web.json_response({"error": "Item is already out of stock."}, status=400)
+
+        new_stock = current_stock - 1
+        sold_at = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+
+        await db.execute("UPDATE shop_items SET stock = ? WHERE id = ?", (new_stock, item_id))
+        await db.execute(
+            """
+            INSERT INTO sales_log (item_id, item_name, category, price, currency, remaining_stock, sold_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                item["id"],
+                item["name"],
+                item["category"],
+                float(item["price"]),
+                item["currency"],
+                new_stock,
+                sold_at,
+            ),
+        )
+        await db.commit()
+
+    webhook_sent = await send_sold_webhook(item, new_stock)
+    items = await list_shop_items()
+    sales = await list_recent_sales(25)
+    return web.json_response(
+        {
+            "ok": True,
+            "webhook_sent": webhook_sent,
+            "remaining_stock": new_stock,
+            "items": items,
+            "sales": sales,
+        }
+    )
+
+
+async def handle_delete_shop_item(request: web.Request) -> web.Response:
+    if not is_admin_authorized(request):
+        return web.json_response({"error": "Unauthorized"}, status=401)
+
+    item_id = request.match_info["item_id"]
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute("DELETE FROM shop_items WHERE id = ?", (item_id,))
+        await db.commit()
+
+    items = await list_shop_items()
+    sales = await list_recent_sales(25)
+    return web.json_response({"ok": True, "items": items, "sales": sales})
+
+
 async def handle_health(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "bot_ready": bot.is_ready()})
 
@@ -346,16 +592,24 @@ async def on_ready():
 
 
 async def start_services():
-    app = web.Application()
+    await init_db()
+
+    app = web.Application(client_max_size=6 * 1024 * 1024)
     app.router.add_get("/", handle_index)
     app.router.add_get("/api/showcase", handle_showcase_api)
+    app.router.add_get("/api/shop", handle_get_shop)
+    app.router.add_post("/api/admin/login", handle_admin_login)
+    app.router.add_post("/api/shop/items", handle_create_shop_item)
+    app.router.add_put("/api/shop/items/{item_id}", handle_update_shop_item)
+    app.router.add_post("/api/shop/items/{item_id}/minus-one", handle_minus_one_sold)
+    app.router.add_delete("/api/shop/items/{item_id}", handle_delete_shop_item)
     app.router.add_get("/health", handle_health)
 
     runner = web.AppRunner(app)
     await runner.setup()
     site = web.TCPSite(runner, host="0.0.0.0", port=PORT)
     await site.start()
-    print(f"[WEB] Serving showcase on http://0.0.0.0:{PORT}")
+    print(f"[WEB] Serving showcase & SQLite shop on http://0.0.0.0:{PORT}")
 
     if DISCORD_TOKEN:
         async with bot:
