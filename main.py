@@ -1,6 +1,8 @@
 import asyncio
+import base64
 import json
 import os
+import re
 import uuid
 from datetime import datetime, timezone
 
@@ -20,6 +22,9 @@ STORE_URL = os.getenv("STORE_URL", "https://vortexshop.onrender.com").strip()
 DB_PATH = os.getenv("DB_PATH", "vortexshop.db").strip()
 PORT = int(os.getenv("PORT", "10000"))
 
+TICKET_CATEGORY_ID = int(os.getenv("TICKET_CATEGORY_ID", "0") or "0")
+TICKET_STAFF_ROLE_ID = int(os.getenv("TICKET_STAFF_ROLE_ID", "0") or "0")
+
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 INDEX_HTML_PATH = os.path.join(BASE_DIR, "index.html")
 
@@ -29,6 +34,7 @@ intents.presences = True
 intents.guilds = True
 
 bot = discord.Client(intents=intents)
+tree = discord.app_commands.CommandTree(bot)
 
 
 def _now_iso() -> str:
@@ -37,6 +43,11 @@ def _now_iso() -> str:
 
 def _now_short() -> str:
     return datetime.now(timezone.utc).strftime("%H:%M:%S UTC")
+
+
+def _slugify_channel_name(value: str) -> str:
+    cleaned = re.sub(r"[^a-zA-Z0-9_-]+", "-", value.strip().lower()).strip("-")
+    return cleaned[:24] or "buyer"
 
 
 async def init_db() -> None:
@@ -70,6 +81,26 @@ async def init_db() -> None:
             )
             """
         )
+        await db.execute(
+            """
+            CREATE TABLE IF NOT EXISTS ticket_orders (
+                id TEXT PRIMARY KEY,
+                item_id TEXT NOT NULL,
+                item_name TEXT NOT NULL,
+                category TEXT NOT NULL,
+                price REAL NOT NULL,
+                currency TEXT NOT NULL,
+                description TEXT NOT NULL DEFAULT '',
+                image_url TEXT NOT NULL DEFAULT '',
+                buyer_discord TEXT NOT NULL,
+                buyer_notes TEXT NOT NULL DEFAULT '',
+                channel_id TEXT NOT NULL DEFAULT '',
+                channel_name TEXT NOT NULL DEFAULT '',
+                status TEXT NOT NULL DEFAULT 'open',
+                created_at TEXT NOT NULL
+            )
+            """
+        )
         await db.commit()
 
 
@@ -88,6 +119,17 @@ async def get_recent_sales(limit: int = 30) -> list[dict]:
         db.row_factory = aiosqlite.Row
         async with db.execute(
             "SELECT * FROM sales_log ORDER BY sold_at DESC LIMIT ?",
+            (limit,),
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
+
+
+async def get_recent_tickets(limit: int = 30) -> list[dict]:
+    async with aiosqlite.connect(DB_PATH) as db:
+        db.row_factory = aiosqlite.Row
+        async with db.execute(
+            "SELECT * FROM ticket_orders ORDER BY created_at DESC LIMIT ?",
             (limit,),
         ) as cursor:
             rows = await cursor.fetchall()
@@ -130,6 +172,189 @@ async def send_sold_webhook(sale: dict) -> None:
                     print(f"[Webhook] Discord returned {resp.status}: {body}")
     except Exception as exc:
         print(f"[Webhook] Failed to send webhook: {exc}")
+
+
+class CloseTicketView(discord.ui.View):
+    def __init__(self) -> None:
+        super().__init__(timeout=None)
+
+    @discord.ui.button(
+        label="Close Ticket",
+        style=discord.ButtonStyle.danger,
+        custom_id="vortex_close_ticket_btn",
+    )
+    async def close_ticket(
+        self, interaction: discord.Interaction, button: discord.ui.Button
+    ) -> None:
+        channel = interaction.channel
+        if not isinstance(channel, discord.TextChannel):
+            await interaction.response.send_message(
+                "This button only works inside a ticket channel.", ephemeral=True
+            )
+            return
+        await interaction.response.send_message("Closing ticket in 3 seconds...")
+        await asyncio.sleep(3)
+        try:
+            await channel.delete(reason=f"Closed by {interaction.user}")
+        except Exception as exc:
+            print(f"[Ticket] Failed to delete channel: {exc}")
+
+
+def _resolve_buyer_member(
+    guild: discord.Guild, buyer_input: str
+) -> discord.Member | None:
+    raw = buyer_input.strip()
+    digits = re.sub(r"\D", "", raw)
+    if digits.isdigit():
+        member = guild.get_member(int(digits))
+        if member:
+            return member
+
+    lowered = raw.lstrip("@").lower()
+    for m in guild.members:
+        if m.name.lower() == lowered or (m.global_name and m.global_name.lower() == lowered):
+            return m
+    return None
+
+
+def _build_image_file(image_url: str) -> discord.File | None:
+    if not image_url or not image_url.startswith("data:image/"):
+        return None
+    try:
+        header, b64_data = image_url.split(",", 1)
+        ext = "png"
+        if "jpeg" in header or "jpg" in header:
+            ext = "jpg"
+        elif "webp" in header:
+            ext = "webp"
+        elif "gif" in header:
+            ext = "gif"
+        raw_bytes = base64.b64decode(b64_data)
+        from io import BytesIO
+
+        return discord.File(BytesIO(raw_bytes), filename=f"item_preview.{ext}")
+    except Exception as exc:
+        print(f"[Ticket] Failed decoding image data URL: {exc}")
+        return None
+
+
+async def create_order_ticket_channel(order: dict) -> tuple[str, str]:
+    if not bot.is_ready():
+        return "", ""
+
+    guild = bot.get_guild(GUILD_ID)
+    if guild is None:
+        return "", ""
+
+    category: discord.CategoryChannel | None = None
+    if TICKET_CATEGORY_ID:
+        cat_obj = guild.get_channel(TICKET_CATEGORY_ID)
+        if isinstance(cat_obj, discord.CategoryChannel):
+            category = cat_obj
+
+    if category is None:
+        for c in guild.categories:
+            if c.name.lower() in ("tickets", "orders", "vortex tickets"):
+                category = c
+                break
+
+    buyer_member = _resolve_buyer_member(guild, order["buyer_discord"])
+    overwrites: dict[discord.abc.Snowflake, discord.PermissionOverwrite] = {
+        guild.default_role: discord.PermissionOverwrite(view_channel=False),
+        guild.me: discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            manage_channels=True,
+            embed_links=True,
+            attach_files=True,
+        ),
+    }
+
+    if buyer_member is not None:
+        overwrites[buyer_member] = discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            read_message_history=True,
+            attach_files=True,
+        )
+
+    if TICKET_STAFF_ROLE_ID:
+        staff_role = guild.get_role(TICKET_STAFF_ROLE_ID)
+        if staff_role is not None:
+            overwrites[staff_role] = discord.PermissionOverwrite(
+                view_channel=True,
+                send_messages=True,
+                read_message_history=True,
+                manage_channels=True,
+            )
+
+    owner_member = guild.get_member(OWNER_USER_ID)
+    if owner_member is not None:
+        overwrites[owner_member] = discord.PermissionOverwrite(
+            view_channel=True,
+            send_messages=True,
+            read_message_history=True,
+            manage_channels=True,
+        )
+
+    slug = _slugify_channel_name(order["buyer_discord"])
+    short_id = order["id"][:6]
+    channel_name = f"ticket-{slug}-{short_id}"[:95]
+
+    try:
+        channel = await guild.create_text_channel(
+            name=channel_name,
+            category=category,
+            overwrites=overwrites,
+            reason=f"Shop ticket order {order['id']} for {order['buyer_discord']}",
+        )
+    except Exception as exc:
+        print(f"[Ticket] Error creating ticket channel: {exc}")
+        return "", ""
+
+    desc_text = (order.get("description") or "").strip() or "No description provided."
+    if order.get("buyer_notes"):
+        desc_text = f"{desc_text}\n\n**Buyer Note:** {order['buyer_notes'].strip()}"
+
+    embed = discord.Embed(
+        title=f"New Order Ticket — {order['item_name']}",
+        description=desc_text,
+        color=0x8B5CF6,
+    )
+    embed.add_field(
+        name="Buyer Discord", value=str(order["buyer_discord"]), inline=True
+    )
+    embed.add_field(name="Item", value=str(order["item_name"]), inline=True)
+    embed.add_field(name="Category", value=str(order["category"]), inline=True)
+    embed.add_field(
+        name="Price",
+        value=f"{float(order['price']):.2f} {order['currency']}",
+        inline=True,
+    )
+    embed.add_field(name="Order ID", value=f"`{order['id']}`", inline=True)
+    embed.set_footer(text="VortexShop Live Ticket System")
+
+    file_obj = _build_image_file(order.get("image_url", ""))
+    if file_obj is not None:
+        embed.set_image(url=f"attachment://{file_obj.filename}")
+        mention_text = buyer_member.mention if buyer_member else f"**{order['buyer_discord']}**"
+        await channel.send(
+            content=f"{mention_text} — Ticket opened for your order.",
+            embed=embed,
+            file=file_obj,
+            view=CloseTicketView(),
+        )
+    else:
+        if order.get("image_url") and order["image_url"].startswith(("http://", "https://")):
+            embed.set_image(url=order["image_url"])
+        mention_text = buyer_member.mention if buyer_member else f"**{order['buyer_discord']}**"
+        await channel.send(
+            content=f"{mention_text} — Ticket opened for your order.",
+            embed=embed,
+            view=CloseTicketView(),
+        )
+
+    return str(channel.id), channel.name
 
 
 def _map_status(status: discord.Status | None) -> str:
@@ -180,7 +405,6 @@ def build_showcase_payload() -> dict:
 
         owner_member = guild.get_member(OWNER_USER_ID)
 
-        # Build tracked role catalog (excluding @everyone)
         for r in reversed(guild.roles):
             if r.is_default() or r.managed:
                 continue
@@ -194,7 +418,6 @@ def build_showcase_payload() -> dict:
                     }
                 )
 
-        # Collect members holding tracked roles
         tracked_role_ids = {item["id"] for item in role_catalog}
         for m in guild.members:
             if m.bot:
@@ -315,6 +538,7 @@ async def handle_api_shop(request: web.Request) -> web.Response:
     data: dict = {"ok": True, "items": items}
     if _check_admin_password(request):
         data["sales"] = await get_recent_sales()
+        data["tickets"] = await get_recent_tickets()
     return web.json_response(data)
 
 
@@ -336,7 +560,10 @@ async def handle_admin_login(request: web.Request) -> web.Response:
         )
     items = await get_all_items()
     sales = await get_recent_sales()
-    return web.json_response({"ok": True, "items": items, "sales": sales})
+    tickets = await get_recent_tickets()
+    return web.json_response(
+        {"ok": True, "items": items, "sales": sales, "tickets": tickets}
+    )
 
 
 async def handle_create_item(request: web.Request) -> web.Response:
@@ -512,6 +739,97 @@ async def handle_delete_item(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "items": items, "sales": sales})
 
 
+async def handle_create_ticket_order(request: web.Request) -> web.Response:
+    try:
+        body = await request.json()
+    except Exception:
+        return web.json_response({"ok": False, "error": "Invalid JSON."}, status=400)
+
+    buyer_discord = str(body.get("buyer_discord", "")).strip()
+    if not buyer_discord:
+        return web.json_response(
+            {"ok": False, "error": "Discord ID or Username is required."}, status=400
+        )
+
+    item_name = str(body.get("item_name", "")).strip()
+    if not item_name:
+        return web.json_response(
+            {"ok": False, "error": "Item name is required."}, status=400
+        )
+
+    order = {
+        "id": str(uuid.uuid4()),
+        "item_id": str(body.get("item_id", "")).strip(),
+        "item_name": item_name,
+        "category": str(body.get("category", "General")).strip() or "General",
+        "price": max(0.0, float(body.get("price", 0.0) or 0.0)),
+        "currency": str(body.get("currency", "USD")).strip() or "USD",
+        "description": str(body.get("description", "")).strip(),
+        "image_url": str(body.get("image_url", "")).strip(),
+        "buyer_discord": buyer_discord,
+        "buyer_notes": str(body.get("buyer_notes", "")).strip(),
+        "channel_id": "",
+        "channel_name": "",
+        "status": "open",
+        "created_at": _now_iso(),
+    }
+
+    channel_id, channel_name = await create_order_ticket_channel(order)
+    order["channel_id"] = channel_id
+    order["channel_name"] = channel_name
+
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            INSERT INTO ticket_orders
+                (id, item_id, item_name, category, price, currency, description,
+                 image_url, buyer_discord, buyer_notes, channel_id, channel_name,
+                 status, created_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """,
+            (
+                order["id"],
+                order["item_id"],
+                order["item_name"],
+                order["category"],
+                order["price"],
+                order["currency"],
+                order["description"],
+                order["image_url"],
+                order["buyer_discord"],
+                order["buyer_notes"],
+                order["channel_id"],
+                order["channel_name"],
+                order["status"],
+                order["created_at"],
+            ),
+        )
+        await db.commit()
+
+    return web.json_response(
+        {
+            "ok": True,
+            "ticket": {
+                "id": order["id"],
+                "channel_id": order["channel_id"],
+                "channel_name": order["channel_name"],
+                "buyer_discord": order["buyer_discord"],
+                "item_name": order["item_name"],
+            },
+        }
+    )
+
+
+@tree.command(name="ticketpanel", description="Post the VortexShop order ticket panel.")
+async def cmd_ticket_panel(interaction: discord.Interaction) -> None:
+    embed = discord.Embed(
+        title="VortexShop Order Tickets",
+        description="Browse the live shop on the website, click **Ticket Order**, enter your Discord ID or Username, and a private ticket channel will be created here automatically.",
+        color=0xF59E0B,
+    )
+    await interaction.response.send_message(embed=embed)
+
+
 async def start_web_server() -> web.AppRunner:
     app = web.Application(client_max_size=15 * 1024 * 1024)
     app.router.add_get("/", handle_index)
@@ -522,6 +840,7 @@ async def start_web_server() -> web.AppRunner:
     app.router.add_put("/api/shop/items/{item_id}", handle_update_item)
     app.router.add_post("/api/shop/items/{item_id}/minus-one", handle_minus_one_sold)
     app.router.add_delete("/api/shop/items/{item_id}", handle_delete_item)
+    app.router.add_post("/api/tickets/create", handle_create_ticket_order)
 
     runner = web.AppRunner(app)
     await runner.setup()
@@ -533,6 +852,11 @@ async def start_web_server() -> web.AppRunner:
 
 @bot.event
 async def on_ready() -> None:
+    bot.add_view(CloseTicketView())
+    try:
+        await tree.sync()
+    except Exception as exc:
+        print(f"[Bot] Slash sync error: {exc}")
     print(f"[Bot] Logged in as {bot.user} (ID: {bot.user.id})")
 
 
